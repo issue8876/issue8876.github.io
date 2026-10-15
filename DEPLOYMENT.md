@@ -31,7 +31,7 @@ API 키를 넣지 않은 경우 `/api/health`는 `ready: false`를 반환합니�
 
 ## GitHub Pages 배포
 
-원격 저장소: `https://github.com/issue8876/diding.github.io.git`
+원격 저장소: `https://github.com/issue8876/issue8876.github.io.git`
 
 기존 원격 이력을 보존하는 일반 push로 배포합니다. 강제 push로 원격 브랜치를 덮어쓰지 않습니다.
 
@@ -43,7 +43,7 @@ API 키를 넣지 않은 경우 `/api/health`는 `ready: false`를 반환합니�
 
 GitHub Actions는 `main` 또는 `master`로의 push와 수동 실행을 지원합니다. 원격 기본 브랜치가 다르면 워크플로의 브랜치 설정을 바꿉니다.
 
-예상 공개 경로: `https://issue8876.github.io/diding.github.io/pages/maeumgil.html`. 실제 배포가 성공했는지는 GitHub Actions의 Deploy 단계와 공개 URL에서 확인해야 합니다.
+예상 공개 경로: `https://issue8876.github.io/pages/maeumgil.html`. 실제 배포가 성공했는지는 GitHub Actions의 Deploy 단계와 공개 URL에서 확인해야 합니다.
 
 빌드 명령:
 
@@ -51,7 +51,7 @@ GitHub Actions는 `main` 또는 `master`로의 push와 수동 실행을 지원�
 node scripts/build-pages.mjs
 ```
 
-빌드 결과인 `dist/`에는 `index.html`, `pages/`, `css/`, `js/`, `.nojekyll`만 포함합니다. 서버, 테스트, `.env`, 설문 원자료는 올리지 않습니다. 빌드 단계에서 알려진 키 형식이 정적 파일에 들어갔는지 검사합니다.
+빌드 결과인 `dist/`에는 `index.html`, `pages/`, `css/`, `js/`, `assets/`, `.nojekyll`만 포함합니다. 서버, 테스트, `.env`, 설문 원자료는 올리지 않습니다. 빌드 단계에서 알려진 키 형식이 정적 파일에 들어갔는지 검사합니다.
 
 ## 별도 API 서버 배포: Render 예시
 

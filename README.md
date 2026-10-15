@@ -100,10 +100,10 @@ diding.github.io/
 ### 로컬 실행
 ```bash
 # 저장소 클론
-git clone https://github.com/issue8876/diding.github.io.git
+git clone https://github.com/issue8876/issue8876.github.io.git
 
 # 디렉토리 이동
-cd diding.github.io
+cd issue8876.github.io
 
 # index.html 파일을 브라우저로 열기
 # 또는 간단한 HTTP 서버 실행
@@ -113,7 +113,7 @@ python -m http.server 8000
 
 ### GitHub Pages로 배포
 - GitHub 저장소 Settings > Pages에서 활성화
-- `https://issue8876.github.io/diding.github.io/` 에서 접속 가능
+- `https://issue8876.github.io/` 에서 접속 가능
 
 ## 💡 향후 개선 계획
 
@@ -157,4 +157,4 @@ python -m http.server 8000
 
 **만든이**: 혜련 👩‍💻  
 **GitHub**: [diding](https://github.com/diding)  
-**웹사이트**: [diding.github.io](https://issue8876.github.io/diding.github.io/)
+**웹사이트**: [diding.github.io](https://issue8876.github.io/)

@@ -5,7 +5,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 // Only public frontend paths are copied. In particular, never copy .env or server/.
 const dist = path.join(root, 'dist');
 await mkdir(dist, { recursive: true });
-const entries = ['index.html', 'pages', 'css', 'js'];
+const entries = ['index.html', 'pages', 'css', 'js', 'assets'];
 for (const name of entries) await cp(path.join(root, name), path.join(dist, name), { recursive: true });
 const raw = process.env.PUBLIC_API_BASE_URL || '';
 if (raw) { const url = new URL(raw); if (url.protocol !== 'https:' || url.username || url.password || url.search || url.hash || url.pathname !== '/') throw new Error('PUBLIC_API_BASE_URL must be an HTTPS origin, without credentials or path.'); }

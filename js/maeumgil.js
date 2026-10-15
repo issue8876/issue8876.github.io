@@ -16,7 +16,7 @@ function choices(items) { clearChoices(); for (const [label, cb] of items) $('ch
 function addMessage(role, text, { alert = false, remember = true } = {}) {
   $('intro').hidden = true;
   const row = document.createElement('div'); row.className = `message-row ${role}${alert ? ' alert' : ''}`;
-  if (role === 'assistant') { const avatar = document.createElement('span'); avatar.className = 'message-avatar'; avatar.textContent = '🌱'; avatar.setAttribute('aria-hidden', 'true'); row.append(avatar); }
+  if (role === 'assistant') { const avatar = document.createElement('span'); avatar.className = 'message-avatar'; const mark = document.createElement('img'); mark.src = new URL('../assets/icons/heart.svg', import.meta.url).href; mark.alt = ''; mark.width = 24; mark.height = 24; avatar.append(mark); avatar.setAttribute('aria-hidden', 'true'); row.append(avatar); }
   const bubble = document.createElement('div'); bubble.className = 'bubble'; bubble.textContent = text; row.append(bubble); $('messages').append(row);
   if (remember) state.history.push({ role, text: redactPII(text) });
   state.history = state.history.slice(-20);
@@ -37,12 +37,12 @@ function startTopic(key) {
   cancelPending(); clearBreathing(); state.topic = key; state.stage = 'explore'; active('talk');
   addMessage('assistant', topics[key].intro);
   choices(topics[key].choices.map(label => [label, () => sendText(label)]));
-  notice(state.connected ? 'AI 연결 중 · 이름이나 연락처는 적지 않아도 돼.' : '기본 활동 · 준비된 질문과 선택지로 천천히 이어가 볼게.');
+  notice(state.connected ? 'AI 연결 중 · 이름이나 연락처는 적지 않아도 돼.' : '준비된 질문 중에서 편한 답을 골라줘.');
 }
 function startTalk() {
   cancelPending(); clearBreathing(); state.stage = 'topic'; active('talk');
   addMessage('assistant', state.profile === 'middle' ? '지금 가장 마음에 걸리는 주제를 골라줘. 직접 적어도 괜찮아.' : '어떤 이야기를 나눠 볼까? 편한 것을 하나 골라 줘.');
-  choices(Object.entries(topics).map(([key, t]) => [`${t.emoji} ${t.label}`, () => startTopic(key)]));
+  choices(Object.entries(topics).map(([key, t]) => [t.label, () => startTopic(key)]));
 }
 function chooseMood(mood) {
   state.mood = mood; addMessage('user', mood);
@@ -143,7 +143,7 @@ async function sendText(raw) {
   }
   if (state.connected) await requestAI(); else offlineReply(text);
 }
-function updateConnection() { $('mode-badge').textContent = state.connected ? 'AI 대화 연결됨' : '기본 활동'; $('mode-badge').classList.toggle('connected', state.connected); $('connect-open').textContent = state.connected ? 'AI 연결 관리' : 'AI 연결'; }
+function updateConnection() { $('mode-badge').textContent = state.connected ? 'AI 대화 중' : '마음 활동'; $('mode-badge').classList.toggle('connected', state.connected); $('connect-open').textContent = 'AI 대화 설정'; }
 async function checkServer() {
   if (!apiBase && !['localhost', '127.0.0.1'].includes(location.hostname)) { $('connection-info').textContent = '아직 AI 대화 서버가 연결되지 않았어. 마음 점검·숨 고르기·실천 카드는 지금 사용할 수 있어.'; serverReady = false; return; }
   try { const res = await fetch(`${apiBase}/api/health`, { signal: AbortSignal.timeout(5000) }); if (!res.ok) throw new Error(); const data = await res.json(); serverReady = data.ready === true; $('connection-info').textContent = serverReady ? 'AI 대화를 사용할 수 있어. 운영자에게 받은 이용 코드를 입력해 줘.' : '운영자가 AI 연결을 준비하고 있어. 지금은 기본 활동을 사용할 수 있어.'; } catch { serverReady = false; $('connection-info').textContent = '지금은 AI 서버에 연결할 수 없어. 기본 활동은 계속 사용할 수 있어.'; }
