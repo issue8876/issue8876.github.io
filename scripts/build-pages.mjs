@@ -15,7 +15,15 @@ async function audit(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     if (entry.name !== '.nojekyll' && (entry.name.startsWith('.') || /(?:server|node_modules|tests)/.test(entry.name))) throw new Error(`Unexpected deployment file: ${entry.name}`);
     const name = path.join(dir, entry.name); if (entry.isDirectory()) await audit(name);
-    else { const content = await readFile(name, 'utf8'); if (/AIza[\w-]{30,}|-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}/.test(content)) throw new Error('Possible secret found in public build.'); }
+    else {
+      const data = await readFile(name);
+      if (path.extname(name) === '.woff2') {
+        if (data.subarray(0, 4).toString('ascii') !== 'wOF2') throw new Error('Invalid WOFF2 font.');
+        continue;
+      }
+      const content = data.toString('utf8');
+      if (/AIza[\w-]{30,}|-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}/.test(content)) throw new Error('Possible secret found in public build.');
+    }
   }
 }
 await audit(dist); console.log('Pages build ready: dist/ (frontend only; secret scan passed)');

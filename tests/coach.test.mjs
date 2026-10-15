@@ -71,6 +71,9 @@ test('HTTP integration: static files, secret paths, CORS, auth, invalid bodies a
   const base = `http://127.0.0.1:${server.address().port}`;
   const headers = { Authorization: `Bearer ${env.COACH_ACCESS_CODE}`, 'Content-Type': 'application/json', Origin: 'https://issue8876.github.io' };
   const page = await fetch(`${base}/pages/maeumgil.html`); assert.equal(page.status, 200); assert.match(await page.text(), /마음길 코치/);
+  const font = await fetch(`${base}/assets/fonts/GowunDodum-Regular.woff2`);
+  assert.equal(font.status, 200); assert.equal(font.headers.get('content-type'), 'font/woff2');
+  assert.equal(Buffer.from(await font.arrayBuffer()).subarray(0, 4).toString('ascii'), 'wOF2');
   for (const secret of ['/.env', '/.git/config', '/server/coach.mjs', '/js/../server/coach.mjs', '/js/%2e%2e%5c.env']) assert.equal((await fetch(base + secret)).status, 404, secret);
   assert.equal((await fetch(`${base}/api/health`, { headers: { Origin: 'https://evil.example' } })).status, 403);
   const health = await fetch(`${base}/api/health`, { headers: { Origin: 'https://issue8876.github.io' } }); assert.equal(health.headers.get('access-control-allow-origin'), 'https://issue8876.github.io'); assert.equal((await health.json()).ready, true);

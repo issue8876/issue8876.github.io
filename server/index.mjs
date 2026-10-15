@@ -5,7 +5,7 @@ import path from 'node:path';
 import { authorized, coachReply, createLimiter, HttpError, isReady } from './coach.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon' };
+const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
 const allowedStatic = /^(?:index\.html|pages\/[a-zA-Z0-9_-]+\.html|(?:css|js|assets)\/[a-zA-Z0-9_./-]+)$/;
 
 async function readJSON(req) {
