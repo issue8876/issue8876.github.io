@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f5f3ed">
+  <meta name="description" content="초·중·고 학생을 위한 마음 표현, 작은 목표와 마음 돌봄 활동. 마음길 코치와 내 속도로 한 걸음.">
+  <title>마음길 코치 · 내 속도로, 한 걸음</title>
+  <link rel="stylesheet" href="../css/maeumgil.css">
+  <script type="module" src="../js/maeumgil.js"></script>
+</head>
+<body>
+  <a class="skip" href="#message">대화 입력으로 건너뛰기</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="maeumgil.html" aria-label="마음길 코치 처음 화면"><span class="brand-mark" aria-hidden="true">🌱</span><span>마음길 코치<small>내 속도로, 한 걸음</small></span></a>
+      <div class="top-actions"><span id="mode-badge" class="badge">기본 활동</span><button class="text-button" id="privacy-open">대화 안내</button><a class="home-link" href="../index.html">홈 ↗</a></div>
+    </header>
+    <main class="workspace">
+      <aside class="sidebar" aria-label="마음길 활동">
+        <div class="sidebar-heading"><span class="eyebrow">MY LITTLE STEP</span><h1>오늘의 나를<br>천천히 만나기.</h1><p>잘 말하려고 애쓰지 않아도 돼.<br>여기서는 네 속도로 가면 돼.</p></div>
+        <label class="profile-label" for="profile">나에게 맞는 말로</label>
+        <select id="profile" aria-label="나에게 맞는 말로"><option value="lower">초등 1–3학년</option><option value="upper" selected>초등 4–6학년</option><option value="middle">중학생</option><option value="high">고등학생</option></select>
+        <nav class="activity-nav" aria-label="활동 선택">
+          <button class="nav-item active" data-start="talk"><span>💬</span> 오늘 이야기하기 <span class="arrow">↗</span></button>
+          <button class="nav-item" data-start="check"><span>🧭</span> 짧은 마음 점검 <span class="arrow">↗</span></button>
+          <button class="nav-item" data-start="breathe"><span>🍃</span> 잠깐 숨 고르기 <span class="arrow">↗</span></button>
+        </nav>
+        <section id="goal-card" class="goal-card" hidden><span class="eyebrow">나의 작은 한 걸음</span><h2 id="goal-text"></h2><p id="goal-when"></p><div class="goal-actions"><button data-goal="done">해봤어</button><button data-goal="change">바꿀래</button><button id="copy-goal">복사</button></div><p id="goal-feedback" role="status"></p></section>
+        <div class="plant-scene" aria-hidden="true"><svg viewBox="0 0 280 160" fill="none"><ellipse cx="140" cy="139" rx="79" ry="10" fill="#e4e7db"/><path d="M139 130V62" stroke="#54735b" stroke-width="5" stroke-linecap="round"/><path d="M137 98C87 98 72 66 80 55C110 48 139 67 137 98Z" fill="#a6bd92"/><path d="M141 78C139 43 161 26 184 31C193 52 174 78 141 78Z" fill="#6e9474"/><path d="M140 116C158 88 190 91 196 102C182 124 159 131 140 116Z" fill="#c0cfac"/><path d="M112 126H169L161 153H120L112 126Z" fill="#d5b9a0"/><circle cx="56" cy="37" r="4" fill="#d5b9a0"/><path d="M222 65V77M216 71H228" stroke="#b1afce" stroke-width="2" stroke-linecap="round"/></svg><p>작은 한 걸음도, 네가 고른 길이야.</p></div>
+        <button class="help-link" id="help-open">지금 도움이 필요해요 ↗</button>
+        <button class="reset-link" id="reset">대화 지우고 새로 시작</button>
+      </aside>
+      <section class="conversation" aria-label="마음길 코치와 대화">
+        <div class="conversation-top"><div><span class="online-dot"></span><strong>마음길 코치</strong><span class="subtle">함께 한 걸음씩</span></div><button id="read-aloud" class="icon-button" aria-pressed="false" title="마지막 코치 답변 읽어주기">읽어주기 ♬</button></div>
+        <div class="chat-scroll" id="chat-scroll"><div class="intro" id="intro"><span class="intro-tag">반가워. 오늘, 어떤 마음으로 왔어?</span><h2>지금 네 마음은 어때?</h2><p>가까운 마음을 골라도 좋고, 오늘 있었던 일을 바로 이야기해도 좋아.</p><div class="mood-grid" aria-label="지금의 기분"><button data-mood="괜찮아"><span>🙂</span>괜찮아</button><button data-mood="속상해"><span>😔</span>속상해</button><button data-mood="걱정돼"><span>😟</span>걱정돼</button><button data-mood="화가 나"><span>😤</span>화가 나</button><button data-mood="잘 모르겠어"><span>😶</span>잘 모르겠어</button></div><div class="topic-heading">이런 이야기부터 해볼까?</div><div class="topic-grid"><button data-topic="study"><span>✏️</span><strong>공부·숙제</strong><small>시작이 막막할 때</small></button><button data-topic="friend"><span>💬</span><strong>친구 관계</strong><small>마음이 복잡할 때</small></button><button data-topic="worry"><span>☁️</span><strong>발표·걱정</strong><small>괜히 긴장될 때</small></button><button data-topic="mistake"><span>🌿</span><strong>실수·속상함</strong><small>다시 해보고 싶을 때</small></button></div></div><div id="messages" role="log" aria-live="polite" aria-relevant="additions text"></div></div>
+        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">기본 활동은 준비된 질문으로 진행돼. AI 연결 상태는 아래에서 확인할 수 있어.</div><form id="chat-form"><label class="sr-only" for="message">코치에게 이야기하기</label><textarea id="message" rows="1" maxlength="1200" placeholder="오늘 있었던 일이나 마음을 적어줘…"></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기">🎙</button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><div class="composer-foot"><span>실명·학교·연락처는 적지 않아도 돼.</span><button id="connect-open">AI 연결</button></div></div>
+      </section>
+    </main>
+    <footer class="page-footer">마음길 코치는 마음 돌봄을 돕는 교육용 도구야. 힘든 일이 계속되면 믿을 수 있는 어른과 함께해 줘.</footer>
+  </div>
+  <dialog id="privacy-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><span class="eyebrow">우리의 대화 안내</span><h2>편하게, 그리고 안전하게.</h2><p>기본 활동의 대화와 마음 점검은 현재 화면의 메모리에만 남아. 새로고침하거나 대화를 지우면 없어져.</p><p>AI를 연결하면 개인정보를 가리는 처리를 거쳐 대화 일부가 Google로 전송돼. 이름이나 주소를 완벽하게 찾아 가릴 수는 없으니 처음부터 적지 말아 줘. 음성 입력을 선택하면 브라우저의 음성 서비스가 사용될 수 있어.</p><p>마음 점검은 대화를 돕는 교육용 활동이야. 표준화된 심리검사나 진단은 아니야. AI의 말도 틀릴 수 있어.</p><p>위험하거나 힘든 일이 있으면 가까운 선생님이나 안전하게 도와줄 어른에게 이야기해 줘. 이 서비스가 선생님에게 자동으로 연락해 주지는 않아.</p><button class="primary-button" data-close>알겠어</button></dialog>
+  <dialog id="connect-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><span class="eyebrow">AI 대화 연결</span><h2>마음길 코치와 이어서.</h2><p id="connection-info">서버 연결 상태를 확인하고 있어.</p><p class="small">AI 대화는 Google로 전송돼. 실제 학생 운영 전에는 운영자가 제공사의 연령·개인정보 조건을 확인해야 해.</p><form id="connect-form"><label for="access-code">운영자에게 받은 이용 코드</label><input id="access-code" type="password" autocomplete="off" maxlength="128" placeholder="이용 코드 입력"><label class="checkbox-label"><input id="transfer-consent" type="checkbox" required>대화가 AI 제공사로 전송되는 점을 확인했어요.</label><div class="dialog-actions"><button type="submit" class="primary-button">연결하기</button><button type="button" id="disconnect">연결 해제</button></div><p id="connect-status" role="status"></p></form></dialog>
+  <dialog id="help-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><span class="eyebrow">지금은 안전이 먼저야</span><h2>혼자 견디지 않아도 돼.</h2><p>너를 안전하게 도울 수 있는 선생님, 상담 선생님이나 믿을 수 있는 어른에게 이 화면을 보여줘. 너를 해치는 사람에게 직접 도움을 청할 필요는 없어.</p><p>당장 위험하면 <a href="tel:112">112</a> 또는 <a href="tel:119">119</a>에 도움을 요청해.</p><a class="primary-button help-call" href="tel:+82109?oai_link_source=model_response_hotline">자살예방상담전화 109</a><p class="small">이 화면은 긴급 구조를 요청하거나 주변 어른에게 자동으로 연락하지 않아.</p><button data-close>화면으로 돌아가기</button></dialog>
+  <dialog id="reset-dialog"><h2>새 마음길을 시작할까?</h2><p>지금 대화와 마음 점검, 실천 카드가 지워져. AI 연결도 해제돼.</p><div class="dialog-actions"><button id="confirm-reset" class="primary-button">지우고 시작하기</button><button data-close>돌아가기</button></div></dialog>
+</body>
+</html>

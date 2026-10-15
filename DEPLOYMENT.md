@@ -1,0 +1,106 @@
+# 마음길 코치 배포와 운영
+
+## 현재 구성
+
+- 웹 화면: `pages/maeumgil.html`. GitHub Pages에 정적 파일로 배포합니다.
+- AI 서버: Node.js 22.12 이상. 외부 패키지 설치 없이 실행합니다.
+- 모델: `gemini-3.8-flash`, 기본 thinking level `low`.
+- 로컬 비밀 설정: `.env`. `.gitignore`와 `.dockerignore`로 제외합니다.
+- 공개 설정: `PUBLIC_API_BASE_URL`에는 API 서버의 HTTPS origin만 넣습니다. API 키를 넣으면 안 됩니다.
+- 대화, 점검 응답, 이용 코드는 브라우저 메모리에만 유지합니다. 새로고침하면 사라집니다.
+- 서버는 대화 본문이나 키를 기록하지 않습니다. Google 요청에 `store: false`를 사용합니다. 이는 Google의 모든 데이터 처리·보관 조건이 없어지는 뜻은 아닙니다.
+
+GitHub Pages는 Node 서버를 실행하지 않으므로 **화면 배포와 AI 서버 배포는 별도**입니다. 서버가 없어도 마음 점검, 준비된 선택형 활동, 숨 고르기, 실천 카드는 작동합니다. 이때 화면은 ‘기본 활동’이라고 표시하며 AI가 답하는 것처럼 표현하지 않습니다.
+
+## 로컬에서 실행
+
+1. `.env.example`을 `.env`로 복사합니다. 이미 `.env`가 있으면 덮어쓰지 않습니다.
+2. `.env`의 `GEMINI_API_KEY`에 API 키를 입력합니다. 키를 채팅이나 공개 저장소에 붙여넣지 않습니다.
+3. `COACH_ACCESS_CODE`에 16자 이상의 임의 이용 코드를 설정합니다. 미리 생성된 `.env`에는 임의 코드가 들어 있습니다. 이 코드는 API 키와 다른, 서비스 접근용 코드입니다.
+4. 실행합니다.
+
+```powershell
+node --env-file-if-exists=.env server/index.mjs
+```
+
+기본 주소: `http://127.0.0.1:8787/pages/maeumgil.html`
+
+페이지의 ‘AI 연결’에서 이용 코드와 전송 안내를 확인하면 연결할 수 있습니다. 연결 이전에 한 기본 활동 대화는 전송하지 않습니다. 연결 해제하면 서버로 보낼 대화 문맥도 초기화합니다.
+
+API 키를 넣지 않은 경우 `/api/health`는 `ready: false`를 반환합니다. 실제 키가 없는 상태에서 모델의 실제 응답 품질·권한·지연을 검증할 수는 없습니다.
+
+## GitHub Pages 배포
+
+원격 저장소: `https://github.com/issue8876/diding.github.io.git`
+
+기존 원격 이력을 보존하는 일반 push로 배포합니다. 강제 push로 원격 브랜치를 덮어쓰지 않습니다.
+
+1. 해당 저장소에 접근할 수 있는 GitHub 계정으로 Git 인증을 완료합니다.
+2. 원격의 기본 브랜치와 현재 내용을 확인하고, 이 변경을 그 이력 위에 반영합니다.
+3. 일반 push로 배포 브랜치에 반영합니다. `--force`를 사용하지 않습니다.
+4. GitHub 저장소 **Settings → Pages → Source**에서 **GitHub Actions**를 선택합니다.
+5. `.github/workflows/pages.yml`이 테스트 → 정적 빌드 → 배포를 수행합니다.
+
+GitHub Actions는 `main` 또는 `master`로의 push와 수동 실행을 지원합니다. 원격 기본 브랜치가 다르면 워크플로의 브랜치 설정을 바꿉니다.
+
+예상 공개 경로: `https://issue8876.github.io/diding.github.io/pages/maeumgil.html`. 실제 배포가 성공했는지는 GitHub Actions의 Deploy 단계와 공개 URL에서 확인해야 합니다.
+
+빌드 명령:
+
+```powershell
+node scripts/build-pages.mjs
+```
+
+빌드 결과인 `dist/`에는 `index.html`, `pages/`, `css/`, `js/`, `.nojekyll`만 포함합니다. 서버, 테스트, `.env`, 설문 원자료는 올리지 않습니다. 빌드 단계에서 알려진 키 형식이 정적 파일에 들어갔는지 검사합니다.
+
+## 별도 API 서버 배포: Render 예시
+
+`render.yaml`을 사용한 Blueprint와 `Dockerfile`을 함께 제공합니다. 아직 서버 계정이 없는 경우 소스만 push하고, 운영자가 서버 계정과 요금제를 정한 뒤 배포합니다. 소스에 키를 넣어 자동 배포하려고 해서는 안 됩니다.
+
+1. Render에서 이 GitHub 저장소로 Blueprint를 생성하거나 Node Web Service를 생성합니다.
+2. `render.yaml`의 설정을 사용합니다. Render가 `PORT`를 지정하고 `HOST=0.0.0.0`으로 실행합니다.
+3. 서버의 비밀 환경 변수에 `GEMINI_API_KEY`, `COACH_ACCESS_CODE`를 입력합니다. 호스팅된 서버에서는 로컬 `.env`를 올리는 대신 같은 이름의 비밀 환경 변수를 사용합니다.
+4. `ALLOWED_ORIGINS=https://issue8876.github.io`를 설정합니다. 커스텀 도메인을 사용하면 정확한 origin을 쉼표로 추가합니다.
+5. 서버의 `/api/health`가 `ready: true`를 반환하는지 확인합니다. 이는 키 값이 설정되었음을 나타내며 키 유효성이나 모델 권한을 검증한 결과는 아닙니다.
+6. GitHub **Settings → Secrets and variables → Actions → Variables**에 `PUBLIC_API_BASE_URL`을 서버의 HTTPS origin으로 등록합니다. 예: `https://내-서버.onrender.com`. 이 값은 공개 주소이며 키가 아닙니다.
+7. Pages 워크플로를 다시 실행합니다. `dist/js/maeumgil-config.js`에 공개 서버 주소가 반영됩니다.
+8. 공개 사이트에서 AI 연결, 기본 활동, 오류 복구를 확인합니다.
+
+요청 제한은 단일 서버 인스턴스의 메모리에서 수행합니다. 기본은 접속 주소별 분당 대화 12회, 전체 분당 100회, 동시 AI 요청 6개입니다. 인증 실패와 세션 연결은 주소별 분당 8회입니다. 프록시 뒤에서는 여러 사용자가 같은 주소로 묶일 수 있습니다. 학급 규모 동시 접속 시험 후 조정해야 합니다. 여러 인스턴스를 운영할 때는 공유 저장소 기반 제한과 기관 사용자 인증을 추가해야 합니다.
+
+`TRUST_PROXY=true`는 신뢰할 수 있는 단일 역방향 프록시가 헤더를 교체한다는 사실을 확인한 경우에만 사용합니다. CORS는 인증을 대신하지 않습니다. 공유 이용 코드는 초기 제한 운영용이며, 대규모 공개 서비스에서는 교사 계정·만료되는 세션 등으로 교체해야 합니다.
+
+## 입력과 출력 필터
+
+1. 브라우저에서 위험 표현을 확인하고 긴급 도움 안내로 전환합니다.
+2. 서버에서도 모든 사용자 메시지의 위험 표현을 다시 확인합니다. 이 경우 Gemini로 보내지 않습니다.
+3. 전화번호·이메일·일부 실명 표현·학교명·주소·주민번호 패턴을 전송 전에 가립니다.
+4. 프롬프트 추출과 일부 지침 우회 시도를 고정 응답으로 처리합니다.
+5. 모델에는 학년별 말투, 진단·약물 조언 금지, 안전한 어른 연결, 개인정보 질문 금지를 지시합니다.
+6. 모델 출력 중 본문 텍스트만 사용하고 추론·도구 출력은 전달하지 않습니다. 위험 표현·일부 부적절한 지시·URL 등이 감지되면 안전한 고정 안내로 바꿉니다.
+7. 화면에는 `textContent`로 출력하여 HTML을 실행하지 않습니다.
+
+정규식과 모델 지침은 위험·개인정보를 완벽하게 판별하지 못합니다. 문맥에 따라 정상 표현이 걸리거나 위험 표현이 누락될 수 있습니다. 실제 학생 운영 전에는 상담 전문가의 사례 검토, 우회 입력 시험, 접근성 시험, 실제 도움 연결 절차, 개인정보 처리와 동의 절차를 검증해야 합니다. 서비스가 교사나 구조기관에 자동 연락하는 기능은 없습니다.
+
+## 학생 대상 서비스의 제공 조건
+
+화면과 말투는 초등 저학년·고학년·중학생·고등학생을 지원합니다. 다만 Google의 공개 Gemini API 약관과 Google Cloud 생성형 AI 약관은 18세 미만을 대상으로 하거나 이들이 접근할 가능성이 있는 서비스에 대한 사용을 제한하고 있습니다. **필터링이나 보호자 동의만으로 이 제한이 해소되는 것은 아닙니다.** 학생 대상 실제 AI 운영 전에 기관이 제공사와 적용 계약·허용 범위를 확인해야 합니다. 확인 전에는 성인 전문가의 가상 사례 평가에 한정하고 학생 개인정보를 전송하지 마세요.
+
+- Gemini API 약관: https://ai.google.dev/gemini-api/terms
+- Google Cloud 서비스 약관: https://cloud.google.com/terms/service-terms
+- 모델 명세: https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash
+- Interactions API: https://ai.google.dev/api/interactions-api
+- API 키 관리: https://ai.google.dev/gemini-api/docs/api-key
+
+## 점검과 연구
+
+이번 여섯 문항은 목표 정하기·방법 찾기·도움 청하기를 돌아보는 **새 교육용 문항**입니다. 기존 Dify의 CHS 기반 문항이나 검증된 척도로 간주하면 안 됩니다. 문항 버전은 `교육용 마음 점검 v2`이며 총점은 범위 검증용 내부 계산에만 사용하고 학생에게 등급이나 진단으로 제시하지 않습니다. 연구 측정에는 승인된 문항·채점·사용 조건을 별도로 확정해야 합니다.
+
+자동 확인:
+
+```powershell
+node --test tests/*.test.mjs
+node scripts/build-pages.mjs
+```
+
+서버 테스트는 실제 Gemini 대신 모의 응답을 사용합니다. 실제 API 키를 설정한 뒤에는 성인 평가자의 가상 사례로 실제 응답과 안전 처리를 별도로 검증해야 합니다. 실제 상담 기록을 테스트 자료로 저장하지 않습니다.

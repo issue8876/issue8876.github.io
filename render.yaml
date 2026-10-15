@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: maeumgil-coach-api
+    runtime: node
+    buildCommand: node --version
+    startCommand: node server/index.mjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: GEMINI_MODEL
+        value: gemini-3.8-flash
+      - key: GEMINI_THINKING_LEVEL
+        value: low
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: COACH_ACCESS_CODE
+        sync: false
+      - key: ALLOWED_ORIGINS
+        value: https://issue8876.github.io

@@ -1,5 +1,18 @@
 # 혜련의 웹페이지 (diding.github.io)
 
+## 마음길 코치 v2
+
+초등 저학년·고학년·중학생·고등학생의 눈높이에 맞춘 마음 표현, 선택형 대화, 교육용 마음 점검, 숨 고르기, 작은 실천 카드를 추가했습니다.
+
+- 화면: `pages/maeumgil.html`
+- AI: Gemini 3.8 Flash. 입력·출력 필터와 서버 측 `.env`를 사용합니다.
+- 실행: `node --env-file-if-exists=.env server/index.mjs`
+- 테스트: `node --test tests/*.test.mjs`
+- Pages 빌드: `node scripts/build-pages.mjs`
+- 상세 설정과 제공사의 학생 대상 이용 제한: [DEPLOYMENT.md](DEPLOYMENT.md)
+
+GitHub Pages는 화면만 제공합니다. 실제 AI 대화에는 별도 API 서버와 비밀 환경 변수 설정이 필요합니다. 필터링은 제공사의 연령 제한을 해소하지 않습니다.
+
 혜련의 개인 웹사이트로, 교육용 인터랙티브 게임과 도구를 제공합니다.
 
 ## 🌟 주요 기능
@@ -87,7 +100,7 @@ diding.github.io/
 ### 로컬 실행
 ```bash
 # 저장소 클론
-git clone https://github.com/diding/diding.github.io.git
+git clone https://github.com/issue8876/diding.github.io.git
 
 # 디렉토리 이동
 cd diding.github.io
@@ -100,7 +113,7 @@ python -m http.server 8000
 
 ### GitHub Pages로 배포
 - GitHub 저장소 Settings > Pages에서 활성화
-- `https://diding.github.io` 에서 접속 가능
+- `https://issue8876.github.io/diding.github.io/` 에서 접속 가능
 
 ## 💡 향후 개선 계획
 
@@ -144,4 +157,4 @@ python -m http.server 8000
 
 **만든이**: 혜련 👩‍💻  
 **GitHub**: [diding](https://github.com/diding)  
-**웹사이트**: [diding.github.io](https://diding.github.io)
+**웹사이트**: [diding.github.io](https://issue8876.github.io/diding.github.io/)
