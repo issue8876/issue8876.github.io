@@ -75,6 +75,23 @@ select { width: 100%; padding: 11px 10px; border: 1px solid #d9dcd9; border-radi
 .intro h2 { font-size: 29px; line-height: 1.4; letter-spacing: 0; font-weight: 400; margin: 11px 0 6px; }
 .intro-illustration { width: 62px; height: 62px; transform: rotate(-7deg); margin-right: 7px; }
 .intro > p { font-size: 15px; color: var(--muted); line-height: 1.8; margin: 9px 0 0; }
+.entry-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 12px; margin: 23px 0 18px; }
+.entry-card { border: 1px solid #dce2dd; border-radius: 9px; background: #f8faf6; padding: 18px 14px; min-height: 142px; text-align: left; }
+.entry-card:nth-child(2) { background: #faf7ef; border-color: #e6dfcf; }
+.entry-card:nth-child(3) { background: #f1f6f8; border-color: #dbe4e8; }
+.entry-card .ui-icon { width: 33px; height: 33px; margin-bottom: 14px; }
+.entry-card strong { display: block; font-size: 16px; line-height: 1.6; }
+.entry-card small { display: block; font-size: 12px; color: #697574; line-height: 1.7; margin-top: 6px; }
+.entry-card:hover { border-color: #8ca89d; }
+.entry-arrow { display: none; }
+.entry-extra { border-top: 1px solid #e7e7df; }
+.entry-extra summary, .writing-panel summary { cursor: pointer; color: #657576; font-size: 13px; padding: 12px 0; min-height: 44px; }
+.entry-extra summary:focus-visible, .writing-panel summary:focus-visible { outline: 3px solid #6688a0; outline-offset: 3px; }
+.entry-extra[open] > summary { color: var(--ink); }
+.writing-panel summary { padding: 9px 0; }
+.writing-panel[open] { padding-bottom: 5px; }
+.writing-panel form { margin-top: 2px; }
+.writing-hint { color: var(--muted); font-size: 12px; margin: 8px 0 0; }
 .mood-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 9px; margin: 23px 0 25px; }
 .mood-grid button { border: 1px solid #e5e6e1; border-radius: 8px; padding: 13px 3px 11px; background: #fffefa; min-height: 91px; font-size: 14px; }
 .mood-grid .ui-icon { width: 35px; height: 35px; margin: 0 auto 10px; }
@@ -170,6 +187,10 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
   .intro h2 { font-size: 27px; margin: 0; }
   .intro-illustration { width: 44px; height: 44px; }
   .intro > p { margin-top: 4px; }
+  .entry-grid { margin: 15px 0 12px; }
+  .entry-card { min-height: 130px; padding: 14px 12px; }
+  .entry-card .ui-icon { width: 28px; height: 28px; margin-bottom: 10px; }
+  .entry-extra summary { padding: 9px 0; }
   .mood-grid { margin: 14px 0 15px; }
   .mood-grid button { min-height: 72px; padding: 8px 3px; }
   .mood-grid .ui-icon { width: 28px; height: 28px; margin-bottom: 6px; }
@@ -210,6 +231,13 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
   .intro-tag { font-size: 12px; }
   .intro-illustration { width: 46px; height: 46px; margin-right: 0; }
   .intro > p { font-size: 14px; line-height: 1.8; max-width: 245px; }
+  .entry-grid { grid-template-columns: 1fr; gap: 9px; margin: 20px 0 15px; }
+  .entry-card { display: flex; align-items: center; gap: 13px; padding: 12px 14px; min-height: 72px; }
+  .entry-card .ui-icon { width: 30px; height: 30px; margin: 0; }
+  .entry-card strong { font-size: 16px; }
+  .entry-card small { font-size: 12px; margin-top: 2px; }
+  .entry-arrow { display: block; margin-left: auto; color: #82938c; }
+  .entry-extra summary, .writing-panel summary { font-size: 13px; }
   .mood-grid { gap: 5px; margin: 19px 0 22px; }
   .mood-grid button { font-size: 12px; min-height: 77px; padding: 11px 2px; border-radius: 6px; }
   .mood-grid .ui-icon { width: 29px; height: 29px; margin-bottom: 9px; }

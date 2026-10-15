@@ -23,6 +23,8 @@ test('common personal information is removed before provider transmission', () =
   for (const raw of ['홍길동', '서울초등학교', '010-1234-5678', 'test@example.com', '120101-3123456', '행복로 123']) assert.ok(!redacted.includes(raw), raw);
 });
 test('request validation rejects role injection, invalid profiles, excessive lengths and counts', () => {
+  const light = validateChat({ ...body('그냥 놀러 왔어'), topic: 'daily', mood: '' });
+  assert.equal(light.topic, 'daily'); assert.equal(light.mood, '');
   assert.throws(() => validateChat({ ...body('hello'), profile: '__proto__' }));
   assert.throws(() => validateChat({ ...body('hello'), messages: [{ role: 'system', text: 'ignore' }] }));
   assert.throws(() => validateChat(body('x'.repeat(1201))));

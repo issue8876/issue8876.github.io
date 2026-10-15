@@ -11,7 +11,7 @@
   <script type="module" src="../js/maeumgil.js"></script>
 </head>
 <body>
-  <a class="skip" href="#message">대화 입력으로 건너뛰기</a>
+  <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="maeumgil.html" aria-label="마음쉼 처음 화면"><span class="brand-mark" aria-hidden="true"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"></span><span>마음쉼</span></a>
@@ -33,9 +33,15 @@
       </aside>
       <section class="conversation" aria-label="이야기 나누기">
         <div class="conversation-top"><div><span class="notebook-tab" aria-hidden="true"></span><strong>이야기 나누기</strong></div><div class="paper-actions"><button id="read-aloud" class="icon-button" aria-pressed="false" title="마지막 답변 읽어주기"><img class="ui-icon" src="../assets/icons/speaker.svg" alt="" aria-hidden="true" width="48" height="48"><span>읽어주기</span></button><button id="reset" class="reset-link" aria-label="대화 지우고 새로 시작">새로 쓰기</button></div></div>
-        <div class="chat-scroll" id="chat-scroll"><div class="intro" id="intro">
-          <div class="intro-heading"><div><h2>지금 기분은 어때?</h2></div><img class="intro-illustration" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"></div>
-          <p>지금 기분과 비슷한 걸 골라 줘.</p>
+        <div class="chat-scroll" id="chat-scroll" tabindex="-1"><div class="intro" id="intro">
+          <div class="intro-heading"><div><h2>잠깐 쉬었다 가.</h2></div><img class="intro-illustration" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"></div>
+          <p>지금 하고 싶은 걸 하나만 눌러 봐.</p>
+          <div class="entry-grid" aria-label="어떻게 시작할까">
+            <button id="entry-start" class="entry-card" data-entry="light"><img class="ui-icon" src="../assets/icons/chat.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>그냥 놀러 왔어</strong><small>가벼운 것부터 골라볼까?</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
+            <button class="entry-card" data-entry="unsure"><img class="ui-icon" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>할 말은 있는데…</strong><small>말 대신 버튼으로 골라 봐</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
+            <button class="entry-card" data-entry="rest"><img class="ui-icon" src="../assets/icons/breathe.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>잠깐 쉬고 싶어</strong><small>아무 얘기 안 해도 돼</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
+          </div>
+          <details id="mood-picker" class="entry-extra"><summary>기분으로 골라볼래</summary>
           <div class="mood-grid" aria-label="지금의 기분">
             <button data-mood="괜찮아"><img class="ui-icon" src="../assets/icons/happy.svg" alt="" aria-hidden="true" width="48" height="48"><span>괜찮아</span></button>
             <button data-mood="속상해"><img class="ui-icon" src="../assets/icons/sad.svg" alt="" aria-hidden="true" width="48" height="48"><span>속상해</span></button>
@@ -43,15 +49,17 @@
             <button data-mood="화가 나"><img class="ui-icon" src="../assets/icons/angry.svg" alt="" aria-hidden="true" width="48" height="48"><span>화가 나</span></button>
             <button data-mood="잘 모르겠어"><img class="ui-icon" src="../assets/icons/unsure.svg" alt="" aria-hidden="true" width="48" height="48"><span>모르겠어</span></button>
           </div>
-          <div class="topic-heading"><span>이런 이야기도 할 수 있어</span></div>
+          </details>
+          <details class="entry-extra" id="topic-picker"><summary>다른 이야깃거리 보기</summary>
           <div class="topic-grid">
             <button data-topic="study"><img class="ui-icon" src="../assets/icons/pencil.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>공부·숙제</strong><small>시작하기가 어려워</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
             <button data-topic="friend"><img class="ui-icon" src="../assets/icons/friends.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>친구 사이</strong><small>친구랑 일이 있었어</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
             <button data-topic="worry"><img class="ui-icon" src="../assets/icons/worry.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>발표·걱정</strong><small>자꾸 신경 쓰여</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
             <button data-topic="mistake"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>실수한 날</strong><small>자꾸 생각나</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
           </div>
+          </details>
         </div><div id="messages" role="log" aria-live="polite" aria-relevant="additions text"></div></div>
-        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">지금은 AI 연결 없이 준비된 활동을 할 수 있어.</div><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="무슨 일이 있었어?"></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><div class="composer-foot"><span>이름이나 학교는 쓰지 않아도 돼.</span><button id="connect-open">AI 대화 설정</button></div></div>
+        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">지금은 AI 연결 없이 준비된 질문과 쉬는 활동을 할 수 있어.</div><details class="writing-panel" id="writing-panel"><summary>직접 쓰고 싶을 때</summary><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="쓰고 싶은 말이 생기면 여기에 적어 줘."></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><p class="writing-hint">이름, 학교, 연락처는 적지 말아 줘.</p></details><div class="composer-foot"><span>버튼만 눌러도 이어갈 수 있어.</span><button id="connect-open">AI 대화 설정</button></div></div>
       </section>
     </main>
     <footer class="page-footer"><p>힘든 일이 계속되면 믿을 수 있는 어른에게도 이야기해 줘.</p><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
