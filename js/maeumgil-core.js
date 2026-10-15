@@ -5,15 +5,16 @@ export const profiles = {
   high: { label: '고등학생', short: '내 선택을 존중하며' },
 };
 
+// Educational wording preserved from 마음길 코치.yml; not a validated test edition.
 export const questions = [
-  '나는 오늘 해볼 작은 일을 정할 수 있어요.',
-  '어려운 일이 생기면 다른 방법을 생각해 볼 수 있어요.',
-  '작은 일부터 시작할 수 있을 것 같아요.',
-  '혼자 어렵다면 도움을 청할 사람을 떠올릴 수 있어요.',
-  '전에 조금이라도 해낸 일이 생각나요.',
-  '한 방법이 안 되면 다른 방법을 시도해 볼 수 있어요.',
+  "나는 평소에 내가 꽤 잘해 나가고 있다고 느낀다.",
+  "어려운 일이 생기면 해결할 방법을 여러 가지 떠올릴 수 있다.",
+  "나는 또래 친구들만큼 잘해 나가고 있다고 느낀다.",
+  "내가 중요하게 생각하는 일을 해낼 방법을 생각해낼 수 있다.",
+  "내가 지금까지 해본 일들은 앞으로 나에게 도움이 될 것 같다.",
+  "다른 사람이 포기하고 싶어 할 때도 나는 다른 방법을 찾아볼 수 있다."
 ];
-export const scale = ['전혀 아니에요', '거의 아니에요', '조금 아니에요', '조금 그래요', '많이 그래요', '아주 그래요'];
+export const scale = ['전혀 없어', '아주 조금', '조금', '꽤 자주', '거의 항상', '항상'];
 export function summarizeCheck(answers) {
   if (!Array.isArray(answers) || answers.length !== 6 || answers.some(x => !Number.isInteger(x) || x < 1 || x > 6)) {
     throw new Error('6개 문항에 모두 응답해야 합니다.');
@@ -21,7 +22,9 @@ export function summarizeCheck(answers) {
   const total = answers.reduce((a, b) => a + b, 0);
   const strongest = answers.indexOf(Math.max(...answers));
   const support = answers.indexOf(Math.min(...answers));
-  return { total, strongest, support };
+  const agency = answers[0] + answers[2] + answers[4];
+  const pathways = answers[1] + answers[3] + answers[5];
+  return { total, strongest, support, agency, pathways };
 }
 
 // A conservative local routing aid, not a complete risk assessment.
@@ -47,9 +50,9 @@ export function safeModelText(value) {
   return text;
 }
 export const topics = {
-  daily: { label: '가벼운 이야기', emoji: '💬', intro: '어떤 걸 골라볼까?', choices: ['좋아하는 것 고르기', '쉬는 시간 상상하기', '잠깐 쉬기'], goals: ['좋아하는 노래 한 곡 듣기', '창밖을 보며 잠깐 쉬기', '좋아하는 놀이 잠깐 하기'] },
-  study: { label: '공부·숙제', emoji: '✏️', intro: '공부나 숙제에서 어떤 게 제일 어려워?', choices: ['시작이 어려워', '어디부터 할지 모르겠어', '도움을 받고 싶어'], goals: ['책을 펴고 첫 줄 읽기', '문제 한 개만 살펴보기', '어려운 부분 하나 표시하기'] },
-  friend: { label: '친구 관계', emoji: '💬', intro: '친구랑 무슨 일이 있었어? 어떻게 말해야 할지 모르겠으면 아래에서 골라 줘.', choices: ['내 마음부터 정리할래', '친구에게 할 말을 찾을래', '어른에게 도움을 청할래'], goals: ['내 마음을 한 문장으로 적기', '“나는 그때 속상했어” 연습하기', '믿을 수 있는 어른에게 이야기하기'] },
-  worry: { label: '발표·걱정', emoji: '☁️', intro: '뭐가 제일 걱정돼? 말하기 전에 잠깐 숨을 고르거나 조금 연습해 봐도 좋아.', choices: ['잠깐 마음을 가라앉힐래', '아주 조금 연습할래', '걱정을 말로 꺼낼래'], goals: ['첫 문장만 작은 소리로 읽기', '준비할 것 한 가지 적기', '편하게 숨을 세 번 내쉬기'] },
-  mistake: { label: '실수·속상함', emoji: '🌿', intro: '어떤 실수를 했는지 이야기하고 싶어? 아니면 다음에 어떻게 할지 같이 생각해 볼까?', choices: ['속상한 마음을 말할래', '다음 방법을 찾아볼래', '잠깐 쉬고 싶어'], goals: ['다음에 바꿀 행동 한 가지 적기', '나에게 다정한 말 한 문장 하기', '물 한 모금 마시고 잠깐 쉬기'] },
+  challenge: { label: '오늘 어려웠던 일', intro: '어떤 일이 어렵게 느껴졌어?', choices: ['처음 해보는 일', '해봐도 잘 안 되는 일', '도움이 필요한 일'], goals: ['해야 할 일 하나만 정하기', '전에 해본 쉬운 방법 다시 해보기', '도와줄 어른 한 명 떠올리기'] },
+  study: { label: '공부·숙제', intro: '공부나 숙제에서 어느 때가 가장 어려워?', choices: ['시작하려고 할 때', '하다가 막혔을 때', '끝까지 하기 힘들 때'], goals: ['5분만 시작해 보기', '문제 한 개만 살펴보기', '어려운 부분 하나 표시하기'] },
+  friend: { label: '친구 관계', intro: '친구와 어떤 일이 있었어?', choices: ['말 때문에 속상했어', '같이 지내기가 어려워', '내 마음을 전하고 싶어'], goals: ['내 마음을 한 문장으로 정리하기', '“나는 그때 속상했어” 연습하기', '믿을 수 있는 어른에게 이야기하기'] },
+  worry: { label: '발표·시험 걱정', intro: '발표나 시험을 생각하면 어떤 게 가장 걱정돼?', choices: ['준비할 게 너무 많아', '틀리거나 실수할까 봐', '긴장이 잘 안 가라앉아'], goals: ['첫 문장만 작은 소리로 읽기', '준비할 것 한 가지 정하기', '편하게 숨을 세 번 내쉬기'] },
+  mistake: { label: '실수·속상함', intro: '실수한 뒤에 어떤 생각이 남았어?', choices: ['자꾸 그 장면이 생각나', '다시 해도 안 될 것 같아', '다음에는 다르게 하고 싶어'], goals: ['다음에 바꿀 행동 한 가지 정하기', '전에 조금이라도 해낸 일 떠올리기', '물 한 모금 마시고 잠깐 쉬기'] },
 };

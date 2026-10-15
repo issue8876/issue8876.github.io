@@ -2,7 +2,7 @@ import { config } from './maeumgil-config.js';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js';
 
 const $ = id => document.getElementById(id);
-const state = { profile: 'upper', topic: 'daily', stage: 'welcome', answers: [], question: 0, mood: '', goal: null, history: [], code: '', connected: false, busy: false, generation: 0, abort: null, breathTimer: null, recognition: null };
+const state = { profile: 'upper', topic: 'challenge', stage: 'welcome', answers: [], question: 0, mood: '', goal: null, history: [], code: '', connected: false, busy: false, generation: 0, abort: null, breathTimer: null, recognition: null };
 const apiBase = config.apiBase.replace(/\/$/, '');
 let serverReady = false;
 
@@ -45,44 +45,39 @@ function startTalk() {
   choices(Object.entries(topics).map(([key, t]) => [t.label, () => startTopic(key)]));
 }
 function startEntry(kind) {
-  cancelPending(); clearBreathing(); $('question-card')?.remove(); active('talk');
-  state.topic = 'daily'; $('writing-panel').open = false;
-  const labels = { light: '그냥 놀러 왔어', unsure: '할 말은 있는데…', rest: '잠깐 쉬고 싶어' };
-  addMessage('user', labels[kind]);
-  if (kind === 'rest') { finishRest(); return; }
-  if (kind === 'unsure') { startTalk(); return; }
-  lightQuestion(0);
-}
-const lightRounds = [
-  { text: '지금 하나만 고른다면?', options: ['좋아하는 노래 듣기', '재미있는 영상 보기', '간식 먹기', '아무것도 안 하기'] },
-  { text: '쉬는 시간이 길어진다면 뭐 하고 싶어?', options: ['친구랑 놀기', '혼자 편하게 있기', '좋아하는 놀이 하기', '아직 모르겠어'] },
-];
-function lightQuestion(index) {
-  state.stage = 'light'; state.topic = 'daily';
-  const round = lightRounds[index];
-  if (!round) {
-    addMessage('assistant', '이제 뭘 해볼까?');
-    choices([['한 번 더 고를래', () => lightQuestion(0)], ['다른 얘기도 해볼래', startTalk], ['잠깐 쉴래', finishRest]]);
-    notice('다른 이야기를 고르거나 잠깐 쉬어 갈 수 있어.');
-    return;
-  }
-  addMessage('assistant', round.text);
-  choices(round.options.map(label => [label, () => { addMessage('user', label); lightQuestion(index + 1); }]));
-  notice('버튼을 눌러서 이어가면 돼.');
+  cancelPending(); clearBreathing(); $('question-card')?.remove(); $('writing-panel').open = false;
+  if (kind === 'check') { addMessage('user', '마음길 점검을 시작할래'); startCheck(); return; }
+  if (kind === 'calm') { addMessage('user', '먼저 마음을 가라앉히고 싶어'); startBreathing(); return; }
+  addMessage('user', '오늘 하기 어려웠던 일이 있어'); startTalk();
 }
 function chooseTopicAnswer(label) {
-  if (state.topic === 'daily') {
-    addMessage('user', label);
-    if (label === '잠깐 쉬기') finishRest();
-    else lightQuestion(label === '쉬는 시간 상상하기' ? 1 : 0);
+  if (state.connected) { sendText(label); return; }
+  addMessage('user', label); state.stage = 'followup';
+  if (state.topic === 'friend') {
+    addMessage('assistant', '친구와 있었던 일에서 네가 바라는 도움을 먼저 골라 보자. 지금은 어떤 게 필요해?');
+    choices([['내 마음부터 정리하기', () => { addMessage('user', '내 마음부터 정리하기'); addMessage('assistant', '친구에게 말하기 전에 내 마음을 한 문장으로 정리해 볼 수 있어. 어떤 방법으로 해볼까?'); choices([['혼자 작은 소리로 말해보기', () => chooseGoal('내 마음을 혼자 작은 소리로 말해보기')], ['믿을 수 있는 어른과 정리하기', () => chooseGoal('믿을 수 있는 어른과 내 마음 정리하기')], ['먼저 숨 고르기', startBreathing]]); }], ['친구에게 할 말 고르기', () => { addMessage('user', '친구에게 할 말 고르기'); offerGoals(); }], ['어른에게 도움 청하기', () => chooseGoal('믿을 수 있는 어른에게 이야기하기')]]);
     return;
   }
-  if (state.connected) { sendText(label); return; }
-  addMessage('user', label);
-  if (['잠깐 쉬고 싶어', '잠깐 마음을 가라앉힐래'].includes(label)) { finishRest(); return; }
-  if (label === '어른에게 도움을 청할래') { chooseGoal('믿을 수 있는 어른에게 이야기하기'); return; }
-  offerGoals();
+  if (state.topic === 'worry') {
+    addMessage('assistant', '긴장될 때는 숨을 고르거나 준비를 작게 나눠볼 수 있어. 지금은 무엇부터 해볼까?');
+    choices([['조금만 연습하기', () => { addMessage('user', '조금만 연습하기'); offerGoals(); }], ['먼저 숨 고르기', startBreathing], ['도움받을 사람 찾기', () => chooseGoal('믿을 수 있는 어른에게 준비 도움 요청하기')]]);
+    return;
+  }
+  addMessage('assistant', state.topic === 'mistake' ? '실수 한 번으로 네가 어떤 사람인지 정해지지는 않아. 지금은 어떤 도움이 필요해?' : '바로 해결법을 정하기 전에, 어떤 도움이 필요한지 골라볼까?');
+  choices([['전에 해본 방법 떠올리기', () => startStrategy('agency')], ['다른 방법 찾아보기', () => startStrategy('pathways')], ['먼저 마음 가라앉히기', startBreathing]]);
 }
+function startStrategy(kind) {
+  cancelPending(); clearBreathing(); $('question-card')?.remove(); state.stage = 'strategy'; active('talk');
+  addMessage('user', kind === 'agency' ? '시작하는 힘을 찾고 싶어' : '다른 방법을 찾고 싶어');
+  if (kind === 'agency') {
+    addMessage('assistant', '전에 비슷한 일을 조금이라도 해낸 적이 있어?');
+    choices([['혼자 조금 해봤어', () => strategyAnswer('혼자 조금 해봤어', '전에 해본 것 중 다시 써볼 수 있는 방법을 골라 보자.')], ['도움을 받아 해봤어', () => strategyAnswer('도움을 받아 해봤어', '도움을 받아 해본 방법도 다시 쓸 수 있어.')], ['아직 생각이 안 나', () => strategyAnswer('아직 생각이 안 나', '지금 떠오르지 않으면 아주 작은 일부터 골라 보자.')]]);
+  } else {
+    addMessage('assistant', '하던 방법이 잘 안 된다면, 어느 쪽부터 바꿔볼까?');
+    choices([['일을 더 작게 나누기', () => strategyAnswer('일을 더 작게 나누기', '한 번에 할 일을 줄여서 시작해 보자.')], ['다른 순서로 해보기', () => strategyAnswer('다른 순서로 해보기', '쉬운 부분부터 해보는 방법도 있어.')], ['도와줄 사람 찾기', () => chooseGoal('막힌 부분을 믿을 수 있는 어른에게 보여주기')]]);
+  }
+}
+function strategyAnswer(label, response) { addMessage('user', label); offerGoals(response); }
 function chooseMood(mood) {
   state.mood = mood; addMessage('user', mood);
   addMessage('assistant', ({ '괜찮아': '오늘 기억에 남는 일이 있어?', '속상해': '어떤 일 때문에 속상했어?', '걱정돼': '뭐가 걱정되는지 이야기해 줄래?', '화가 나': '무슨 일이 있었어?', '잘 모르겠어': '그럼 오늘 있었던 일부터 이야기해 볼까?' })[mood]);
@@ -91,13 +86,13 @@ function chooseMood(mood) {
 function startCheck() {
   cancelPending(); clearBreathing(); clearChoices(); active('check');
   state.stage = 'check'; state.question = Math.min(state.answers.length, 5);
-  addMessage('assistant', '문장 여섯 개를 읽고 지금 너와 얼마나 비슷한지 골라 줘. 정답은 없어. 중간에 그만해도 돼.', { remember: false });
-  renderQuestion(); notice('교육용 마음 점검 · 표준화된 심리검사나 진단이 아니야.');
+  addMessage('assistant', '마음길 점검은 어려운 일을 시작하고 방법을 찾는 나를 살펴보는 6문장이야. 평소에 얼마나 그런지 1~6 중에서 골라 줘. 시험이 아니고, 중간에 이야기부터 해도 돼.', { remember: false });
+  renderQuestion(); notice('교육용 마음길 점검 · 표준화된 심리검사나 진단이 아니야.');
 }
 function renderQuestion() {
   $('question-card')?.remove(); $('intro').hidden = true;
-  const card = document.createElement('section'); card.id = 'question-card'; card.className = 'question-card'; card.setAttribute('aria-label', '마음 점검 문항');
-  const label = document.createElement('span'); label.className = 'eyebrow'; label.textContent = `마음 점검 ${state.question + 1} / 6`;
+  const card = document.createElement('section'); card.id = 'question-card'; card.className = 'question-card'; card.setAttribute('aria-label', '마음길 점검 문항');
+  const label = document.createElement('span'); label.className = 'eyebrow'; label.textContent = `마음길 점검 ${state.question + 1} / 6`;
   const track = document.createElement('div'); track.className = 'progress-track'; track.setAttribute('role', 'progressbar'); track.setAttribute('aria-label', '응답한 문항'); track.setAttribute('aria-valuemin', '0'); track.setAttribute('aria-valuemax', '6'); track.setAttribute('aria-valuenow', String(state.answers.length)); const fill = document.createElement('span'); fill.style.width = `${state.answers.length / 6 * 100}%`; track.append(fill);
   const h = document.createElement('h3'); h.textContent = questions[state.question]; h.tabIndex = -1;
   const grid = document.createElement('div'); grid.className = 'scale-grid';
@@ -113,16 +108,21 @@ function answerCheck(score) {
   if (state.question < 5) { state.question++; renderQuestion(); return; }
   if (state.answers.length < 6) { state.question = state.answers.length; renderQuestion(); return; }
   const result = summarizeCheck(state.answers); $('question-card')?.remove(); state.stage = 'checked';
-  const responses = ['오늘 해볼 일을 정하는 건 할 만하다고 답했어.', '다른 방법을 떠올리는 건 할 만하다고 답했어.', '조금씩 시작하는 건 할 만하다고 답했어.', '도움을 청할 사람은 떠올릴 수 있다고 답했어.', '전에 해낸 일이 생각난다고 답했어.', '다른 방법으로 다시 해볼 수 있다고 답했어.'];
-  const text = result.strongest === result.support || state.answers[result.strongest] < 4 ? '다 골랐어. 요즘 어떤 일이 있는지 이야기해 볼까?' : `${responses[result.strongest]} 지금 그걸 해보고 싶은 일이 있어?`;
-  addMessage('assistant', text, { remember: false }); choices(Object.entries(topics).map(([key, t]) => [t.label, () => startTopic(key)]));
-  notice('이 답변만으로 성격이나 마음 상태를 판단할 수는 없어.');
+  const reflections = ['평소에 해나가고 있다는 느낌은 있다고 답했어.', '해결할 방법을 여러 가지 떠올릴 때가 있다고 답했어.', '또래 친구들만큼 해나간다는 느낌은 있다고 답했어.', '중요한 일을 해낼 방법이 떠오를 때가 있다고 답했어.', '지금까지 해본 일이 앞으로 도움이 될 것 같다고 답했어.', '다른 사람이 포기하고 싶어 할 때도 다른 방법을 찾을 수 있다고 답했어.'];
+  const reflection = state.answers[result.strongest] >= 4 ? reflections[result.strongest] + ' ' : '';
+  const prompt = result.agency < result.pathways ? '시작하거나 이어가는 데 어떤 도움이 필요할지 찾아볼까?' : result.pathways < result.agency ? '해볼 방법을 더 찾아볼까?' : '지금 필요한 도움을 직접 골라볼까?';
+  addMessage('assistant', '마음길 점검은 여기까지야. ' + reflection + prompt, { remember: false });
+  const supportChoices = [['시작하는 힘 찾기', () => startStrategy('agency')], ['다른 방법 찾기', () => startStrategy('pathways')]];
+  if (result.pathways < result.agency) supportChoices.reverse();
+  choices([...supportChoices, ['어려웠던 일부터 이야기하기', startTalk]]);
+  notice('교육용 참고 답변이야. 점수로 너를 판단하거나 상태를 진단하지 않아.');
 }
-function offerGoals() {
+function offerGoals(context = '') {
   cancelPending(); clearBreathing(); $('question-card')?.remove(); active('talk');
-  state.stage = 'goal'; addMessage('assistant', '지금 해볼 만한 게 있어? 하나만 골라 줘.');
+  state.stage = 'goal'; addMessage('assistant', (typeof context === 'string' && context ? context + ' ' : '') + '오늘 해볼 수 있는 일 하나를 골라볼까?');
   choices(topics[state.topic].goals.map(goal => [goal, () => chooseGoal(goal)]).concat([['지금은 쉬고 싶어', () => finishRest()]]));
 }
+
 function chooseGoal(text) {
   addMessage('user', text); state.goal = { text, when: '', done: false }; state.stage = 'when';
   addMessage('assistant', '언제 해볼까?'); choices(['지금 잠깐', '오늘 쉬는 시간', '오늘 집에서'].map(when => [when, () => saveGoal(when)]));
@@ -132,7 +132,12 @@ function saveGoal(when) {
   choices([['해봤어', () => reflectGoal()], ['더 작게 바꿀래', () => offerGoals()], ['오늘은 여기까지', () => endSession()]]);
 }
 function renderGoal() { $('goal-card').hidden = !state.goal; if (!state.goal) return; $('goal-text').textContent = state.goal.text; $('goal-when').textContent = state.goal.when; $('goal-feedback').textContent = state.goal.done ? '해본 일로 표시했어.' : ''; }
-function reflectGoal() { if (!state.goal) return; state.goal.done = true; renderGoal(); addMessage('assistant', '해보니까 어땠어?'); choices([['조금 편해졌어', () => { addMessage('user', '조금 편해졌어'); addMessage('assistant', '어떤 점이 도움이 됐어? 기억해 두고 싶으면 카드를 복사해 둬도 돼.'); choices([['오늘은 여기까지', endSession], ['다른 이야기하기', startTalk]]); }], ['아직 어려워', () => { offerGoals(); }]]); }
+function reflectGoal() {
+  if (!state.goal) return;
+  state.goal.done = true; renderGoal(); addMessage('assistant', '해보고 나니 어땠어?');
+  const reflect = (label, reply) => { addMessage('user', label); addMessage('assistant', reply); choices([['같은 방법 다시 해볼래', () => chooseGoal(state.goal.text)], ['다른 방법 찾아볼래', () => startStrategy('pathways')], ['오늘은 여기까지', endSession]]); };
+  choices([['조금은 해볼 수 있었어', () => reflect('조금은 해볼 수 있었어', '작게 정한 일을 해본 경험이 생겼어. 다음에도 이 방법을 써볼까?')], ['도움을 받아 해봤어', () => reflect('도움을 받아 해봤어', '도움을 받아 해본 방법도 다음에 쓸 수 있어. 이어서 어떻게 해볼까?')], ['아직 어려워', () => { addMessage('user', '아직 어려워'); addMessage('assistant', '해보니 어느 쪽에서 막혔어?'); choices([['시작이 어려웠어', () => startStrategy('agency')], ['방법이 안 맞았어', () => startStrategy('pathways')], ['먼저 쉬고 싶어', startBreathing]]); }]]);
+}
 function finishRest() { state.stage = 'rest'; addMessage('assistant', '잠깐 쉬자. 물 한 모금 마시고 편하게 앉아 있어도 좋아.'); choices([['숨 고르기', startBreathing], ['오늘은 여기까지', endSession]]); }
 function endSession() { cancelPending(); clearBreathing(); state.stage = 'end'; clearChoices(); addMessage('assistant', '오늘은 여기까지 하자. 힘든 일이 계속되면 믿을 수 있는 어른에게도 이야기해 줘.'); choices([['다른 이야기하기', startTalk], ['대화 지우기', () => $('reset-dialog').showModal()]]); }
 function startBreathing() {
@@ -141,7 +146,7 @@ function startBreathing() {
   const card = document.createElement('div'); card.className = 'breathing-card'; const circle = document.createElement('div'); circle.className = 'breathing-circle'; circle.textContent = '편안하게';
   const desc = document.createElement('p'); desc.textContent = '편하게 들이쉬고, 천천히 내쉬기.\n네가 편한 속도로 쉬어 줘.';
   const toggle = button('30초 함께하기', () => { if (state.breathTimer) { clearBreathing(); toggle.textContent = '다시 함께하기'; circle.textContent = '편안하게'; return; } let left = 30; circle.classList.add('running'); toggle.textContent = '멈추기'; state.breathTimer = setInterval(() => { left--; circle.textContent = `${left}초`; if (left <= 0) { clearBreathing(); circle.textContent = '수고했어'; toggle.textContent = '다시 함께하기'; notice('조금 쉬었네. 이제 하고 싶은 걸 골라 줘.'); } }, 1000); });
-  card.append(circle, desc, toggle); $('messages').append(card); choices([['이야기 나누기', startTalk], ['오늘은 여기까지', endSession]]); scroll();
+  card.append(circle, desc, toggle); $('messages').append(card); choices([['마음길 점검 해보기', startCheck], ['어려웠던 일 고르기', startTalk], ['오늘은 여기까지', endSession]]); scroll();
 }
 function offlineReply(text = '') {
   if (state.stage === 'help') { addMessage('assistant', '지금은 너를 안전하게 도와줄 수 있는 실제 어른과 함께하는 게 중요해. 선생님이나 상담 선생님에게 이 화면을 보여줘도 괜찮아.'); choices([['도움받는 방법 보기', () => $('help-dialog').showModal()], ['잠깐 숨 고르기', startBreathing]]); return; }
@@ -184,10 +189,10 @@ async function sendText(raw) {
 }
 function updateConnection() { $('connect-open').textContent = state.connected ? 'AI 연결 설정' : 'AI 대화 설정'; }
 async function checkServer() {
-  if (!apiBase && !['localhost', '127.0.0.1'].includes(location.hostname)) { $('connection-info').textContent = '아직 AI 대화 서버가 연결되지 않았어. 마음 점검·숨 고르기·실천 카드는 지금 사용할 수 있어.'; serverReady = false; return; }
+  if (!apiBase && !['localhost', '127.0.0.1'].includes(location.hostname)) { $('connection-info').textContent = '아직 AI 대화 서버가 연결되지 않았어. 마음길 점검·숨 고르기·실천 카드는 지금 사용할 수 있어.'; serverReady = false; return; }
   try { const res = await fetch(`${apiBase}/api/health`, { signal: AbortSignal.timeout(5000) }); if (!res.ok) throw new Error(); const data = await res.json(); serverReady = data.ready === true; $('connection-info').textContent = serverReady ? 'AI 대화를 사용할 수 있어. 운영자에게 받은 이용 코드를 입력해 줘.' : '운영자가 AI 연결을 준비하고 있어. 지금은 기본 활동을 사용할 수 있어.'; } catch { serverReady = false; $('connection-info').textContent = '지금은 AI 서버에 연결할 수 없어. 기본 활동은 계속 사용할 수 있어.'; }
 }
-function reset() { cancelPending(); clearBreathing(); state.history = []; state.answers = []; state.question = 0; state.goal = null; state.mood = ''; state.topic = 'daily'; state.stage = 'welcome'; $('writing-panel').open = false; $('mood-picker').open = false; $('topic-picker').open = false; $('chat-scroll').scrollTop = 0; state.code = ''; state.connected = false; $('access-code').value = ''; $('transfer-consent').checked = false; $('messages').replaceChildren(); $('intro').hidden = false; $('goal-card').hidden = true; $('message').value = ''; $('connect-status').textContent = ''; clearChoices(); updateConnection(); active('talk'); notice('다시 시작할 수 있어. 아래에서 하고 싶은 걸 골라 줘.'); }
+function reset() { cancelPending(); clearBreathing(); state.history = []; state.answers = []; state.question = 0; state.goal = null; state.mood = ''; state.topic = 'challenge'; state.stage = 'welcome'; $('writing-panel').open = false; $('mood-picker').open = false; $('topic-picker').open = false; $('chat-scroll').scrollTop = 0; state.code = ''; state.connected = false; $('access-code').value = ''; $('transfer-consent').checked = false; $('messages').replaceChildren(); $('intro').hidden = false; $('goal-card').hidden = true; $('message').value = ''; $('connect-status').textContent = ''; clearChoices(); updateConnection(); active('talk'); notice('다시 시작할 수 있어. 아래에서 하고 싶은 걸 골라 줘.'); }
 
 document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => { $('question-card')?.remove(); ({ talk: startTalk, check: startCheck, breathe: startBreathing })[b.dataset.start](); }));
 document.querySelectorAll('[data-entry]').forEach(b => b.addEventListener('click', () => startEntry(b.dataset.entry)));
@@ -211,7 +216,7 @@ $('connect-form').addEventListener('submit', async e => {
 $('disconnect').addEventListener('click', () => { cancelPending(); state.code = ''; state.connected = false; state.history = []; $('access-code').value = ''; updateConnection(); $('connect-dialog').close(); notice('AI 연결을 해제했어. 기본 활동으로 계속할 수 있어.'); });
 document.querySelectorAll('[data-goal]').forEach(b => b.addEventListener('click', () => { cancelPending(); b.dataset.goal === 'done' ? reflectGoal() : offerGoals(); }));
 $('copy-goal').addEventListener('click', async () => { if (!state.goal) return; try { await navigator.clipboard.writeText(`오늘의 작은 한 걸음\n${state.goal.text}\n언제: ${state.goal.when}`); $('goal-feedback').textContent = '실천 카드를 복사했어. 공유할 사람은 네가 고르면 돼.'; } catch { $('goal-feedback').textContent = '복사가 어려워. 카드의 문장을 직접 선택해서 복사해 줘.'; } });
-$('read-aloud').addEventListener('click', () => { if (!('speechSynthesis' in window)) { notice('이 브라우저에서는 읽어주기가 지원되지 않아.', true); return; } if (speechSynthesis.speaking) { speechSynthesis.cancel(); $('read-aloud').setAttribute('aria-pressed', 'false'); return; } const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); const text = bubbles.length ? bubbles[bubbles.length - 1].textContent : '잠깐 쉬었다 가. 그냥 놀러 왔어, 할 말은 있는데, 잠깐 쉬고 싶어 중에서 하나만 눌러 봐.'; const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'ko-KR'; utterance.rate = .9; utterance.onend = () => $('read-aloud').setAttribute('aria-pressed', 'false'); utterance.onerror = utterance.onend; speechSynthesis.speak(utterance); $('read-aloud').setAttribute('aria-pressed', 'true'); });
+$('read-aloud').addEventListener('click', () => { if (!('speechSynthesis' in window)) { notice('이 브라우저에서는 읽어주기가 지원되지 않아.', true); return; } if (speechSynthesis.speaking) { speechSynthesis.cancel(); $('read-aloud').setAttribute('aria-pressed', 'false'); return; } const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); const text = bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음길을 살펴볼까? 마음길 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.'; const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'ko-KR'; utterance.rate = .9; utterance.onend = () => $('read-aloud').setAttribute('aria-pressed', 'false'); utterance.onerror = utterance.onend; speechSynthesis.speak(utterance); $('read-aloud').setAttribute('aria-pressed', 'true'); });
 $('mic').addEventListener('click', () => { const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!Recognition) { notice('말로 입력하기를 지원하지 않는 브라우저야. 버튼을 고르거나 글로 적어줘.', true); return; } if (state.recognition) { state.recognition.stop(); return; } if (!window.confirm('말로 입력하면 브라우저의 음성 서비스로 음성이 전송될 수 있어. 계속할까?')) return; const recognition = new Recognition(); state.recognition = recognition; recognition.lang = 'ko-KR'; recognition.interimResults = false; recognition.onresult = e => { $('message').value = e.results[0][0].transcript.slice(0, 1200); notice('알아들은 말을 확인하고 보내기를 눌러줘.'); }; recognition.onerror = () => notice('음성을 받지 못했어. 마이크 권한을 확인하거나 글로 적어줘.', true); recognition.onend = () => { state.recognition = null; $('mic').classList.remove('recording'); }; try { recognition.start(); $('mic').classList.add('recording'); notice('듣고 있어. 실명이나 학교 이름은 말하지 않아도 돼.'); } catch { state.recognition = null; notice('마이크를 시작하지 못했어.', true); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { clearBreathing(); window.speechSynthesis?.cancel(); } });
 window.addEventListener('pagehide', () => { cancelPending(); clearBreathing(); window.speechSynthesis?.cancel(); state.code = ''; state.history = []; });

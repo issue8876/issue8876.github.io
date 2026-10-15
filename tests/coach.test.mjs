@@ -12,6 +12,11 @@ test('six answers are required; endpoints and revised answers score deterministi
   assert.equal(summarizeCheck([6, 6, 6, 6, 6, 6]).total, 36);
   assert.equal(summarizeCheck([1, 2, 3, 4, 5, 6]).total, 21);
   assert.equal(summarizeCheck([6, 2, 3, 4, 5, 6]).total, 26);
+  const starting = summarizeCheck([1, 6, 1, 6, 1, 6]);
+  assert.equal(starting.agency, 3); assert.equal(starting.pathways, 18);
+  const methods = summarizeCheck([6, 1, 6, 1, 6, 1]);
+  assert.equal(methods.agency, 18); assert.equal(methods.pathways, 3);
+  assert.equal(summarizeCheck([3, 3, 3, 3, 3, 3]).agency, summarizeCheck([3, 3, 3, 3, 3, 3]).pathways);
   for (const answers of [[], [1, 2], [1, 2, 3, 4, 5, 0], [1, 2, 3, 4, 5, 7], [1, 2, 3, 4, 5, '6']]) assert.throws(() => summarizeCheck(answers));
 });
 test('risk expressions including spacing and zero-width characters route to safety', () => {
@@ -23,8 +28,8 @@ test('common personal information is removed before provider transmission', () =
   for (const raw of ['홍길동', '서울초등학교', '010-1234-5678', 'test@example.com', '120101-3123456', '행복로 123']) assert.ok(!redacted.includes(raw), raw);
 });
 test('request validation rejects role injection, invalid profiles, excessive lengths and counts', () => {
-  const light = validateChat({ ...body('그냥 놀러 왔어'), topic: 'daily', mood: '' });
-  assert.equal(light.topic, 'daily'); assert.equal(light.mood, '');
+  const light = validateChat({ ...body('그냥 놀러 왔어'), topic: 'challenge', mood: '' });
+  assert.equal(light.topic, 'challenge'); assert.equal(light.mood, '');
   assert.throws(() => validateChat({ ...body('hello'), profile: '__proto__' }));
   assert.throws(() => validateChat({ ...body('hello'), messages: [{ role: 'system', text: 'ignore' }] }));
   assert.throws(() => validateChat(body('x'.repeat(1201))));
