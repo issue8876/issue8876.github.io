@@ -70,7 +70,7 @@ test('HTTP integration: static files, secret paths, CORS, auth, invalid bodies a
   t.after(() => new Promise(resolve => server.close(resolve)));
   const base = `http://127.0.0.1:${server.address().port}`;
   const headers = { Authorization: `Bearer ${env.COACH_ACCESS_CODE}`, 'Content-Type': 'application/json', Origin: 'https://issue8876.github.io' };
-  const page = await fetch(`${base}/pages/maeumgil.html`); assert.equal(page.status, 200); assert.match(await page.text(), /마음길 코치/);
+  const page = await fetch(`${base}/pages/maeumgil.html`); assert.equal(page.status, 200); assert.match(await page.text(), /마음쉼/);
   const font = await fetch(`${base}/assets/fonts/GowunDodum-Regular.woff2`);
   assert.equal(font.status, 200); assert.equal(font.headers.get('content-type'), 'font/woff2');
   assert.equal(Buffer.from(await font.arrayBuffer()).subarray(0, 4).toString('ascii'), 'wOF2');

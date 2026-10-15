@@ -40,11 +40,7 @@ button:hover { filter: brightness(.98); }
 .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; font-size: 20px; font-weight: 400; letter-spacing: 0; }
 .brand-mark { display: grid; place-items: center; width: 43px; height: 43px; }
 .brand-mark img { width: 40px; height: 40px; }
-.brand small { display: block; font-size: 13px; color: var(--muted); font-weight: 400; margin-top: 4px; letter-spacing: 0; }
 .top-actions { display: flex; align-items: center; gap: 22px; font-size: 14px; }
-.badge { color: var(--muted); font-size: 13px; }
-.badge.connected { color: #426c53; }
-.badge.connected::before { content: ''; display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: #7b9b76; }
 .text-button { font-size: 14px; padding: 10px 0; }
 .home-link { text-decoration: none; color: var(--muted); }
 .workspace { display: grid; grid-template-columns: 225px minmax(0,1fr); gap: 34px; height: calc(100dvh - 145px); min-height: 540px; max-height: 950px; }
@@ -185,11 +181,9 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
   .app-shell { padding: 0 12px; }
   .topbar { height: 73px; padding: 0 4px; }
   .brand { font-size: 18px; gap: 7px; }
-  .brand small { font-size: 12px; }
   .brand-mark, .brand-mark img { width: 36px; height: 36px; }
   .top-actions { gap: 12px; }
-  .top-actions .home-link, .badge { display: none; }
-  .top-actions .badge.connected { display: inline-flex; align-items: center; font-size: 12px; }
+  .top-actions .home-link { display: none; }
   .workspace { display: flex; flex-direction: column; gap: 10px; height: auto; min-height: 0; max-height: none; }
   .sidebar { padding: 0; overflow: visible; display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; }
   .sidebar-heading, .profile-label, .sidebar-note { display: none; }

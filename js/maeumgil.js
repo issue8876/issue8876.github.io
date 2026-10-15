@@ -143,7 +143,7 @@ async function sendText(raw) {
   }
   if (state.connected) await requestAI(); else offlineReply(text);
 }
-function updateConnection() { $('mode-badge').textContent = state.connected ? 'AI 대화 중' : '마음 활동'; $('mode-badge').classList.toggle('connected', state.connected); $('connect-open').textContent = 'AI 대화 설정'; }
+function updateConnection() { $('connect-open').textContent = state.connected ? 'AI 연결 설정' : 'AI 대화 설정'; }
 async function checkServer() {
   if (!apiBase && !['localhost', '127.0.0.1'].includes(location.hostname)) { $('connection-info').textContent = '아직 AI 대화 서버가 연결되지 않았어. 마음 점검·숨 고르기·실천 카드는 지금 사용할 수 있어.'; serverReady = false; return; }
   try { const res = await fetch(`${apiBase}/api/health`, { signal: AbortSignal.timeout(5000) }); if (!res.ok) throw new Error(); const data = await res.json(); serverReady = data.ready === true; $('connection-info').textContent = serverReady ? 'AI 대화를 사용할 수 있어. 운영자에게 받은 이용 코드를 입력해 줘.' : '운영자가 AI 연결을 준비하고 있어. 지금은 기본 활동을 사용할 수 있어.'; } catch { serverReady = false; $('connection-info').textContent = '지금은 AI 서버에 연결할 수 없어. 기본 활동은 계속 사용할 수 있어.'; }

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#f4f2ee">
-  <meta name="description" content="학교에서 있었던 일, 친구 때문에 속상한 일. 마음길에서 이야기하고 쉬어 가세요.">
-  <title>마음길 코치 · 오늘의 마음 노트</title>
+  <meta name="description" content="학교에서 있었던 일, 친구 때문에 속상한 일. 마음쉼에서 이야기하고 쉬어 가세요.">
+  <title>마음쉼</title>
   <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../css/maeumgil.css">
   <script type="module" src="../js/maeumgil.js"></script>
@@ -14,12 +14,12 @@
   <a class="skip" href="#message">대화 입력으로 건너뛰기</a>
   <div class="app-shell">
     <header class="topbar">
-      <a class="brand" href="maeumgil.html" aria-label="마음길 코치 처음 화면"><span class="brand-mark" aria-hidden="true"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"></span><span>마음길 코치<small>오늘의 마음 노트</small></span></a>
-      <div class="top-actions"><span id="mode-badge" class="badge" aria-live="polite">마음 활동</span><button class="text-button" id="privacy-open">대화 안내</button><a class="home-link" href="../index.html">홈</a></div>
+      <a class="brand" href="maeumgil.html" aria-label="마음쉼 처음 화면"><span class="brand-mark" aria-hidden="true"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"></span><span>마음쉼</span></a>
+      <div class="top-actions"><button class="text-button" id="privacy-open">대화 안내</button><a class="home-link" href="../index.html">홈</a></div>
     </header>
     <main class="workspace">
-      <aside class="sidebar" aria-label="마음길 활동">
-        <div class="sidebar-heading"><h1>오늘 어땠어?</h1><p>학교에서 있었던 일도, 그냥 떠오르는 생각도 좋아.</p></div>
+      <aside class="sidebar" aria-label="활동 선택">
+        <div class="sidebar-heading"><h1>오늘 어땠어?</h1><p>학교에서 있었던 일도,<br>그냥 떠오르는 생각도 좋아.</p></div>
         <label class="profile-label" for="profile">학교·학년</label>
         <select id="profile" aria-label="나에게 맞는 말로"><option value="lower">초등 1–3학년</option><option value="upper" selected>초등 4–6학년</option><option value="middle">중학생</option><option value="high">고등학생</option></select>
         <nav class="activity-nav" aria-label="활동 선택">
@@ -31,8 +31,8 @@
         <div class="sidebar-note"><img class="ui-icon" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"><p>글로 쓰기 어렵다면 아래에서 골라도 돼.</p></div>
         <button class="help-link" id="help-open">지금 도움이 필요해요 <span aria-hidden="true">→</span></button>
       </aside>
-      <section class="conversation" aria-label="마음길 코치와 대화">
-        <div class="conversation-top"><div><span class="notebook-tab" aria-hidden="true"></span><strong>이야기 나누기</strong></div><div class="paper-actions"><button id="read-aloud" class="icon-button" aria-pressed="false" title="마지막 코치 답변 읽어주기"><img class="ui-icon" src="../assets/icons/speaker.svg" alt="" aria-hidden="true" width="48" height="48"><span>읽어주기</span></button><button id="reset" class="reset-link" aria-label="대화 지우고 새로 시작">새로 쓰기</button></div></div>
+      <section class="conversation" aria-label="이야기 나누기">
+        <div class="conversation-top"><div><span class="notebook-tab" aria-hidden="true"></span><strong>이야기 나누기</strong></div><div class="paper-actions"><button id="read-aloud" class="icon-button" aria-pressed="false" title="마지막 답변 읽어주기"><img class="ui-icon" src="../assets/icons/speaker.svg" alt="" aria-hidden="true" width="48" height="48"><span>읽어주기</span></button><button id="reset" class="reset-link" aria-label="대화 지우고 새로 시작">새로 쓰기</button></div></div>
         <div class="chat-scroll" id="chat-scroll"><div class="intro" id="intro">
           <div class="intro-heading"><div><h2>지금 기분은 어때?</h2></div><img class="intro-illustration" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"></div>
           <p>지금 기분과 비슷한 걸 골라 줘.</p>
@@ -51,7 +51,7 @@
             <button data-topic="mistake"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>실수한 날</strong><small>자꾸 생각나</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
           </div>
         </div><div id="messages" role="log" aria-live="polite" aria-relevant="additions text"></div></div>
-        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">지금은 AI 연결 없이 준비된 활동을 할 수 있어.</div><form id="chat-form"><label class="sr-only" for="message">코치에게 이야기하기</label><textarea id="message" rows="1" maxlength="1200" placeholder="무슨 일이 있었어?"></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><div class="composer-foot"><span>이름이나 학교는 쓰지 않아도 돼.</span><button id="connect-open">AI 대화 설정</button></div></div>
+        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">지금은 AI 연결 없이 준비된 활동을 할 수 있어.</div><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="무슨 일이 있었어?"></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><div class="composer-foot"><span>이름이나 학교는 쓰지 않아도 돼.</span><button id="connect-open">AI 대화 설정</button></div></div>
       </section>
     </main>
     <footer class="page-footer"><p>힘든 일이 계속되면 믿을 수 있는 어른에게도 이야기해 줘.</p><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
