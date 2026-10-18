@@ -66,5 +66,5 @@ export function createApp({ env = process.env, fetchImpl = fetch } = {}) {
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = Number(process.env.PORT || 8787); const host = process.env.HOST || '127.0.0.1';
   const server = createApp(); server.requestTimeout = 40000; server.headersTimeout = 10000;
-  server.listen(port, host, () => console.log(`마음쉼 http://${host}:${port}/pages/maeumgil.html · AI ${isReady(process.env) ? 'ready' : 'not configured'}`));
+  server.listen(port, host, () => console.log(`마음쉼 http://${host}:${port}/pages/maeum.html · AI ${isReady(process.env) ? 'ready' : 'not configured'}`));
 }

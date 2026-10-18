@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <button class="menu-btn" onclick="toggleMenu()">☰</button>
         <div class="nav-links" id="navLinks">
             <a href="${basePath}index.html" class="nav-link ${isHomePage ? 'active' : ''}">홈</a>
-            <a href="${basePath}pages/maeumgil.html" class="nav-link">마음길 코치</a>
+            <a href="${basePath}pages/maeum.html" class="nav-link">마음쉼</a>
             <a href="${basePath}pages/deeplearning.html" class="nav-link ${window.location.pathname.includes('deeplearning') ? 'active' : ''}">딥러닝 게임</a>
             <a href="${basePath}pages/seatingarrangement.html" class="nav-link ${window.location.pathname.includes('seatingarrangement') ? 'active' : ''}">자리 배치</a>
             <a href="${basePath}pages/englishword.html" class="nav-link ${window.location.pathname.includes('englishword') ? 'active' : ''}">영어 단어</a>

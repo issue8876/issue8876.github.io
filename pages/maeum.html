@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f4f2ee">
+  <meta name="description" content="학교에서 있었던 일, 친구 때문에 속상한 일. 마음쉼에서 이야기하고 쉬어 가세요.">
+  <title>마음쉼</title>
+  <link rel="canonical" href="https://issue8876.github.io/pages/maeum.html">
+  <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../css/maeumgil.css">
+  <script type="module" src="../js/maeumgil.js"></script>
+</head>
+<body>
+  <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="maeum.html" aria-label="마음쉼 처음 화면"><span class="brand-mark" aria-hidden="true"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"></span><span>마음쉼</span></a>
+      <div class="top-actions"><button class="text-button" id="privacy-open">대화 안내</button><a class="home-link" href="../index.html">홈</a></div>
+    </header>
+    <main class="workspace">
+      <aside class="sidebar" aria-label="활동 선택">
+        <div class="sidebar-heading"><h1>어려운 일도, 조금씩.</h1><p>어려웠던 일을 살펴보고,<br>오늘 해볼 방법을 골라 보자.</p></div>
+        <label class="profile-label" for="profile">학교·학년</label>
+        <select id="profile" aria-label="나에게 맞는 말로"><option value="lower">초등 1–3학년</option><option value="upper" selected>초등 4–6학년</option><option value="middle">중학생</option><option value="high">고등학생</option></select>
+        <nav class="activity-nav" aria-label="활동 선택">
+          <button class="nav-item active" data-start="talk"><img class="ui-icon" src="../assets/icons/chat.svg" alt="" aria-hidden="true" width="48" height="48"><span>오늘 이야기</span></button>
+          <button class="nav-item" data-start="check"><img class="ui-icon" src="../assets/icons/checklist.svg" alt="" aria-hidden="true" width="48" height="48"><span>마음길 점검</span></button>
+          <button class="nav-item" data-start="breathe"><img class="ui-icon" src="../assets/icons/breathe.svg" alt="" aria-hidden="true" width="48" height="48"><span>숨 고르기</span></button>
+        </nav>
+        <section id="goal-card" class="goal-card" hidden><span class="eyebrow">오늘 해볼 일</span><h2 id="goal-text"></h2><p id="goal-when"></p><div class="goal-actions"><button data-goal="done">해봤어</button><button data-goal="change">바꿀래</button><button id="copy-goal">복사</button></div><p id="goal-feedback" role="status"></p></section>
+        <div class="sidebar-note"><img class="ui-icon" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"><p>글로 쓰기 어렵다면 아래에서 골라도 돼.</p></div>
+        <button class="help-link" id="help-open">지금 도움이 필요해요 <span aria-hidden="true">→</span></button>
+      </aside>
+      <section class="conversation" aria-label="이야기 나누기">
+        <div class="conversation-top"><div><span class="notebook-tab" aria-hidden="true"></span><strong>이야기 나누기</strong></div><div class="paper-actions"><button id="read-aloud" class="icon-button" aria-pressed="false" title="마지막 답변 읽어주기"><img class="ui-icon" src="../assets/icons/speaker.svg" alt="" aria-hidden="true" width="48" height="48"><span>읽어주기</span></button><button id="reset" class="reset-link" aria-label="대화 지우고 새로 시작">새로 쓰기</button></div></div>
+        <div class="chat-scroll" id="chat-scroll" tabindex="-1"><div class="intro" id="intro">
+          <div class="intro-heading"><div><h2>내 마음길을 살펴볼까?</h2></div><img class="intro-illustration" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"></div>
+          <p>점검부터 해도, 어려웠던 일부터 골라도 돼.</p>
+          <div class="entry-grid" aria-label="어떻게 시작할까">
+            <button id="entry-start" class="entry-card" data-entry="check"><img class="ui-icon" src="../assets/icons/checklist.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>마음길 점검</strong><small>6문장으로 나를 살펴보기</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
+            <button class="entry-card" data-entry="talk"><img class="ui-icon" src="../assets/icons/chat.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>오늘 어려웠던 일</strong><small>상황을 고르고 방법 찾기</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
+            <button class="entry-card" data-entry="calm"><img class="ui-icon" src="../assets/icons/breathe.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>먼저 마음 가라앉히기</strong><small>숨 고르고 천천히 시작하기</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
+          </div>
+          <details id="mood-picker" class="entry-extra"><summary>기분으로 골라볼래</summary>
+          <div class="mood-grid" aria-label="지금의 기분">
+            <button data-mood="괜찮아"><img class="ui-icon" src="../assets/icons/happy.svg" alt="" aria-hidden="true" width="48" height="48"><span>괜찮아</span></button>
+            <button data-mood="속상해"><img class="ui-icon" src="../assets/icons/sad.svg" alt="" aria-hidden="true" width="48" height="48"><span>속상해</span></button>
+            <button data-mood="걱정돼"><img class="ui-icon" src="../assets/icons/uneasy.svg" alt="" aria-hidden="true" width="48" height="48"><span>걱정돼</span></button>
+            <button data-mood="화가 나"><img class="ui-icon" src="../assets/icons/angry.svg" alt="" aria-hidden="true" width="48" height="48"><span>화가 나</span></button>
+            <button data-mood="잘 모르겠어"><img class="ui-icon" src="../assets/icons/unsure.svg" alt="" aria-hidden="true" width="48" height="48"><span>모르겠어</span></button>
+          </div>
+          </details>
+          <details class="entry-extra" id="topic-picker"><summary>이야기할 상황을 바로 고를래</summary>
+          <div class="topic-grid">
+            <button data-topic="study"><img class="ui-icon" src="../assets/icons/pencil.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>공부·숙제</strong><small>시작하기가 어려워</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
+            <button data-topic="friend"><img class="ui-icon" src="../assets/icons/friends.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>친구 사이</strong><small>친구랑 일이 있었어</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
+            <button data-topic="worry"><img class="ui-icon" src="../assets/icons/worry.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>발표·시험 걱정</strong><small>자꾸 신경 쓰여</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
+            <button data-topic="mistake"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>실수한 날</strong><small>자꾸 생각나</small></span><span class="topic-arrow" aria-hidden="true">→</span></button>
+          </div>
+          </details>
+        </div><div id="messages" role="log" aria-live="polite" aria-relevant="additions text"></div></div>
+        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">마음길 점검과 선택형 활동은 AI 연결 없이 할 수 있어.</div><details class="writing-panel" id="writing-panel"><summary>직접 쓰고 싶을 때</summary><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="쓰고 싶은 말이 생기면 여기에 적어 줘."></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><p class="writing-hint">이름, 학교, 연락처는 적지 말아 줘.</p></details><div class="composer-foot"><span>버튼만 눌러도 이어갈 수 있어.</span><button id="connect-open">AI 대화 설정</button></div></div>
+      </section>
+    </main>
+    <footer class="page-footer"><p>힘든 일이 계속되면 믿을 수 있는 어른에게도 이야기해 줘.</p><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
+  </div>
+  <dialog id="privacy-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><h2>이용하기 전에 알아 둬</h2><p>기본 활동에서 나눈 대화와 답변은 이 화면을 열어 둔 동안에만 남아. 새로고침하거나 대화를 지우면 없어져.</p><p>AI를 연결하면 대화 일부가 Google로 전송돼. 보내기 전에 개인정보를 가리지만, 모두 찾아내지는 못해. 이름, 학교, 주소, 연락처는 적지 말아 줘. 음성 입력을 선택하면 브라우저의 음성 서비스가 사용될 수 있어.</p><p>마음길 점검은 어려운 일을 시작하고 해볼 방법을 찾기 위한 교육용 활동이야. 표준화된 심리검사나 진단은 아니고, AI의 답변도 틀릴 수 있어.</p><p>위험하거나 힘든 일이 있으면 가까운 선생님이나 안전하게 도와줄 어른에게 이야기해 줘. 이 서비스가 선생님에게 자동으로 연락해 주지는 않아.</p><button class="primary-button" data-close>알겠어</button></dialog>
+  <dialog id="connect-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><h2>AI 대화 연결하기</h2><p id="connection-info">서버 연결 상태를 확인하고 있어.</p><p class="small">AI 대화는 Google로 전송돼. 실제 학생 운영 전에는 운영자가 제공사의 연령·개인정보 조건을 확인해야 해.</p><form id="connect-form"><label for="access-code">운영자에게 받은 이용 코드</label><input id="access-code" type="password" autocomplete="off" maxlength="128" placeholder="이용 코드 입력"><label class="checkbox-label"><input id="transfer-consent" type="checkbox" required>대화가 AI 제공사로 전송되는 점을 확인했어요.</label><div class="dialog-actions"><button type="submit" class="primary-button">연결하기</button><button type="button" id="disconnect">연결 해제</button></div><p id="connect-status" role="status"></p></form></dialog>
+  <dialog id="help-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><span class="eyebrow">지금은 안전이 먼저야</span><h2>혼자 견디지 않아도 돼.</h2><p>너를 안전하게 도울 수 있는 선생님, 상담 선생님이나 믿을 수 있는 어른에게 이 화면을 보여줘. 너를 해치는 사람에게 직접 도움을 청할 필요는 없어.</p><p>당장 위험하면 <a href="tel:112">112</a> 또는 <a href="tel:119">119</a>에 도움을 요청해.</p><a class="primary-button help-call" href="tel:+82109?oai_link_source=model_response_hotline">자살예방상담전화 109</a><p class="small">이 화면은 긴급 구조를 요청하거나 주변 어른에게 자동으로 연락하지 않아.</p><button data-close>화면으로 돌아가기</button></dialog>
+  <dialog id="reset-dialog"><h2>대화를 지우고 다시 시작할까?</h2><p>지금 대화와 마음길 점검, 실천 카드가 지워져. AI 연결도 해제돼.</p><div class="dialog-actions"><button id="confirm-reset" class="primary-button">지우고 시작하기</button><button data-close>돌아가기</button></div></dialog>
+</body>
+</html>

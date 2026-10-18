@@ -2,7 +2,7 @@
 
 ## 현재 구성
 
-- 웹 화면: `pages/maeumgil.html`. GitHub Pages에 정적 파일로 배포합니다.
+- 웹 화면: `pages/maeum.html`. GitHub Pages에 정적 파일로 배포합니다.
 - AI 서버: Node.js 22.12 이상. 외부 패키지 설치 없이 실행합니다.
 - 모델: `gemini-3.8-flash`, 기본 thinking level `low`.
 - 로컬 비밀 설정: `.env`. `.gitignore`와 `.dockerignore`로 제외합니다.
@@ -23,7 +23,7 @@ GitHub Pages는 Node 서버를 실행하지 않으므로 **화면 배포와 AI �
 node --env-file-if-exists=.env server/index.mjs
 ```
 
-기본 주소: `http://127.0.0.1:8787/pages/maeumgil.html`
+기본 주소: `http://127.0.0.1:8787/pages/maeum.html`
 
 페이지의 ‘AI 연결’에서 이용 코드와 전송 안내를 확인하면 연결할 수 있습니다. 연결 이전에 한 기본 활동 대화는 전송하지 않습니다. 연결 해제하면 서버로 보낼 대화 문맥도 초기화합니다.
 
@@ -43,7 +43,7 @@ API 키를 넣지 않은 경우 `/api/health`는 `ready: false`를 반환합니�
 
 GitHub Actions는 `main` 또는 `master`로의 push와 수동 실행을 지원합니다. 원격 기본 브랜치가 다르면 워크플로의 브랜치 설정을 바꿉니다.
 
-예상 공개 경로: `https://issue8876.github.io/pages/maeumgil.html`. 실제 배포가 성공했는지는 GitHub Actions의 Deploy 단계와 공개 URL에서 확인해야 합니다.
+예상 공개 경로: `https://issue8876.github.io/pages/maeum.html`. 실제 배포가 성공했는지는 GitHub Actions의 Deploy 단계와 공개 URL에서 확인해야 합니다.
 
 빌드 명령:
 

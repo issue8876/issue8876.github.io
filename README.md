@@ -6,7 +6,7 @@
 
 초등 저학년·고학년·중학생·고등학생의 눈높이에 맞춘 마음 표현, 선택형 대화, 교육용 마음 점검, 숨 고르기, 작은 실천 카드를 추가했습니다.
 
-- 화면: `pages/maeumgil.html`
+- 화면: `pages/maeum.html`
 - AI: Gemini 3.8 Flash. 입력·출력 필터와 서버 측 `.env`를 사용합니다.
 - 실행: `node --env-file-if-exists=.env server/index.mjs`
 - 테스트: `node --test tests/*.test.mjs`
