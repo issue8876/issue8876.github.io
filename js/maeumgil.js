@@ -249,7 +249,6 @@ $('message').addEventListener('input', () => { $('message').style.height = 'auto
 $('profile').addEventListener('change', () => { cancelPending(); reader.stop(); state.profile = $('profile').value; document.body.classList.toggle('low-literacy', state.profile === 'lower'); if (state.history.length) { state.history = []; addMessage('assistant', `${profiles[state.profile].label}으로 바꿨어. 하고 싶은 활동을 골라 줘.`, { remember: false }); } });
 $('privacy-open').addEventListener('click', () => $('privacy-dialog').showModal());
 $('connect-open').addEventListener('click', openConnection);
-$('help-open').addEventListener('click', () => $('help-dialog').showModal());
 $('reset').addEventListener('click', () => $('reset-dialog').showModal());
 $('confirm-reset').addEventListener('click', () => { reset(); $('reset-dialog').close(); });
 document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', () => b.closest('dialog').close()));
