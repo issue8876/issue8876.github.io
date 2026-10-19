@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { assessSafety, redactPII, safeModelText, summarizeCheck } from '../js/maeumgil-core.js';
-import { coachReply, validateChat, createLimiter, authorized } from '../server/coach.mjs';
+import { coachReply, validateChat, createLimiter, isReady } from '../server/coach.mjs';
+import { createSessions } from '../server/access.mjs';
 import { createApp } from '../server/index.mjs';
 
-const env = { GEMINI_API_KEY: 'unit-test-placeholder', GEMINI_MODEL: 'gemini-3.8-flash', COACH_ACCESS_CODE: 'test-access-code-123456789', ALLOWED_ORIGINS: 'https://issue8876.github.io' };
+const env = { GEMINI_API_KEY: 'unit-test-placeholder', GEMINI_MODEL: 'gemini-3.8-flash', COACH_JOIN_CODE: '1234', ALLOWED_ORIGINS: 'https://issue8876.github.io' };
 const body = text => ({ profile: 'upper', topic: 'study', messages: [{ role: 'user', text }] });
 const modelResponse = text => ({ status: 'completed', steps: [{ type: 'model_output', content: [{ type: 'text', text }] }] });
 test('six answers are required; endpoints and revised answers score deterministically', () => {
@@ -65,28 +66,63 @@ test('rate limiter allows a fresh window and caps distinct keys', () => {
   assert.equal(limit('a'), true); assert.equal(limit('a'), true); assert.equal(limit('a'), false); assert.equal(limit('b'), false);
   now = 11; assert.equal(limit('a'), true);
 });
-test('access code is required and checked exactly', () => {
-  assert.equal(authorized(`Bearer ${env.COACH_ACCESS_CODE}`, env.COACH_ACCESS_CODE), true);
-  assert.equal(authorized('Bearer wrong', env.COACH_ACCESS_CODE), false);
-  assert.equal(authorized(undefined, env.COACH_ACCESS_CODE), false);
-  assert.equal(authorized('Bearer short', 'short'), false);
+test('numeric classroom codes issue independent expiring tokens, never chat credentials', () => {
+  let time = 0;
+  const sessions = createSessions({ code: '0123', now: () => time, ttlMs: 100, maxSessions: 2 });
+  for (const value of [undefined, 123, '123', '01230', 'abcd', ' 0123', '１２３４']) assert.equal(sessions.issue(value), null);
+  const first = sessions.issue('0123'), second = sessions.issue('0123');
+  assert.ok(first.token.length >= 32); assert.notEqual(first.token, second.token);
+  assert.equal(sessions.accepts(`Bearer ${first.token}`), true);
+  assert.equal(sessions.accepts('Bearer 0123'), false);
+  assert.equal(sessions.accepts(undefined), false);
+  assert.deepEqual(sessions.issue('0123'), { full: true });
+  time = 100;
+  assert.equal(sessions.accepts(`Bearer ${first.token}`), false);
+  assert.ok(sessions.issue('0123').token);
+  assert.equal(isReady(env), true);
+  for (const code of ['', '123', '1234567', 'abcdef']) assert.equal(isReady({ ...env, COACH_JOIN_CODE: code }), false);
+  assert.equal(isReady({ ...env, GEMINI_API_KEY: '' }), false);
 });
 test('HTTP integration: static files, secret paths, CORS, auth, invalid bodies and chat', async t => {
   const server = createApp({ env, fetchImpl: async () => Response.json(modelResponse('한 가지씩 시작해 볼까?')) });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
   t.after(() => new Promise(resolve => server.close(resolve)));
   const base = `http://127.0.0.1:${server.address().port}`;
-  const headers = { Authorization: `Bearer ${env.COACH_ACCESS_CODE}`, 'Content-Type': 'application/json', Origin: 'https://issue8876.github.io' };
+  const headers = { 'Content-Type': 'application/json', Origin: 'https://issue8876.github.io' };
   const page = await fetch(`${base}/pages/maeum.html`); assert.equal(page.status, 200); assert.match(await page.text(), /마음쉼/);
   const font = await fetch(`${base}/assets/fonts/GowunDodum-Regular.woff2`);
   assert.equal(font.status, 200); assert.equal(font.headers.get('content-type'), 'font/woff2');
   assert.equal(Buffer.from(await font.arrayBuffer()).subarray(0, 4).toString('ascii'), 'wOF2');
   for (const secret of ['/.env', '/.git/config', '/server/coach.mjs', '/js/../server/coach.mjs', '/js/%2e%2e%5c.env']) assert.equal((await fetch(base + secret)).status, 404, secret);
   assert.equal((await fetch(`${base}/api/health`, { headers: { Origin: 'https://evil.example' } })).status, 403);
-  const health = await fetch(`${base}/api/health`, { headers: { Origin: 'https://issue8876.github.io' } }); assert.equal(health.headers.get('access-control-allow-origin'), 'https://issue8876.github.io'); assert.equal((await health.json()).ready, true);
+  const health = await fetch(`${base}/api/health`, { headers: { Origin: 'https://issue8876.github.io' } }); assert.equal(health.headers.get('access-control-allow-origin'), 'https://issue8876.github.io'); const healthBody = await health.text(); assert.equal(JSON.parse(healthBody).ready, true); assert.ok(!healthBody.includes(env.COACH_JOIN_CODE));
   assert.equal((await fetch(`${base}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' })).status, 401);
+  assert.equal((await fetch(`${base}/api/chat`, { method: 'POST', headers: { ...headers, Authorization: 'Bearer 1234' }, body: JSON.stringify(body('숙제')) })).status, 401);
+  assert.equal((await fetch(`${base}/api/session`, { method: 'POST', headers, body: JSON.stringify({ code: '0000' }) })).status, 401);
+  const joined = await fetch(`${base}/api/session`, { method: 'POST', headers, body: JSON.stringify({ code: env.COACH_JOIN_CODE }) });
+  assert.equal(joined.status, 200); assert.equal(joined.headers.get('cache-control'), 'no-store');
+  const session = await joined.json(); assert.equal(session.expiresIn, 3600); headers.Authorization = `Bearer ${session.token}`;
   assert.equal((await fetch(`${base}/api/chat`, { method: 'POST', headers, body: 'not json' })).status, 400);
   assert.equal((await fetch(`${base}/api/chat`, { method: 'POST', headers, body: JSON.stringify(body('x'.repeat(1201))) })).status, 400);
   const chat = await fetch(`${base}/api/chat`, { method: 'POST', headers, body: JSON.stringify(body('숙제를 시작하기 어려워')) }); assert.equal(chat.status, 200); assert.match((await chat.json()).message, /시작/);
   const risk = await fetch(`${base}/api/chat`, { method: 'POST', headers, body: JSON.stringify(body('죽고 싶어')) }); assert.equal((await risk.json()).safety, true);
+});
+
+test('HTTP join attempts are throttled and expired sessions cannot call the provider', async t => {
+  let time = 0, calls = 0;
+  const server = createApp({ env, now: () => time, fetchImpl: async () => { calls++; return Response.json(modelResponse('시작해 볼까?')); } });
+  await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+  t.after(() => new Promise(resolve => server.close(resolve)));
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const headers = { 'Content-Type': 'application/json' };
+  const join = code => fetch(`${base}/api/session`, { method: 'POST', headers, body: JSON.stringify({ code }) });
+  const first = await join('1234'); const session = await first.json();
+  // Students sharing a school IP can join; only failed codes trigger the IP lock.
+  for (let i = 0; i < 10; i++) assert.equal((await join('1234')).status, 200);
+  for (let i = 0; i < 5; i++) assert.equal((await join('0000')).status, 401);
+  assert.equal((await join('1234')).status, 429);
+  time = 60001; assert.equal((await join('1234')).status, 200);
+  time = 3600000;
+  const expired = await fetch(`${base}/api/chat`, { method: 'POST', headers: { ...headers, Authorization: `Bearer ${session.token}` }, body: JSON.stringify(body('공부가 어려워')) });
+  assert.equal(expired.status, 401); assert.equal(calls, 0);
 });

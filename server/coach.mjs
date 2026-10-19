@@ -1,15 +1,10 @@
-import { timingSafeEqual } from 'node:crypto';
+import { validJoinCode } from './access.mjs';
 import { assessSafety, helpMessage, redactPII, safeModelText, profiles, topics } from '../js/maeumgil-core.js';
 
 export class HttpError extends Error {
   constructor(status, message) { super(message); this.status = status; }
 }
-export function isReady(env) { return Boolean(env.GEMINI_API_KEY?.trim() && env.COACH_ACCESS_CODE?.trim().length >= 16); }
-export function authorized(header, code) {
-  if (!code || code.length < 16 || typeof header !== 'string' || !header.startsWith('Bearer ')) return false;
-  const supplied = Buffer.from(header.slice(7)); const expected = Buffer.from(code);
-  return supplied.length === expected.length && timingSafeEqual(supplied, expected);
-}
+export function isReady(env) { return Boolean(env.GEMINI_API_KEY?.trim() && validJoinCode(env.COACH_JOIN_CODE)); }
 export function validateChat(body) {
   if (!body || typeof body !== 'object' || !Object.hasOwn(profiles, body.profile) || !Object.hasOwn(topics, body.topic)) throw new HttpError(400, '활동과 학년을 다시 선택해 줘.');
   if (!Array.isArray(body.messages) || body.messages.length < 1 || body.messages.length > 16) throw new HttpError(400, '대화가 너무 길어졌어. 새 대화로 시작해 줘.');

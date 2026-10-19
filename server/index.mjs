@@ -2,7 +2,8 @@ import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { authorized, coachReply, createLimiter, HttpError, isReady } from './coach.mjs';
+import { coachReply, createLimiter, HttpError, isReady } from './coach.mjs';
+import { createSessions } from './access.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
@@ -15,10 +16,13 @@ async function readJSON(req) {
   for await (const chunk of req) { size += chunk.length; if (size > 64000) throw new HttpError(413, '메시지가 너무 길어. 짧게 나눠서 적어 줘.'); chunks.push(chunk); }
   try { return JSON.parse(Buffer.concat(chunks).toString('utf8')); } catch { throw new HttpError(400, '메시지 형식을 확인해 줘.'); }
 }
-export function createApp({ env = process.env, fetchImpl = fetch } = {}) {
+export function createApp({ env = process.env, fetchImpl = fetch, now = Date.now } = {}) {
   const allowedOrigins = new Set((env.ALLOWED_ORIGINS || 'http://localhost:8787,http://127.0.0.1:8787').split(',').map(x => x.trim()).filter(Boolean));
   const chatLimit = createLimiter({ limit: 12 });
-  const authLimit = createLimiter({ limit: 8 });
+  const authLimit = createLimiter({ limit: 5, now });
+  const globalAuthLimit = createLimiter({ limit: 30, maxKeys: 1, now });
+  const sessions = createSessions({ code: env.COACH_JOIN_CODE, now });
+  const joinFailures = new Map();
   const globalLimit = createLimiter({ limit: 100, maxKeys: 1 });
   let inFlight = 0;
   return http.createServer(async (req, res) => {
@@ -39,12 +43,26 @@ export function createApp({ env = process.env, fetchImpl = fetch } = {}) {
         if (!['/api/chat', '/api/session'].includes(url.pathname) || req.method !== 'POST') { send(404, { error: '요청한 기능을 찾을 수 없어.' }); return; }
         // A single trusted reverse proxy may provide a client IP. Never trust arbitrary X-Forwarded-For.
         const peer = env.TRUST_PROXY === 'true' ? (req.headers['x-forwarded-for'] || '').split(',').at(-1)?.trim() || req.socket.remoteAddress : req.socket.remoteAddress;
-        const valid = authorized(req.headers.authorization, env.COACH_ACCESS_CODE);
-        if ((!valid || url.pathname === '/api/session') && !authLimit(peer)) throw new HttpError(429, '요청이 많아. 1분 뒤 다시 시도해 줘.');
-        if (!valid) throw new HttpError(401, '이용 코드를 확인해 줘.');
+        if (url.pathname === '/api/session') {
+          for (const [key, failure] of joinFailures) if (failure.until <= now()) joinFailures.delete(key);
+          const failure = joinFailures.get(peer);
+          if ((failure?.count || 0) >= 5 || !globalAuthLimit('all')) throw new HttpError(429, '연결 요청이 많아. 1분 뒤 다시 해 보거나 선생님께 코드를 확인해 줘.');
+          if (!isReady(env)) throw new HttpError(503, '아직 연결을 준비하고 있어. 기본 활동은 지금 할 수 있어.');
+          const body = await readJSON(req);
+          const session = sessions.issue(body?.code);
+          if (!session) {
+            joinFailures.set(peer, { count: (failure?.count || 0) + 1, until: failure?.until || now() + 60000 });
+            throw new HttpError(401, '코드가 맞지 않아. 선생님께 받은 숫자를 다시 확인해 줘.');
+          }
+          if (session.full) throw new HttpError(503, '지금 이용자가 많아. 잠시 뒤 다시 연결해 줘.');
+          send(200, { ok: true, ...session }); return;
+        }
+        if (!sessions.accepts(req.headers.authorization)) {
+          if (!authLimit(peer)) throw new HttpError(429, '요청이 많아. 1분 뒤 다시 시도해 줘.');
+          throw new HttpError(401, '연결 시간이 지났어. 선생님께 받은 코드로 다시 연결해 줘.');
+        }
         if (!isReady(env)) throw new HttpError(503, 'AI 연결 준비 중이야. 기본 활동을 이용해 줘.');
         const body = await readJSON(req);
-        if (url.pathname === '/api/session') { send(200, { ok: true }); return; }
         if (!chatLimit(peer) || !globalLimit('all') || inFlight >= 6) throw new HttpError(429, '지금 이용자가 많아. 잠시 뒤 다시 보내 줘.');
         inFlight++;
         try { send(200, await coachReply(body, env, fetchImpl)); } finally { inFlight--; }

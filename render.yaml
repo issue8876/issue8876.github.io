@@ -18,7 +18,7 @@ services:
         value: low
       - key: GEMINI_API_KEY
         sync: false
-      - key: COACH_ACCESS_CODE
+      - key: COACH_JOIN_CODE
         sync: false
       - key: ALLOWED_ORIGINS
         value: https://issue8876.github.io
