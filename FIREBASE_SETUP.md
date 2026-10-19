@@ -1,7 +1,7 @@
 # 마음쉼 · Firebase로 연구용 시험 환경 만들기
 
 구성: Firebase Hosting(화면) → Cloud Functions for Firebase(코드 확인·필터) → Gemini 3.8 Flash.
-프로젝트 ID는 `maeum-835b3`입니다. https://maeum-835b3.web.app/pages/maeum.html 에 Hosting과 AI 함수, App Check를 연결했습니다. 숫자 코드 인증은 브라우저에서 확인했습니다. 운영자가 충전을 완료했다고 알려 주었으나, 마지막 검증에서도 Google이 선불 크레딧 부족(HTTP 402)을 반환해 실제 AI 답변은 확인하지 못했습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
+프로젝트 ID는 `maeum-835b3`입니다. https://maeum-835b3.web.app/pages/maeum.html 에 Hosting과 AI 함수, App Check를 연결했습니다. 운영자가 제공한 선불 충전 API 키로 교체하고 함수를 재배포했으며, 2026년 10월 19일 브라우저에서 숫자 코드 인증과 가상 사례의 실제 Gemini 답변을 확인했습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
 
 ## 현재 상태와 다음 배포
 
@@ -9,8 +9,9 @@
 - `.env`의 Gemini API 키·숫자 코드·서명 키를 Secret Manager에 등록했습니다. 값은 Git과 정적 화면에 포함하지 않습니다.
 - App Check 사이트 키는 `functions/.env.maeum-835b3`에 준비했습니다. 이 파일도 Git에서 제외됩니다.
 - 현재 배포는 `firebase.json`을 사용하며 `/api/**`를 AI 함수로 전달합니다. GitHub Pages 주소는 기본 활동만 제공합니다.
-- 기존 API 키는 다른 프로젝트 소속이라 `maeum-835b3`에 `maeum-server-gemini` 키를 만들었습니다. Gemini API(`generativelanguage.googleapis.com`)로만 사용을 제한하고 로컬 `.env`와 Secret Manager를 교체했습니다.
-- Firebase 결제 연결과 Gemini API 선불 잔액은 별개입니다. 충전 완료 안내 후에도 Google이 “Your prepayment credits are depleted”를 반환했습니다. 추가 충전 전에 https://ai.studio/projects 에서 이 프로젝트가 사용하는 결제 계정과 선불 잔액 표시를 확인하고, 결제 반영 후 가상 사례로 다시 검증해야 합니다.
+- 현재는 운영자가 `.env`에 변경한 선불 충전 API 키를 사용합니다. 이 키의 발급 프로젝트는 Firebase 앱 프로젝트와 다릅니다. 앱과 함수는 `maeum-835b3`에서 실행되며, Gemini 사용량과 요금은 API 키가 속한 프로젝트의 결제 계정에 적용됩니다. API 키의 소속 프로젝트를 이전하지는 않습니다.
+- 이전에 발생했던 크레딧 부족(HTTP 402)은 사용 가능한 키로 교체한 뒤 해소됐습니다. Firebase 결제 연결과 Gemini API 선불 잔액은 별개이므로, 향후 402 발생 시 https://ai.studio/projects 에서 현재 API 키가 속한 프로젝트의 선불 잔액과 결제 상태를 확인합니다.
+- `.env`에 키를 저장하는 것만으로 배포된 서버가 바뀌지는 않습니다. Secret Manager의 `GEMINI_API_KEY`를 갱신하고 함수를 재배포해야 적용됩니다. 숫자 코드와 서명 키는 이번 API 키 교체에서 유지했습니다.
 - App Check 없는 POST 요청은 403으로 거부됩니다. 서버 테스트 14개와 정적 빌드의 비밀 값 검사도 통과했습니다. `/api/health`의 `ready: true`는 비밀 설정 완료를 뜻하며 Gemini 결제 상태까지 보장하지 않습니다.
 - 함수 빌드 이미지 저장소에 1일 경과 이미지 정리 정책을 설정했습니다.
 - CLI 실행: 이 기기에는 `.local/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js`에 CLI를 설치했습니다. Node로 이 파일을 실행하거나, 일반 환경에서는 아래의 `npx firebase-tools` 명령을 사용합니다.
