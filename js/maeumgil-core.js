@@ -14,9 +14,10 @@ export const questions = [
   "내가 지금까지 해본 일들은 앞으로 나에게 도움이 될 것 같다.",
   "다른 사람이 포기하고 싶어 할 때도 나는 다른 방법을 찾아볼 수 있다."
 ];
-export const scale = ['전혀 없어', '아주 조금', '조금', '꽤 자주', '거의 항상', '항상'];
+// Educational frequency labels, revised for consistency; not a standardized CHS edition.
+export const scale = ['전혀 없어', '아주 드물어', '가끔 그래', '자주 그래', '거의 항상 그래', '항상 그래'];
 export function summarizeCheck(answers) {
-  if (!Array.isArray(answers) || answers.length !== 6 || answers.some(x => !Number.isInteger(x) || x < 1 || x > 6)) {
+  if (!Array.isArray(answers) || answers.length !== 6 || Array.from(answers).some(x => !Number.isInteger(x) || x < 1 || x > 6)) {
     throw new Error('6개 문항에 모두 응답해야 합니다.');
   }
   const total = answers.reduce((a, b) => a + b, 0);
@@ -30,8 +31,8 @@ export function summarizeCheck(answers) {
 // A conservative local routing aid, not a complete risk assessment.
 export function assessSafety(value) {
   const text = String(value).normalize('NFKC').replace(/[\s\u200b-\u200d·.,!?~ㅠㅜㅋㅎ]/g, '');
-  if (/(죽고싶|죽을래|죽어버|죽으려고|죽을거|자살|자해|목숨|살기싫|살고싶지|없어지고싶|사라지고싶|끝내고싶|해치고싶|죽이고싶|죽일거|칼로|뛰어내|손목.{0,8}(긋|그었|베)|약.{0,5}(많이먹|한꺼번에))/.test(text)) return 'urgent';
-  if (/(때려|맞았|맞고|폭력|학대|성폭|성추행|만졌|만져|따돌|왕따|괴롭|집에가기무서|집에가면무서|협박)/.test(text)) return 'support';
+  if (/(죽고싶|죽고십|죽구싶|죽을래|죽어버|죽으려고|죽을거|자살|자해|목숨|살기싫|살고싶지|살아있기싫|없어지고싶|사라지고싶|(?:내가|난|나는).{0,2}사라졌으면|다신안깨고싶|눈뜨고싶지않|(?:삶|인생|모든걸|모든것).{0,3}끝내고싶|해치고싶|죽이고싶|죽일거|칼로|뛰어내|손목.{0,8}(긋|그었|베)|약.{0,5}(많이먹|한꺼번에))/.test(text)) return 'urgent';
+  if (/(때려|때리|맞았|맞고|폭력|학대|성폭|성추행|만졌|만져|따돌|왕따|괴롭|집에가기무서|집에가면무서|협박|사진.{0,8}(퍼뜨린|뿌린)|옷.{0,5}벗으라)/.test(text)) return 'support';
   return null;
 }
 export const helpMessage = '지금은 네 안전이 가장 중요해. 혼자 견디지 않아도 돼. 너를 안전하게 도울 수 있는 선생님, 상담 선생님이나 믿을 수 있는 어른에게 지금 이 화면을 보여줘. 너를 해치는 사람에게 직접 도움을 청할 필요는 없어. 당장 위험하면 112 또는 119에 도움을 요청해. 자살예방상담전화 109에서도 이야기를 나눌 수 있어.';

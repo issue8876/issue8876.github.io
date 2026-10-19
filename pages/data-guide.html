@@ -1,0 +1,24 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>대화와 데이터 안내 · 마음쉼</title><link rel="stylesheet" href="../css/maeumgil-guide.css"></head><body><main>
+<nav><a href="maeum.html">마음쉼으로 돌아가기</a><a href="teacher-guide.html">교사용 수업 안내</a></nav>
+<h1>대화와 데이터는 어떻게 다뤄질까?</h1><p class="meta">구현 반영: 2026년 10월 20일 · 운영 로그 보관 설정 확인: 2026년 10월 19일 · 서비스 주소: maeum.web.app</p>
+<p class="note">기본 활동의 화면 지우기와 Google에 이미 전송한 내용의 삭제는 달라. 이름을 쓰지 않아도 이야기 내용만으로 누군지 알아볼 수 있어.</p>
+<h2>어디로 무엇을 보내나요?</h2>
+<table><thead><tr><th>기능</th><th>보내는 내용과 처리</th></tr></thead><tbody>
+<tr><td>기본 활동</td><td>점검 답과 대화, 계획은 열린 화면의 메모리에서 처리합니다. 앱은 이 내용을 서버의 대화 기록이나 데이터베이스에 저장하지 않습니다. 사이트에 접속하기 위한 요청 정보는 별개입니다.</td></tr>
+<tr><td>AI 연결</td><td>숫자 코드는 Firebase 서버에서 검증합니다. 성공하면 1시간 동안 유효한 연결 토큰을 화면 메모리에 둡니다. 코드·토큰을 Google AI 대화 본문에 넣지 않습니다. App Check는 기기·사이트의 연결 확인에 사용됩니다.</td></tr>
+<tr><td>AI 대화</td><td>연결한 뒤 나눈 최근 최대 16개 대화(직접 쓴 말·선택한 말·답변), 학년, 주제, 고른 기분을 Firebase 서버를 거쳐 Google Gemini API로 보냅니다. 점검의 숫자 응답은 보내지 않습니다. 이름·학교·연락처 등을 프로그램으로 가리지만 모두 찾아내지는 못합니다.</td></tr>
+<tr><td>읽어주기</td><td>선택한 음성 모델을 내려받고 읽을 문장은 기기에서 합성합니다. 대체 음성도 기기에 설치된 한국어 음성만 사용합니다. 음성 파일 캐시는 대화를 담고 있지 않습니다.</td></tr>
+<tr><td>말로 입력하기</td><td>선택하기 전에 별도로 확인합니다. 브라우저의 음성 인식 서비스로 음성이 전송될 수 있으며, 처리·보관은 해당 브라우저 제공자의 정책에 따릅니다.</td></tr>
+</tbody></table>
+<h2>누가 볼 수 있고 얼마나 남나요?</h2>
+<ul><li>앱에는 교사의 대화 열람 화면, 학생별 기록 목록, 자동 공유 기능이 없습니다. 화면을 함께 보거나 학생이 직접 보여준 내용은 상대방이 볼 수 있습니다.</li>
+<li>앱 서버는 대화 본문·숫자 코드·API 키를 운영 로그에 출력하지 않습니다. 요청 시각·상태·IP 등 접속 정보는 Google Cloud 운영 로그에 포함될 수 있습니다. 확인한 보관 설정은 일반 로그 30일, 필수 관리·감사 로그 400일입니다. 필수 로그가 대화 원문을 저장한다는 뜻은 아닙니다.</li>
+<li>Gemini 요청에는 <code>store: false</code>를 사용해 Interactions 대화 객체 저장을 요청하지 않습니다. 이것이 모든 Google 보관의 해제를 의미하지는 않습니다. Google의 악용 방지 정책은 입력·맥락·출력을 55일 보관하고 필요한 경우 권한 있는 담당자가 검토할 수 있다고 설명합니다.</li>
+<li>Google의 학습 활용 조건은 유료·무료 서비스 및 추가 데이터 공유 설정에 따라 달라집니다. 이 앱의 코드에는 학습 데이터 수집·전송 동의 기능이 없으며, API 키 프로젝트의 추가 데이터 공유 설정은 이번 점검에서 확인하지 못했습니다.</li></ul>
+<h2>지우거나 문의하고 싶다면</h2>
+<p>‘새로 쓰기’에서 대화 지우기를 선택하거나 새로고침하면 현재 화면의 대화·점검·계획·연결 토큰이 사라집니다. ‘연결 끝내기’는 앞으로의 AI 전송을 멈추며, 현재 보이는 대화까지 지우려면 ‘새로 쓰기’를 이용합니다. 이미 Google로 전송한 내용이나 운영 로그까지 이 버튼으로 삭제되지는 않습니다.</p>
+<p>앱 자체에 저장된 대화 원문이나 연구용 응답 자료는 없으므로 이를 내려받거나 개별 삭제하는 관리 기능도 없습니다. Google 보관과 관련된 요청은 해당 서비스·프로젝트 운영자를 통한 처리가 필요합니다.</p>
+<p class="note">운영기관·담당자·공개 문의처: 미등록. 운영자가 문의 및 삭제 요청 창구를 등록하기 전에는 이 페이지가 완전한 운영기관 개인정보 처리방침을 대신하지 않습니다. 문의를 위해 대화나 개인정보를 공개 게시물에 올리지 마세요.</p>
+<h2>근거와 확인 범위</h2><p>확인한 구현: 대화 DB 쓰기 없음, 서버 본문 로깅 없음, 요청 전 개인정보 가림, 만료 토큰, Google 객체 저장 해제 요청. 실제 Google 보관·삭제 완료나 개별 기기의 브라우저 음성 서비스는 앱이 보증할 수 없습니다.</p>
+<ul><li><a href="https://ai.google.dev/gemini-api/docs/interactions#data-storage-and-retention" target="_blank" rel="noopener">Google Interactions 저장 설정</a></li><li><a href="https://ai.google.dev/gemini-api/docs/usage-policies" target="_blank" rel="noopener">Google 악용 방지와 55일 보관 안내</a></li><li><a href="https://ai.google.dev/gemini-api/terms" target="_blank" rel="noopener">Gemini API 추가 약관·데이터 처리 조건</a></li></ul>
+</main></body></html>

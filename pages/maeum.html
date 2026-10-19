@@ -12,27 +12,27 @@
   </script>
   <link rel="canonical" href="https://issue8876.github.io/pages/maeum.html">
   <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../css/maeumgil.css?v=20261019-dialog">
-  <script type="module" src="../js/maeumgil.js?v=20261019-short-url"></script>
+  <link rel="stylesheet" href="../css/maeumgil.css?v=20261020-review">
+  <script type="module" src="../js/maeumgil.js?v=20261020-review"></script>
 </head>
-<body>
+<body class="at-start">
   <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="maeum.html" aria-label="마음쉼 처음 화면"><span class="brand-mark" aria-hidden="true"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"></span><span>마음쉼</span></a>
-      <div class="top-actions"><button class="text-button" id="privacy-open">대화 안내</button><a class="home-link" href="../index.html">홈</a></div>
+      <div class="top-actions"><button id="help-open" class="help-shortcut" type="button">도움이 필요해</button><button class="text-button" id="privacy-open">대화 안내</button><a class="home-link" href="../index.html">홈</a></div>
     </header>
     <main class="workspace">
       <aside class="sidebar" aria-label="활동 선택">
         <div class="sidebar-heading"><h1>어려운 일도, 조금씩.</h1><p>어려웠던 일을 살펴보고,<br>오늘 해볼 방법을 골라 보자.</p></div>
         <label class="profile-label" for="profile">학교·학년</label>
-        <select id="profile" aria-label="나에게 맞는 말로"><option value="lower">초등 1–3학년</option><option value="upper" selected>초등 4–6학년</option><option value="middle">중학생</option><option value="high">고등학생</option></select>
+        <select aria-describedby="profile-help" id="profile" aria-label="나에게 맞는 말로"><option value="lower">초등 1–3학년</option><option value="upper" selected>초등 4–6학년</option><option value="middle">중학생</option><option value="high">고등학생</option></select><p id="profile-help" class="profile-help">학년을 고르면 문항 설명과 AI 말투를 바꿔 줘. 문항 6개와 응답 단계는 같아.</p>
         <nav class="activity-nav" aria-label="활동 선택">
           <button class="nav-item active" data-start="talk"><img class="ui-icon" src="../assets/icons/chat.svg" alt="" aria-hidden="true" width="48" height="48"><span>오늘 이야기</span></button>
           <button class="nav-item" data-start="check"><img class="ui-icon" src="../assets/icons/checklist.svg" alt="" aria-hidden="true" width="48" height="48"><span>마음 점검</span></button>
           <button class="nav-item" data-start="breathe"><img class="ui-icon" src="../assets/icons/breathe.svg" alt="" aria-hidden="true" width="48" height="48"><span>숨 고르기</span></button>
         </nav>
-        <section id="goal-card" class="goal-card" hidden><span class="eyebrow">오늘 해볼 일</span><h2 id="goal-text"></h2><p id="goal-when"></p><div class="goal-actions"><button data-goal="done">해봤어</button><button data-goal="change">바꿀래</button></div></section>
+        <section id="goal-card" class="goal-card" hidden><span class="eyebrow">오늘 해볼 일</span><h2 id="goal-text"></h2><p id="goal-when"></p><p id="goal-helper"></p></section>
         <div class="sidebar-note"><img class="ui-icon" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"><p>글로 쓰기 어렵다면 아래에서 골라도 돼.</p></div>
       </aside>
       <section class="conversation" aria-label="이야기 나누기">
@@ -42,7 +42,7 @@
           <div class="intro-heading"><div><h2>내 마음 살펴볼까?</h2></div><img class="intro-illustration" src="../assets/icons/book.svg" alt="" aria-hidden="true" width="48" height="48"></div>
           <p>점검부터 해도, 어려웠던 일부터 골라도 돼.</p>
           <div class="entry-grid" aria-label="어떻게 시작할까">
-            <button id="entry-start" class="entry-card" data-entry="check"><img class="ui-icon" src="../assets/icons/checklist.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>마음 점검</strong><small>6문장으로 나를 살펴보기</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
+            <button id="entry-start" class="entry-card" data-entry="check"><img class="ui-icon" src="../assets/icons/checklist.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>마음 점검</strong><small>시작하는 힘과 방법 찾기</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
             <button class="entry-card" data-entry="talk"><img class="ui-icon" src="../assets/icons/chat.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>오늘 어려웠던 일</strong><small>상황을 고르고 방법 찾기</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
             <button class="entry-card" data-entry="calm"><img class="ui-icon" src="../assets/icons/breathe.svg" alt="" aria-hidden="true" width="48" height="48"><span><strong>먼저 마음 가라앉히기</strong><small>숨 고르고 천천히 시작하기</small></span><span class="entry-arrow" aria-hidden="true">→</span></button>
           </div>
@@ -64,18 +64,26 @@
           </div>
           </details>
         </div><div id="messages" role="log" aria-live="polite" aria-relevant="additions text"></div></div>
-        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">내 마음 점검과 선택형 활동은 AI 연결 없이 할 수 있어.</div><details class="writing-panel" id="writing-panel"><summary>직접 쓰고 싶을 때</summary><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="쓰고 싶은 말이 생기면 여기에 적어 줘."></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><p class="writing-hint">이름, 학교, 연락처는 적지 말아 줘.</p></details><div class="composer-foot"><span>버튼만 눌러도 이어갈 수 있어.</span><button id="connect-open">AI 대화 설정</button></div></div>
+        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">내 마음 점검과 선택형 활동은 AI 연결 없이 할 수 있어.</div><details class="writing-panel" id="writing-panel"><summary>직접 쓰고 싶을 때</summary><p id="writing-mode" class="writing-mode"></p><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="쓰고 싶은 말이 생기면 여기에 적어 줘."></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><p class="writing-hint">이름, 학교, 연락처는 적지 말아 줘.</p></details><div class="composer-foot"><span>버튼만 눌러도 이어갈 수 있어.</span><button id="connect-open">AI 대화 설정</button></div></div>
       </section>
     </main>
-    <footer class="page-footer"><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
+    <footer class="page-footer"><a href="../pages/teacher-guide.html">교사용 수업 안내</a><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
   </div>
-  <dialog id="privacy-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><h2>이용하기 전에 알아 둬</h2><div class="voice-preview"><h3>목소리 들어보기</h3><p>어떤 목소리인지 먼저 들어볼까?</p><button id="voice-preview" type="button" aria-pressed="false">목소리 미리 듣기</button><p id="voice-preview-status" class="small" role="status"></p></div><p>기본 활동에서 나눈 대화와 답변은 이 화면을 열어 둔 동안에만 남아. 새로고침하거나 대화를 지우면 없어져.</p><button class="primary-button" data-close>알겠어</button></dialog>
+  <dialog id="privacy-dialog" aria-labelledby="privacy-title"><button class="dialog-close" data-close aria-label="닫기">×</button><h2 id="privacy-title">이용하기 전에 알아 둬</h2>
+    <div class="voice-preview"><h3>목소리 들어보기</h3><p>어떤 목소리인지 먼저 들어볼까?</p><button id="voice-preview" type="button" aria-pressed="false">목소리 미리 듣기</button><p id="voice-preview-status" class="small" role="status"></p></div>
+    <h3>기본 활동</h3><p>대화와 점검 답, 계획은 이 화면을 열어 둔 동안만 남아. ‘새로 쓰기’나 새로고침을 하면 지워져. 교사에게 자동으로 보내지 않아.</p>
+    <h3>AI와 이야기할 때</h3><p>연결 뒤에 나눈 최근 대화와 학년·주제·고른 기분이 Google로 전송돼. 마음 점검의 숫자 응답은 보내지 않아. 이름·학교·연락처는 적지 말아 줘.</p>
+    <p>앱에는 교사가 대화를 열람하는 화면이나 대화 저장 기능이 없어. Google의 안전 확인용 보관은 별개라서 화면을 지워도 이미 전송한 내용까지 지워지는 것은 아니야.</p>
+    <p><a href="../pages/data-guide.html">보관·열람·삭제에 관한 자세한 안내</a> · <a href="../pages/teacher-guide.html#check-basis">마음 점검의 목적과 문항 안내</a></p>
+    <p class="small">운영기관·담당자·문의처는 아직 등록되지 않았어. 이 앱은 상태를 진단하거나 자동으로 도움을 요청하는 서비스는 아니야.</p>
+    <button class="primary-button" data-close>알겠어</button>
+  </dialog>
   <dialog id="connect-dialog" aria-labelledby="connect-title">
     <button class="dialog-close" data-close aria-label="닫기">×</button>
     <h2 id="connect-title">AI와 이야기하기</h2>
     <p>선생님께 받은 숫자 코드를 넣어 줘.<br>이름이나 회원가입은 필요 없어.</p>
     <p id="connection-info" class="connection-info" role="status">연결할 수 있는지 확인하고 있어.</p>
-    <form id="connect-form">
+    <p class="connection-data-note">연결하면 지금부터 나눈 최근 대화와 학년·주제·고른 기분이 Google로 전송돼. <a href="../pages/data-guide.html" target="_blank" rel="noopener">전송·보관·삭제 안내</a></p><button id="connection-retry" type="button" hidden>연결 다시 확인하기</button><form id="connect-form">
       <div id="connect-fields">
       <label for="access-code">선생님이 알려 준 숫자 코드</label>
       <input id="access-code" class="join-code" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" pattern="[0-9]{4}" minlength="4" maxlength="4" placeholder="숫자 4자리" aria-describedby="join-code-hint" required>
