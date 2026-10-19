@@ -1,8 +1,8 @@
-import { speechText, speechChunks, koreanVoice } from './maeumgil-speech-core.js';
+import { speechText, speechChunks, koreanVoice } from './maeumgil-speech-core.js?v=20261019-soft';
 
 export function createSpeechReader({
   onState = () => {},
-  makeWorker = () => new Worker(new URL('./maeumgil-speech-worker.js', import.meta.url), { type: 'module' }),
+  makeWorker = () => new Worker(new URL('./maeumgil-speech-worker.js?v=20261019-soft', import.meta.url), { type: 'module' }),
   makeContext = () => new (window.AudioContext || window.webkitAudioContext)(),
   synthesis = globalThis.speechSynthesis,
   makeUtterance = text => new SpeechSynthesisUtterance(text),
@@ -30,7 +30,8 @@ export function createSpeechReader({
     clearTimer(); worker?.terminate(); worker = undefined;
     if (sources.size) { done = true; return; }
     if (!synthesis) { active = false; report('error', '이 기기에서는 읽어주기를 사용할 수 없어.'); return; }
-    const voice = koreanVoice(synthesis.getVoices());
+    const voice = koreanVoice(synthesis.getVoices().filter(voice => voice.localService === true));
+    if (!voice) { active = false; report('error', '이 기기에서 목소리를 준비하지 못했어. 인터넷 연결을 확인하고 다시 눌러 줘.'); return; }
     const chunks = speechChunks(text);
     report('playing', '새 목소리를 불러오지 못해서 기기의 기본 목소리로 읽어줄게.');
     let index = 0;
@@ -85,7 +86,7 @@ export function createSpeechReader({
           source.connect(gain); gain.connect(context.destination);
           sources.add(source);
           source.onended = () => { sources.delete(source); source.disconnect(); gain.disconnect(); finish(id); };
-          source.start(start); nextTime = end + .2;
+          source.start(start); nextTime = end + .06;
           report('playing', 'AI 목소리로 읽고 있어. 다시 누르면 멈출 수 있어.');
         } else if (data.type === 'done') { done = true; clearTimer(); finish(id); }
         else if (data.type === 'error') fallback(text, id);

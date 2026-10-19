@@ -20,7 +20,12 @@ export function speechChunks(value, maxLength = 85) {
       chunks.push(sentence.slice(0, end).trim());
       sentence = sentence.slice(end).trim();
     }
-    if (sentence) chunks.push(sentence);
+    if (sentence) {
+      const previous = chunks.at(-1);
+      // Let the model phrase short sentences together instead of restarting at every full stop.
+      if (previous && previous.length + sentence.length + 1 <= maxLength) chunks[chunks.length - 1] += ` ${sentence}`;
+      else chunks.push(sentence);
+    }
   }
   return chunks;
 }

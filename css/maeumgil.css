@@ -316,3 +316,8 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
   .breathing-card.is-running .breath-body { animation: breath-chest 6s ease-in-out infinite !important; }
   .breathing-card.is-running .breath-air { animation: breath-air 6s ease-in-out infinite !important; }
 }
+
+.voice-preview { margin: 20px 0; padding: 18px; border: 1px solid #dce6df; border-radius: 12px; background: #f3f7f3; }
+.voice-preview h3 { margin: 0; font-size: 20px; font-weight: 400; }
+.voice-preview p { margin: 10px 0; }
+.voice-preview p:empty { display: none; }

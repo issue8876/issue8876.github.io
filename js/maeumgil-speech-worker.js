@@ -1,6 +1,6 @@
 import * as ort from 'https://cdn.jsdelivr.net/npm/onnxruntime-web@1.30.0/dist/ort.wasm.min.mjs';
 import { TextToSpeech, UnicodeProcessor, Style } from './vendor/supertonic.js';
-import { speechChunks } from './maeumgil-speech-core.js';
+import { speechChunks } from './maeumgil-speech-core.js?v=20261019-soft';
 
 const MODEL = 'https://huggingface.co/supertone-oss-archive/supertonic-2/resolve/7edbcd0bba8cd579100a353a9e0b2b49cad7c875';
 const FILES = [
@@ -43,7 +43,7 @@ async function initialize(id) {
   if (engine) return engine;
   const cfg = await json('onnx/tts.json');
   const indexer = await json('onnx/unicode_indexer.json');
-  const preset = await json('voice_styles/F2.json');
+  const preset = await json('voice_styles/F1.json');
   const sessions = [];
   let completed = 0;
   for (const [file, expected] of FILES) {
@@ -66,7 +66,7 @@ self.onmessage = async ({ data: { id, text } }) => {
     const chunks = speechChunks(text);
     for (let index = 0; index < chunks.length; index++) {
       postMessage({ id, type: 'generating', index, total: chunks.length });
-      const result = await tts.call(chunks[index], 'ko', style, 5, 1.0, 0.22);
+      const result = await tts.call(chunks[index], 'ko', style, 8, 0.98, 0.12);
       const count = Math.min(result.wav.length, Math.ceil(result.duration[0] * tts.sampleRate));
       const pcm = Float32Array.from(result.wav.slice(0, count));
       let energy = 0;

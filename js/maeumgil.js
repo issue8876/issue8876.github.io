@@ -1,7 +1,7 @@
 import { config } from './maeumgil-config.js';
 import { createBreathingCard } from './maeumgil-breathing.js?v=20261019-clear';
 import { apiHeaders } from './maeumgil-connection.js';
-import { createSpeechReader } from './maeumgil-speech.js?v=20261019-local-voice';
+import { createSpeechReader } from './maeumgil-speech.js?v=20261019-soft';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js';
 
 const $ = id => document.getElementById(id);
@@ -13,6 +13,9 @@ const reader = createSpeechReader({ onState: ({ state, detail, percent }) => {
   if ($('speech-state').textContent !== detail) $('speech-state').textContent = detail;
   $('speech-progress').textContent = Number.isFinite(percent) ? ` · ${percent}%` : '';
   $('speech-status').hidden = !detail;
+  $('voice-preview').textContent = state === 'loading' ? '준비 멈추기' : state === 'playing' ? '듣기 멈추기' : '목소리 미리 듣기';
+  $('voice-preview').setAttribute('aria-pressed', String(active));
+  if ($('voice-preview-status').textContent !== detail) $('voice-preview-status').textContent = detail;
 } });
 const state = { profile: 'upper', topic: 'challenge', stage: 'welcome', answers: [], question: 0, mood: '', goal: null, history: [], token: '', connected: false, busy: false, generation: 0, abort: null, breathing: null, recognition: null };
 const apiBase = config.apiBase.replace(/\/$/, '');
@@ -147,7 +150,7 @@ function saveGoal(when) {
   state.goal.when = when; state.stage = 'followup'; renderGoal(); addMessage('assistant', '카드에 적어 뒀어. 해보고 나서 어땠는지 알려줘.');
   choices([['해봤어', () => reflectGoal()], ['더 작게 바꿀래', () => offerGoals()], ['오늘은 여기까지', () => endSession()]]);
 }
-function renderGoal() { $('goal-card').hidden = !state.goal; if (!state.goal) return; $('goal-text').textContent = state.goal.text; $('goal-when').textContent = state.goal.when; $('goal-feedback').textContent = state.goal.done ? '해본 일로 표시했어.' : ''; }
+function renderGoal() { $('goal-card').hidden = !state.goal; if (!state.goal) return; $('goal-text').textContent = state.goal.text; $('goal-when').textContent = state.goal.when; }
 function reflectGoal() {
   if (!state.goal) return;
   state.goal.done = true; renderGoal(); addMessage('assistant', '해보고 나니 어땠어?');
@@ -247,7 +250,9 @@ $('chat-form').addEventListener('submit', e => { e.preventDefault(); sendText($(
 $('message').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendText($('message').value); } });
 $('message').addEventListener('input', () => { $('message').style.height = 'auto'; $('message').style.height = `${Math.min($('message').scrollHeight, 140)}px`; $('message').style.overflowY = $('message').scrollHeight > 140 ? 'auto' : 'hidden'; });
 $('profile').addEventListener('change', () => { cancelPending(); reader.stop(); state.profile = $('profile').value; document.body.classList.toggle('low-literacy', state.profile === 'lower'); if (state.history.length) { state.history = []; addMessage('assistant', `${profiles[state.profile].label}으로 바꿨어. 하고 싶은 활동을 골라 줘.`, { remember: false }); } });
-$('privacy-open').addEventListener('click', () => $('privacy-dialog').showModal());
+$('privacy-open').addEventListener('click', () => { reader.stop(); $('privacy-dialog').showModal(); });
+$('privacy-dialog').addEventListener('close', () => reader.stop());
+$('voice-preview').addEventListener('click', () => reader.read('오늘 무슨 일이 있었어? 말하기 어려우면 아래에서 하나 골라도 돼. 천천히 같이 해보자.'));
 $('connect-open').addEventListener('click', openConnection);
 $('reset').addEventListener('click', () => $('reset-dialog').showModal());
 $('confirm-reset').addEventListener('click', () => { reset(); $('reset-dialog').close(); });
@@ -274,7 +279,6 @@ $('connect-form').addEventListener('submit', async e => {
 $('connect-dialog').addEventListener('close', () => { connectionGeneration++; connecting = false; $('connect-submit').disabled = false; $('connect-submit').textContent = '이야기 시작하기'; $('access-code').value = ''; $('transfer-consent').checked = false; });
 $('disconnect').addEventListener('click', () => { cancelPending(); state.token = ''; state.connected = false; state.history = []; $('access-code').value = ''; updateConnection(); $('connect-dialog').close(); notice('AI 연결을 해제했어. 기본 활동으로 계속할 수 있어.'); });
 document.querySelectorAll('[data-goal]').forEach(b => b.addEventListener('click', () => { cancelPending(); b.dataset.goal === 'done' ? reflectGoal() : offerGoals(); }));
-$('copy-goal').addEventListener('click', async () => { if (!state.goal) return; try { await navigator.clipboard.writeText(`오늘의 작은 한 걸음\n${state.goal.text}\n언제: ${state.goal.when}`); $('goal-feedback').textContent = '실천 카드를 복사했어. 공유할 사람은 네가 고르면 돼.'; } catch { $('goal-feedback').textContent = '복사가 어려워. 카드의 문장을 직접 선택해서 복사해 줘.'; } });
 $('read-aloud').addEventListener('click', () => { const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); reader.read(bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음 살펴볼까? 마음 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.'); });
 $('mic').addEventListener('click', () => { const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!Recognition) { notice('말로 입력하기를 지원하지 않는 브라우저야. 버튼을 고르거나 글로 적어줘.', true); return; } if (state.recognition) { state.recognition.stop(); return; } if (!window.confirm('말로 입력하면 브라우저의 음성 서비스로 음성이 전송될 수 있어. 계속할까?')) return; const recognition = new Recognition(); state.recognition = recognition; recognition.lang = 'ko-KR'; recognition.interimResults = false; recognition.onresult = e => { $('message').value = e.results[0][0].transcript.slice(0, 1200); notice('알아들은 말을 확인하고 보내기를 눌러줘.'); }; recognition.onerror = () => notice('음성을 받지 못했어. 마이크 권한을 확인하거나 글로 적어줘.', true); recognition.onend = () => { state.recognition = null; $('mic').classList.remove('recording'); }; try { recognition.start(); $('mic').classList.add('recording'); notice('듣고 있어. 실명이나 학교 이름은 말하지 않아도 돼.'); } catch { state.recognition = null; notice('마이크를 시작하지 못했어.', true); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden) { state.breathing?.stop(); reader.stop(); } });

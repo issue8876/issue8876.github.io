@@ -10,6 +10,7 @@ test('Korean reading keeps sentence pauses and splits long replies into bounded 
   assert.ok(chunks.length > 1);
   assert.ok(chunks.every(chunk => chunk.length <= 85));
   assert.equal(chunks.join(' '), speechText(text));
+  assert.deepEqual(speechChunks('오늘 어땠어? 천천히 말해도 돼. 같이 해보자.'), ['오늘 어땠어? 천천히 말해도 돼. 같이 해보자.']);
   assert.deepEqual(speechChunks(''), []);
   assert.ok(speechChunks('가'.repeat(300)).every(chunk => chunk.length <= 85));
   assert.equal(koreanVoice([{lang:'en-US',name:'English Natural'},{lang:'ko-KR',name:'기본'},{lang:'ko-KR',name:'Korean Natural'}]).name, 'Korean Natural');
@@ -60,14 +61,28 @@ test('unsupported local speech falls back transparently and cancellation prevent
   const spoken = [], states = [];
   const reader = createSpeechReader({
     onState:state=>states.push(state),makeContext:()=>{throw new Error('No AudioContext');},
-    synthesis:{getVoices:()=>[{lang:'ko-KR',name:'Google 한국어'}],cancel(){},speak:utterance=>spoken.push(utterance)},
+    synthesis:{getVoices:()=>[{lang:'ko-KR',name:'기기 한국어',localService:true}],cancel(){},speak:utterance=>spoken.push(utterance)},
     makeUtterance:text=>({text}),
   });
-  reader.read('첫 문장이야. 두 번째 문장이야.');
+  const text = '첫 문장이야. 두 번째 문장이야. '.repeat(10);
+  reader.read(text);
   assert.equal(spoken.length,1);
-  assert.equal(spoken[0].voice.name,'Google 한국어');
+  assert.ok(spoken[0].text.length < text.length);
+  assert.equal(spoken[0].voice.name,'기기 한국어');
   assert.match(states.at(-1).detail,/기본 목소리/);
   reader.stop(); spoken[0].onend();
   assert.equal(spoken.length,1);
   assert.equal(reader.active,false);
+});
+
+test('local speech failure never sends the text to a cloud-only browser voice', () => {
+  const spoken = [], states = [];
+  const reader = createSpeechReader({
+    onState:state=>states.push(state),makeContext:()=>{throw new Error('No AudioContext');},
+    synthesis:{getVoices:()=>[{lang:'ko-KR',name:'Korean Natural',localService:false}],cancel(){},speak:value=>spoken.push(value)},
+  });
+  reader.read('내 이야기는 기기에서만 읽어 줘.');
+  assert.equal(spoken.length,0);
+  assert.equal(reader.active,false);
+  assert.equal(states.at(-1).state,'error');
 });
