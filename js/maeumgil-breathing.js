@@ -35,15 +35,10 @@ export function createBreathingCard({ onFinish = () => {}, onLeave = () => {} } 
         <path class="breath-air breath-air-right" d="M201 90q13-8 24 0m-21 16q14-8 27 0" />
       </svg>
     </div>
-    <p class="breathing-caption">그림이 커질 때 들이쉬고, 작아질 때 내쉬어 봐.</p>
+    <p class="breathing-caption">원이 커지면 들이쉬고, 작아지면 내쉬어 봐.</p>
     <p class="breathing-note">그림보다 네가 편한 속도가 먼저야. 불편하면 멈춰도 돼.</p>
     <div class="breathing-progress" role="progressbar" aria-label="숨 고르기 진행" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0"><span></span></div>
     <div class="breathing-controls"><button type="button" class="breathing-toggle">30초 함께하기</button><button type="button" class="breathing-leave">다른 활동 하기</button></div>`;
-  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    const motion = document.createElement('button'); motion.type = 'button'; motion.className = 'breathing-motion'; motion.textContent = '그림 움직임 켜기'; motion.setAttribute('aria-pressed', 'false');
-    motion.addEventListener('click', () => { const enabled = card.classList.toggle('allow-motion'); motion.setAttribute('aria-pressed', String(enabled)); motion.textContent = enabled ? '그림 움직임 끄기' : '그림 움직임 켜기'; });
-    card.querySelector('.breathing-controls').append(motion);
-  }
   const phase = card.querySelector('.breathing-phase');
   const time = card.querySelector('.breathing-time');
   const caption = card.querySelector('.breathing-caption');
@@ -76,7 +71,7 @@ export function createBreathingCard({ onFinish = () => {}, onLeave = () => {} } 
   toggle.addEventListener('click', () => {
     if (running) { stop(); return; }
     running = true; previousLabel = ''; started = performance.now();
-    caption.textContent = '그림이 커질 때 들이쉬고, 작아질 때 내쉬어 봐.';
+    caption.textContent = '원이 커지면 들이쉬고, 작아지면 내쉬어 봐.';
     toggle.textContent = '잠깐 멈추기'; card.classList.add('is-running'); tick(started);
   });
   card.querySelector('.breathing-leave').addEventListener('click', onLeave);

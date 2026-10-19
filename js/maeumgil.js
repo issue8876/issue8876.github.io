@@ -1,5 +1,5 @@
 import { config } from './maeumgil-config.js';
-import { createBreathingCard } from './maeumgil-breathing.js';
+import { createBreathingCard } from './maeumgil-breathing.js?v=20261019-clear';
 import { apiHeaders } from './maeumgil-connection.js';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js';
 

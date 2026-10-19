@@ -151,10 +151,10 @@ textarea::placeholder { color: #919895; }
 .breathing-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
 .breathing-phase { margin: 0; font-size: 20px; }
 .breathing-time { font-size: 12px; color: #6e807a; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.breathing-scene { height: clamp(120px, 24dvh, 165px); margin: 2px auto 4px; }
+.breathing-scene { height: clamp(155px, 28dvh, 205px); margin: 9px auto 10px; }
 .breathing-scene svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.breath-halo { fill: #dceae3; transform-origin: 130px 96px; transform: scale(.78); }
-.breath-ring { fill: none; stroke: #b7d0c3; stroke-width: 1; transform-origin: 130px 96px; transform: scale(.78); }
+.breath-halo { fill: #bddbca; opacity: .55; transform-origin: 130px 96px; transform: scale(.6); }
+.breath-ring { fill: none; stroke: #6e9c85; stroke-width: 2.5; transform-origin: 130px 96px; transform: scale(.6); }
 .breath-body { fill: #b7cfc4; stroke: #718d82; stroke-width: 1.6; transform-box: fill-box; transform-origin: 50% 90%; }
 .breath-neck, .breath-face { fill: #f1dcc7; stroke: #927e6b; stroke-width: 1.3; }
 .breath-neck { stroke-linejoin: round; }
@@ -163,6 +163,7 @@ textarea::placeholder { color: #919895; }
 .breath-arm { stroke: #718d82; }
 .breath-air { fill: none; stroke: #8aafa1; stroke-width: 1.5; stroke-linecap: round; opacity: .3; }
 .is-running .breath-halo, .is-running .breath-ring { animation: breath-expand 6s ease-in-out infinite; }
+.is-running .breath-halo { animation-name: breath-glow; }
 .is-running .breath-body { animation: breath-chest 6s ease-in-out infinite; }
 .is-running .breath-air { animation: breath-air 6s ease-in-out infinite; }
 .breathing-card .breathing-caption { font-size: 14px; line-height: 1.6; margin: 5px 0; }
@@ -172,9 +173,10 @@ textarea::placeholder { color: #919895; }
 .breathing-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
 .breathing-card button { min-height: 42px; padding: 8px 14px; background: white; border: 1px solid #ccdcd3; border-radius: 6px; font-size: 13px; }
 .breathing-card .breathing-toggle { background: #567b6b; color: #fff; border-color: #567b6b; }
-@keyframes breath-expand { 0%,100% { transform: scale(.78); } 50% { transform: scale(1); } }
-@keyframes breath-chest { 0%,100% { transform: scale(1); } 50% { transform: scale(1.055, 1.035); } }
-@keyframes breath-air { 0%,100% { opacity: .2; transform: translateY(3px); } 50% { opacity: .8; transform: translateY(-3px); } }
+@keyframes breath-expand { 0%,100% { transform: scale(.6); } 50% { transform: scale(1.15); } }
+@keyframes breath-glow { 0%,100% { transform: scale(.6); opacity: .35; } 50% { transform: scale(1.15); opacity: .85; } }
+@keyframes breath-chest { 0%,100% { transform: scale(1); } 50% { transform: scale(1.12, 1.085); } }
+@keyframes breath-air { 0%,100% { opacity: .15; transform: translateY(5px); } 50% { opacity: .95; transform: translateY(-5px); } }
 .small { font-size: 13px !important; color: var(--muted); }
 dialog { width: min(480px,calc(100% - 30px)); max-height: 85dvh; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; padding: 32px; color: var(--ink); box-shadow: 0 25px 90px #243b3126; }
 dialog::backdrop { background: #303a424d; }
@@ -307,7 +309,9 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
-  .allow-motion.is-running .breath-halo, .allow-motion.is-running .breath-ring { animation: breath-expand 6s ease-in-out infinite !important; }
-  .allow-motion.is-running .breath-body { animation: breath-chest 6s ease-in-out infinite !important; }
-  .allow-motion.is-running .breath-air { animation: breath-air 6s ease-in-out infinite !important; }
+  /* The user starts this paced breathing guide explicitly; stopping ends its motion. */
+  .breathing-card.is-running .breath-ring { animation: breath-expand 6s ease-in-out infinite !important; }
+  .breathing-card.is-running .breath-halo { animation: breath-glow 6s ease-in-out infinite !important; }
+  .breathing-card.is-running .breath-body { animation: breath-chest 6s ease-in-out infinite !important; }
+  .breathing-card.is-running .breath-air { animation: breath-air 6s ease-in-out infinite !important; }
 }
