@@ -8,7 +8,7 @@
 - 완료: Firebase CLI 로그인, 웹앱 등록, reCAPTCHA Enterprise App Check 설정, 서울 리전 `coachApi` 함수와 Hosting 배포, 숫자 코드 인증 확인.
 - `.env`의 Gemini API 키·숫자 코드·서명 키를 Secret Manager에 등록했습니다. 값은 Git과 정적 화면에 포함하지 않습니다.
 - App Check 사이트 키는 `functions/.env.maeum-835b3`에 준비했습니다. 이 파일도 Git에서 제외됩니다.
-- 현재 배포는 `firebase.json`을 사용하며 `/api/**`를 AI 함수로 전달합니다. GitHub Pages 주소는 기본 활동만 제공합니다.
+- 현재 배포는 `firebase.json`을 사용하며 `/api/**`를 AI 함수로 전달합니다. GitHub Pages 주소는 기본 활동을 제공하고, AI 대화 설정을 누르면 Firebase의 연결 화면으로 이동합니다. 로컬 HTML 직접 열기도 Firebase 연결 화면으로 이동합니다.
 - 현재는 운영자가 `.env`에 변경한 선불 충전 API 키를 사용합니다. 이 키의 발급 프로젝트는 Firebase 앱 프로젝트와 다릅니다. 앱과 함수는 `maeum-835b3`에서 실행되며, Gemini 사용량과 요금은 API 키가 속한 프로젝트의 결제 계정에 적용됩니다. API 키의 소속 프로젝트를 이전하지는 않습니다.
 - 이전에 발생했던 크레딧 부족(HTTP 402)은 사용 가능한 키로 교체한 뒤 해소됐습니다. Firebase 결제 연결과 Gemini API 선불 잔액은 별개이므로, 향후 402 발생 시 https://ai.studio/projects 에서 현재 API 키가 속한 프로젝트의 선불 잔액과 결제 상태를 확인합니다.
 - `.env`에 키를 저장하는 것만으로 배포된 서버가 바뀌지는 않습니다. Secret Manager의 `GEMINI_API_KEY`를 갱신하고 함수를 재배포해야 적용됩니다. 숫자 코드를 바꿀 때도 `COACH_JOIN_CODE`를 갱신하고 함수를 재배포해야 합니다. 코드를 바꾸면 이전 연결 토큰은 무효화됩니다.
@@ -94,7 +94,7 @@ npx firebase-tools deploy --only functions,hosting --project YOUR_PROJECT_ID
 - `/`로 접속해도 이 화면으로 이동합니다.
 - `/api/**` 요청은 서울 리전의 `coachApi` 함수로 전달됩니다. 별도 API 서버 주소를 등록할 필요가 없습니다.
 - API 키·숫자 코드·서명 키는 정적 화면 빌드에 포함하지 않습니다.
-- 기존 GitHub Pages 주소는 현재 기본 활동을 유지합니다. Firebase 배포를 검증한 뒤 필요하면 새 주소로 안내하도록 바꿉니다.
+- GitHub Pages에서는 기본 활동을 이용하며, AI 대화 설정에서 Firebase 연결 화면으로 이동합니다. `file://` 로컬 파일 실행은 HTML의 초기 스크립트가 Firebase로 이동시킵니다. 숫자 코드·대화 내용·로컬 파일 경로는 이동 주소에 포함하지 않습니다.
 
 ## 6. 성인 평가자의 가상 사례로 확인
 

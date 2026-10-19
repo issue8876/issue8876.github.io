@@ -1,6 +1,6 @@
 import { config } from './maeumgil-config.js';
 import { createBreathingCard } from './maeumgil-breathing.js?v=20261019-clear';
-import { apiHeaders } from './maeumgil-connection.js';
+import { apiHeaders, hostedConnectionUrl } from './maeumgil-connection.js?v=20261019-entry';
 import { createSpeechReader } from './maeumgil-speech.js?v=20261019-soft';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js';
 
@@ -236,6 +236,8 @@ function updateConnectSubmit() {
   $('connect-submit').disabled = connecting || !/^[0-9]{4}$/.test($('access-code').value.trim()) || !$('transfer-consent').checked;
 }
 function openConnection() {
+  const hostedUrl = hostedConnectionUrl(location);
+  if (hostedUrl) { location.assign(hostedUrl); return; }
   $('connect-status').textContent = '';
   $('transfer-consent').checked = false;
   updateConnection();
@@ -306,3 +308,9 @@ $('mic').addEventListener('click', () => { const Recognition = window.SpeechReco
 document.addEventListener('visibilitychange', () => { if (document.hidden) { state.breathing?.stop(); reader.stop(); } });
 window.addEventListener('pagehide', () => { cancelPending(); clearBreathing(); state.token = ''; state.history = []; });
 updateConnection();
+const entryUrl = new URL(location.href);
+if (entryUrl.searchParams.get('connect') === '1') {
+  entryUrl.searchParams.delete('connect');
+  history.replaceState(null, '', `${entryUrl.pathname}${entryUrl.search}${entryUrl.hash}`);
+  openConnection();
+}
