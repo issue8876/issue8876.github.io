@@ -63,6 +63,7 @@ select { width: 100%; padding: 11px 10px; border: 1px solid #d9dcd9; border-radi
 .conversation-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 0 26px; height: 62px; flex: none; border-bottom: 1px solid #e9e8e2; background: #fcfbf7; }
 .conversation-top > div { display: flex; align-items: center; gap: 10px; font-size: 15px; }
 .conversation-top strong { font-weight: 400; }
+.speech-status { flex: none; margin: 0; padding: 8px 16px; color: #526e64; background: #edf3ef; font-size: 12px; line-height: 1.6; border-bottom: 1px solid #dce6df; }
 .notebook-tab { width: 8px; height: 16px; background: #a8bfd0; border-radius: 0 0 2px 2px; align-self: flex-start; margin-top: -5px; }
 .subtle { color: #8a8d89; font-size: 13px; }
 .paper-actions { gap: 15px !important; }

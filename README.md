@@ -8,6 +8,7 @@
 
 - 화면: `pages/maeum.html`
 - AI: Gemini 3.8 Flash. 입력·출력 필터를 사용하며, 로컬에서는 `.env`, Firebase 배포에서는 Secret Manager로 키를 보관합니다.
+- 읽어주기: 한국어 Supertonic 2 음성을 기기에서 합성합니다. 별도 음성 API 요금이 없으며 첫 사용 시 약 260MB의 모델을 내려받습니다. [음성 설정과 라이선스](VOICE_SETUP.md)를 참고하세요.
 
 Firebase 프로젝트는 `maeum-835b3`입니다. [Firebase 화면](https://maeum-835b3.web.app/pages/maeum.html)에 AI 함수와 App Check, 숫자 코드 인증을 연결했습니다. 운영자가 제공한 선불 충전 API 키를 Secret Manager에 등록하고 함수를 재배포했으며, 브라우저에서 숫자 코드 인증과 가상 사례의 실제 Gemini 답변을 확인했습니다. API 키·숫자 코드·서명 키는 Git과 화면에 포함하지 않습니다. GitHub Pages는 기본 활동을 제공하며 AI 대화는 Firebase 주소에서 이용합니다. [Firebase 설정 안내](FIREBASE_SETUP.md)에 배포 상태와 확인 방법을 기록했습니다.
 - 실행: `node --env-file-if-exists=.env server/index.mjs`

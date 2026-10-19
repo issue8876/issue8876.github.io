@@ -1,9 +1,19 @@
 import { config } from './maeumgil-config.js';
 import { createBreathingCard } from './maeumgil-breathing.js?v=20261019-clear';
 import { apiHeaders } from './maeumgil-connection.js';
+import { createSpeechReader } from './maeumgil-speech.js?v=20261019-local-voice';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js';
 
 const $ = id => document.getElementById(id);
+const reader = createSpeechReader({ onState: ({ state, detail, percent }) => {
+  const active = state === 'loading' || state === 'playing';
+  $('read-aloud').setAttribute('aria-pressed', String(active));
+  $('read-aloud').setAttribute('aria-busy', String(state === 'loading'));
+  $('read-aloud').querySelector('span').textContent = state === 'loading' ? '준비 멈추기' : state === 'playing' ? '읽기 멈추기' : '읽어주기';
+  if ($('speech-state').textContent !== detail) $('speech-state').textContent = detail;
+  $('speech-progress').textContent = Number.isFinite(percent) ? ` · ${percent}%` : '';
+  $('speech-status').hidden = !detail;
+} });
 const state = { profile: 'upper', topic: 'challenge', stage: 'welcome', answers: [], question: 0, mood: '', goal: null, history: [], token: '', connected: false, busy: false, generation: 0, abort: null, breathing: null, recognition: null };
 const apiBase = config.apiBase.replace(/\/$/, '');
 let serverReady = false;
@@ -14,7 +24,7 @@ let connectionGeneration = 0;
 function notice(text, error = false) { $('notice').textContent = text; $('notice').classList.toggle('error', error); }
 function scroll() { requestAnimationFrame(() => { const el = $('chat-scroll'); el.scrollTop = el.scrollHeight; }); }
 function active(name) { document.querySelectorAll('[data-start]').forEach(b => b.classList.toggle('active', b.dataset.start === name)); }
-function clearBreathing() { state.breathing?.destroy(); state.breathing = null; document.querySelector('.conversation').classList.remove('is-breathing'); window.speechSynthesis?.cancel(); $('read-aloud').setAttribute('aria-pressed', 'false'); if (state.recognition) { state.recognition.abort(); state.recognition = null; $('mic').classList.remove('recording'); } }
+function clearBreathing() { state.breathing?.destroy(); state.breathing = null; document.querySelector('.conversation').classList.remove('is-breathing'); reader.stop(); if (state.recognition) { state.recognition.abort(); state.recognition = null; $('mic').classList.remove('recording'); } }
 function clearChoices() { $('choices').replaceChildren(); }
 function button(label, callback) { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', callback); return b; }
 function choices(items) { clearChoices(); for (const [label, cb] of items) $('choices').append(button(label, () => { if (!state.busy) cb(); })); const first = $('choices').querySelector('button'); requestAnimationFrame(() => first?.focus({ preventScroll: true })); }
@@ -187,6 +197,7 @@ async function requestAI() {
 }
 async function sendText(raw) {
   const text = raw.trim(); if (!text || state.busy) return;
+  reader.stop();
   if (text.length > 1200) { notice('한 번에 1,200자 이내로 적어줘.', true); return; }
   $('message').value = ''; $('message').style.height = ''; clearChoices(); addMessage('user', text, { remember: state.stage !== 'check' });
   if (safetyRoute(text)) return;
@@ -235,7 +246,7 @@ document.querySelectorAll('[data-mood]').forEach(b => b.addEventListener('click'
 $('chat-form').addEventListener('submit', e => { e.preventDefault(); sendText($('message').value); });
 $('message').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendText($('message').value); } });
 $('message').addEventListener('input', () => { $('message').style.height = 'auto'; $('message').style.height = `${Math.min($('message').scrollHeight, 140)}px`; $('message').style.overflowY = $('message').scrollHeight > 140 ? 'auto' : 'hidden'; });
-$('profile').addEventListener('change', () => { cancelPending(); state.profile = $('profile').value; document.body.classList.toggle('low-literacy', state.profile === 'lower'); if (state.history.length) { state.history = []; addMessage('assistant', `${profiles[state.profile].label}으로 바꿨어. 하고 싶은 활동을 골라 줘.`, { remember: false }); } });
+$('profile').addEventListener('change', () => { cancelPending(); reader.stop(); state.profile = $('profile').value; document.body.classList.toggle('low-literacy', state.profile === 'lower'); if (state.history.length) { state.history = []; addMessage('assistant', `${profiles[state.profile].label}으로 바꿨어. 하고 싶은 활동을 골라 줘.`, { remember: false }); } });
 $('privacy-open').addEventListener('click', () => $('privacy-dialog').showModal());
 $('connect-open').addEventListener('click', openConnection);
 $('help-open').addEventListener('click', () => $('help-dialog').showModal());
@@ -265,8 +276,8 @@ $('connect-dialog').addEventListener('close', () => { connectionGeneration++; co
 $('disconnect').addEventListener('click', () => { cancelPending(); state.token = ''; state.connected = false; state.history = []; $('access-code').value = ''; updateConnection(); $('connect-dialog').close(); notice('AI 연결을 해제했어. 기본 활동으로 계속할 수 있어.'); });
 document.querySelectorAll('[data-goal]').forEach(b => b.addEventListener('click', () => { cancelPending(); b.dataset.goal === 'done' ? reflectGoal() : offerGoals(); }));
 $('copy-goal').addEventListener('click', async () => { if (!state.goal) return; try { await navigator.clipboard.writeText(`오늘의 작은 한 걸음\n${state.goal.text}\n언제: ${state.goal.when}`); $('goal-feedback').textContent = '실천 카드를 복사했어. 공유할 사람은 네가 고르면 돼.'; } catch { $('goal-feedback').textContent = '복사가 어려워. 카드의 문장을 직접 선택해서 복사해 줘.'; } });
-$('read-aloud').addEventListener('click', () => { if (!('speechSynthesis' in window)) { notice('이 브라우저에서는 읽어주기가 지원되지 않아.', true); return; } if (speechSynthesis.speaking) { speechSynthesis.cancel(); $('read-aloud').setAttribute('aria-pressed', 'false'); return; } const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); const text = bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음 살펴볼까? 마음 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.'; const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'ko-KR'; utterance.rate = .9; utterance.onend = () => $('read-aloud').setAttribute('aria-pressed', 'false'); utterance.onerror = utterance.onend; speechSynthesis.speak(utterance); $('read-aloud').setAttribute('aria-pressed', 'true'); });
+$('read-aloud').addEventListener('click', () => { const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); reader.read(bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음 살펴볼까? 마음 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.'); });
 $('mic').addEventListener('click', () => { const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!Recognition) { notice('말로 입력하기를 지원하지 않는 브라우저야. 버튼을 고르거나 글로 적어줘.', true); return; } if (state.recognition) { state.recognition.stop(); return; } if (!window.confirm('말로 입력하면 브라우저의 음성 서비스로 음성이 전송될 수 있어. 계속할까?')) return; const recognition = new Recognition(); state.recognition = recognition; recognition.lang = 'ko-KR'; recognition.interimResults = false; recognition.onresult = e => { $('message').value = e.results[0][0].transcript.slice(0, 1200); notice('알아들은 말을 확인하고 보내기를 눌러줘.'); }; recognition.onerror = () => notice('음성을 받지 못했어. 마이크 권한을 확인하거나 글로 적어줘.', true); recognition.onend = () => { state.recognition = null; $('mic').classList.remove('recording'); }; try { recognition.start(); $('mic').classList.add('recording'); notice('듣고 있어. 실명이나 학교 이름은 말하지 않아도 돼.'); } catch { state.recognition = null; notice('마이크를 시작하지 못했어.', true); } });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { state.breathing?.stop(); window.speechSynthesis?.cancel(); } });
-window.addEventListener('pagehide', () => { cancelPending(); clearBreathing(); window.speechSynthesis?.cancel(); state.token = ''; state.history = []; });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { state.breathing?.stop(); reader.stop(); } });
+window.addEventListener('pagehide', () => { cancelPending(); clearBreathing(); state.token = ''; state.history = []; });
 updateConnection();
