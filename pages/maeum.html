@@ -12,15 +12,15 @@
   </script>
   <link rel="canonical" href="https://issue8876.github.io/pages/maeum.html">
   <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../css/maeumgil.css?v=20261020-review">
-  <script type="module" src="../js/maeumgil.js?v=20261020-review2"></script>
+  <link rel="stylesheet" href="../css/maeumgil.css?v=20261020-trim">
+  <script type="module" src="../js/maeumgil.js?v=20261020-trim"></script>
 </head>
 <body class="at-start">
   <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
   <div class="app-shell">
     <header class="topbar">
       <a class="brand" href="maeum.html" aria-label="마음쉼 처음 화면"><span class="brand-mark" aria-hidden="true"><img class="ui-icon" src="../assets/icons/heart.svg" alt="" aria-hidden="true" width="48" height="48"></span><span>마음쉼</span></a>
-      <div class="top-actions"><button id="help-open" class="help-shortcut" type="button">도움이 필요해</button><button class="text-button" id="privacy-open">대화 안내</button><a class="home-link" href="../index.html">홈</a></div>
+      <div class="top-actions"><button class="text-button" id="privacy-open">대화 안내</button><a class="home-link" href="../index.html">홈</a></div>
     </header>
     <main class="workspace">
       <aside class="sidebar" aria-label="활동 선택">
@@ -67,7 +67,7 @@
         <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">내 마음 점검과 선택형 활동은 AI 연결 없이 할 수 있어.</div><details class="writing-panel" id="writing-panel"><summary>직접 쓰고 싶을 때</summary><p id="writing-mode" class="writing-mode"></p><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="쓰고 싶은 말이 생기면 여기에 적어 줘."></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><p class="writing-hint">이름, 학교, 연락처는 적지 말아 줘.</p></details><div class="composer-foot"><span>버튼만 눌러도 이어갈 수 있어.</span><button id="connect-open">AI 대화 설정</button></div></div>
       </section>
     </main>
-    <footer class="page-footer"><a href="../pages/teacher-guide.html">교사용 수업 안내</a><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
+    <footer class="page-footer"><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
   </div>
   <dialog id="privacy-dialog" aria-labelledby="privacy-title"><button class="dialog-close" data-close aria-label="닫기">×</button><h2 id="privacy-title">이용하기 전에 알아 둬</h2>
     <div class="voice-preview"><h3>목소리 들어보기</h3><p>어떤 목소리인지 먼저 들어볼까?</p><button id="voice-preview" type="button" aria-pressed="false">목소리 미리 듣기</button><p id="voice-preview-status" class="small" role="status"></p></div>
@@ -83,7 +83,7 @@
     <h2 id="connect-title">AI와 이야기하기</h2>
     <p>선생님께 받은 숫자 코드를 넣어 줘.<br>이름이나 회원가입은 필요 없어.</p>
     <p id="connection-info" class="connection-info" role="status">연결할 수 있는지 확인하고 있어.</p>
-    <p class="connection-data-note">연결하면 지금부터 나눈 최근 대화와 학년·주제·고른 기분이 Google로 전송돼. <a href="../pages/data-guide.html" target="_blank" rel="noopener">전송·보관·삭제 안내</a></p><button id="connection-retry" type="button" hidden>연결 다시 확인하기</button><form id="connect-form">
+    <button id="connection-retry" type="button" hidden>연결 다시 확인하기</button><form id="connect-form">
       <div id="connect-fields">
       <label for="access-code">선생님이 알려 준 숫자 코드</label>
       <input id="access-code" class="join-code" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" pattern="[0-9]{4}" minlength="4" maxlength="4" placeholder="숫자 4자리" aria-describedby="join-code-hint" required>

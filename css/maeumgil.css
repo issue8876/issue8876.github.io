@@ -321,11 +321,10 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 
 /* Review fixes: readable controls, explicit selection, and one scrolling surface on small screens. */
 .topbar { position: sticky; top: 0; z-index: 8; background: #f4f2ee; }
-.help-shortcut { min-height: 44px; padding: 7px 11px; border: 1px solid #b4c4c5; border-radius: 7px; color: #395a64; background: #f7faf8; }
 .profile-help { color: #59666b; font-size: 12px; line-height: 1.6; margin: 7px 0 15px; }
 .composer-foot { color: #52636b; }
 .composer-foot button { color: #365b70; font-size: 14px; min-height: 44px; padding: 7px 4px; }
-.writing-mode, .connection-data-note { color: #52636b; font-size: 13px; line-height: 1.75; }
+.writing-mode { color: #52636b; font-size: 13px; line-height: 1.75; }
 .writing-mode { margin: 0 0 8px; }
 #connection-retry { min-height: 44px; text-decoration: underline; color: #365b70; }
 .check-options { border: 0; padding: 0; margin: 16px 0; min-width: 0; }
@@ -350,7 +349,6 @@ textarea { min-width: 0; }
 @media (max-width: 900px) {
   .topbar { height: 64px; gap: 8px; }
   .top-actions { gap: 10px; }
-  .help-shortcut { padding: 6px 8px; font-size: 13px; }
   .profile-help { grid-column: 1/-1; grid-row: 3; font-size: 12px; margin: 0 0 3px; }
   .goal-card { grid-row: 4; }
   .conversation { height: auto; min-height: 0; overflow: visible; }
