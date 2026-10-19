@@ -1,12 +1,33 @@
 # 마음쉼 · Firebase로 연구용 시험 환경 만들기
 
 구성: Firebase Hosting(화면) → Cloud Functions for Firebase(코드 확인·필터) → Gemini 3.8 Flash.
-Firebase 프로젝트가 아직 없으므로 현재는 코드와 배포 설정을 준비한 상태입니다. GitHub Pages의 기본 활동은 계속 사용할 수 있습니다. Render 계정은 필요하지 않습니다.
+프로젝트 ID는 `maeum-d3a43`입니다. 웹앱 등록과 App Check 연결을 완료했고, 기본 활동은 https://maeum-d3a43.web.app/pages/maeum.html 에 배포했습니다. 사용자의 요청으로 결제 연결을 미뤘으므로 Cloud Functions와 AI 대화는 아직 배포하지 않았습니다. Render 계정은 필요하지 않습니다.
+
+## 현재 상태와 다음 배포
+
+- 완료: Firebase CLI 로그인, 웹앱 등록, reCAPTCHA Enterprise App Check 설정, Hosting 기본 활동 배포.
+- 로컬에 준비: `.env`의 Gemini API 키·숫자 코드·서명 키. 값은 Git에 포함하지 않고 클라우드에도 아직 올리지 않았습니다.
+- App Check 사이트 키는 `functions/.env.maeum-d3a43`에 준비했습니다. 이 파일도 Git에서 제외됩니다.
+- 현재 배포는 `firebase.static.json`을 사용하며 AI 서버를 호출하지 않습니다.
+- 결제 연결 이후 세 가지 비밀 값을 Secret Manager에 등록하고, `firebase.json`으로 함수와 Hosting을 함께 배포해야 AI가 연결됩니다.
+- CLI 실행: 이 기기에는 `.local/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js`에 CLI를 설치했습니다. Node로 이 파일을 실행하거나, 일반 환경에서는 아래의 `npx firebase-tools` 명령을 사용합니다.
+
+결제 없이 기본 화면만 다시 배포:
+
+```sh
+npx firebase-tools deploy --only hosting --config firebase.static.json --project maeum-d3a43
+```
+
+Blaze 연결과 비밀 등록을 마친 뒤 AI 포함 배포:
+
+```sh
+npx firebase-tools deploy --only functions,hosting --project maeum-d3a43
+```
 
 ## 1. 프로젝트와 웹앱 만들기
 
-1. https://console.firebase.google.com 에서 프로젝트를 만듭니다. 프로젝트 **ID**를 기록합니다. Analytics는 이 기능에 필요하지 않습니다.
-2. 프로젝트에 웹앱(`</>`)을 등록합니다. 설정 객체를 직접 코드에 복사할 필요는 없습니다. 배포 후 Hosting의 `/__/firebase/init.json`에서 공개 Firebase 설정을 읽습니다.
+1. 기존 프로젝트 `maeum-d3a43`을 사용합니다. Analytics는 이 기능에 필요하지 않습니다.
+2. ‘마음쉼 연구용’ 웹앱이 등록되어 있습니다. 설정 객체를 직접 코드에 복사할 필요는 없습니다. 배포 후 Hosting의 `/__/firebase/init.json`에서 공개 Firebase 설정을 읽습니다.
 3. Cloud Functions 배포를 위해 **Blaze** 요금제로 연결합니다. 무료 사용량은 있어도 전체가 무료로 보장되는 구성이 아닙니다. Gemini API 결제·선불 크레딧 상태도 별도로 확인합니다.
 4. 프로젝트의 예산 알림을 설정합니다. 알림만으로 지출이 자동 차단되지는 않습니다.
 

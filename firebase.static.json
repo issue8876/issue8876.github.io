@@ -1,0 +1,13 @@
+{
+  "hosting": {
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "predeploy": ["node scripts/build-pages.mjs --firebase-static"],
+    "redirects": [{ "source": "/", "destination": "/pages/maeum.html", "type": 302 }],
+    "headers": [
+      { "source": "**/*.html", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "**/*.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "**/*.css", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
+  }
+}

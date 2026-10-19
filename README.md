@@ -9,9 +9,9 @@
 - 화면: `pages/maeum.html`
 - AI: Gemini 3.8 Flash. 입력·출력 필터를 사용하며, 로컬에서는 `.env`, Firebase 배포에서는 Secret Manager로 키를 보관합니다.
 
-Firebase Hosting + Cloud Functions로 연구용 시험 환경을 준비했습니다. [Firebase 설정 안내](FIREBASE_SETUP.md)를 따라 프로젝트·App Check·비밀 설정을 등록합니다. 아직 Firebase 실서버에 배포된 상태는 아닙니다.
+Firebase 프로젝트는 `maeum-d3a43`입니다. 웹앱·App Check를 설정했고 [Firebase 기본 활동 화면](https://maeum-d3a43.web.app/pages/maeum.html)을 배포했습니다. 결제 연결을 미뤄 Cloud Functions와 실제 AI 대화는 아직 미배포 상태입니다. [Firebase 설정 안내](FIREBASE_SETUP.md)에 준비 상태와 다음 배포 순서를 기록했습니다.
 - 실행: `node --env-file-if-exists=.env server/index.mjs`
-- 테스트: `node --test tests/*.test.mjs`
+- 테스트: `npm test` (서버 복사 준비 후 테스트 실행)
 - Pages 빌드: `node scripts/build-pages.mjs`
 - 상세 설정과 제공사의 학생 대상 이용 제한: [DEPLOYMENT.md](DEPLOYMENT.md)
 
