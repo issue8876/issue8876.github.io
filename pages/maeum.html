@@ -12,8 +12,8 @@
   </script>
   <link rel="canonical" href="https://issue8876.github.io/pages/maeum.html">
   <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../css/maeumgil.css?v=20261019-soft">
-  <script type="module" src="../js/maeumgil.js?v=20261019-entry"></script>
+  <link rel="stylesheet" href="../css/maeumgil.css?v=20261019-dialog">
+  <script type="module" src="../js/maeumgil.js?v=20261019-dialog"></script>
 </head>
 <body>
   <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
@@ -67,7 +67,7 @@
         <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">내 마음 점검과 선택형 활동은 AI 연결 없이 할 수 있어.</div><details class="writing-panel" id="writing-panel"><summary>직접 쓰고 싶을 때</summary><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="쓰고 싶은 말이 생기면 여기에 적어 줘."></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><p class="writing-hint">이름, 학교, 연락처는 적지 말아 줘.</p></details><div class="composer-foot"><span>버튼만 눌러도 이어갈 수 있어.</span><button id="connect-open">AI 대화 설정</button></div></div>
       </section>
     </main>
-    <footer class="page-footer"><p>힘든 일이 계속되면 믿을 수 있는 어른에게도 이야기해 줘.</p><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
+    <footer class="page-footer"><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
   </div>
   <dialog id="privacy-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><h2>이용하기 전에 알아 둬</h2><div class="voice-preview"><h3>목소리 들어보기</h3><p>어떤 목소리인지 먼저 들어볼까?</p><button id="voice-preview" type="button" aria-pressed="false">목소리 미리 듣기</button><p id="voice-preview-status" class="small" role="status"></p></div><p>기본 활동에서 나눈 대화와 답변은 이 화면을 열어 둔 동안에만 남아. 새로고침하거나 대화를 지우면 없어져.</p><p>AI를 연결하면 대화 일부가 Google로 전송돼. 보내기 전에 개인정보를 가리지만, 모두 찾아내지는 못해. 이름, 학교, 주소, 연락처는 적지 말아 줘. 음성 입력을 선택하면 브라우저의 음성 서비스가 사용될 수 있어.</p><p>마음 점검은 어려운 일을 시작하고 해볼 방법을 찾기 위한 교육용 활동이야. 표준화된 심리검사나 진단은 아니고, AI의 답변도 틀릴 수 있어.</p><p>위험하거나 힘든 일이 있으면 가까운 선생님이나 안전하게 도와줄 어른에게 이야기해 줘. 이 서비스가 선생님에게 자동으로 연락해 주지는 않아.</p><button class="primary-button" data-close>알겠어</button></dialog>
   <dialog id="connect-dialog" aria-labelledby="connect-title">
@@ -80,7 +80,6 @@
       <label for="access-code">선생님이 알려 준 숫자 코드</label>
       <input id="access-code" class="join-code" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" pattern="[0-9]{4}" minlength="4" maxlength="4" placeholder="숫자 4자리" aria-describedby="join-code-hint" required>
       <p id="join-code-hint" class="small">숫자 4자리를 넣어 줘. 코드는 선생님께 받아 줘.</p>
-      <label class="checkbox-label"><input id="transfer-consent" type="checkbox" required>AI와 나누는 대화가 Google로 전송되는 것을 확인했어요.</label>
       </div>
       <div class="dialog-actions"><button id="connect-submit" type="submit" class="primary-button" disabled>AI 대화 시작하기</button><button type="button" id="disconnect" hidden>연결 끝내기</button></div>
       <p id="connect-status" role="status" aria-live="polite"></p>

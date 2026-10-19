@@ -233,13 +233,12 @@ function updateConnection() {
   updateConnectSubmit();
 }
 function updateConnectSubmit() {
-  $('connect-submit').disabled = connecting || !/^[0-9]{4}$/.test($('access-code').value.trim()) || !$('transfer-consent').checked;
+  $('connect-submit').disabled = connecting || !/^[0-9]{4}$/.test($('access-code').value.trim());
 }
 function openConnection() {
   const hostedUrl = hostedConnectionUrl(location);
   if (hostedUrl) { location.assign(hostedUrl); return; }
   $('connect-status').textContent = '';
-  $('transfer-consent').checked = false;
   updateConnection();
   $('connect-dialog').showModal();
   if (state.connected) { $('connection-info').textContent = 'AI와 연결되어 있어. 이야기를 계속하거나 연결을 끝낼 수 있어.'; return; }
@@ -254,13 +253,13 @@ async function checkServer() {
       const res = await fetch(`${apiBase}/api/health`, { signal: AbortSignal.timeout(60000) });
       if (!res.ok) throw new Error();
       const data = await res.json(); serverReady = data.ready === true;
-      $('connection-info').textContent = serverReady ? '선생님이 알려 준 숫자 코드로 AI와 연결할 수 있어. 코드 없이 이용하면 기본 활동만 할 수 있어.' : '아직 연결을 준비하고 있어. 기본 활동은 지금 할 수 있어.';
+      $('connection-info').textContent = serverReady ? '선생님이 알려 준 숫자 코드로 AI와 연결할 수 있어.\n코드 없이 이용하면 기본 활동만 할 수 있어.' : '아직 연결을 준비하고 있어. 기본 활동은 지금 할 수 있어.';
     } catch { serverReady = false; $('connection-info').textContent = '연결이 늦어지고 있어. 잠시 뒤 다시 시작하거나 기본 활동을 해도 돼.'; }
     finally { healthCheck = null; }
   })();
   return healthCheck;
 }
-function reset() { cancelPending(); clearBreathing(); state.history = []; state.answers = []; state.question = 0; state.goal = null; state.mood = ''; state.topic = 'challenge'; state.stage = 'welcome'; $('writing-panel').open = false; $('mood-picker').open = false; $('topic-picker').open = false; $('chat-scroll').scrollTop = 0; state.token = ''; state.connected = false; $('access-code').value = ''; $('transfer-consent').checked = false; $('messages').replaceChildren(); $('intro').hidden = false; $('goal-card').hidden = true; $('message').value = ''; $('connect-status').textContent = ''; clearChoices(); updateConnection(); active('talk'); notice('다시 시작할 수 있어. 아래에서 하고 싶은 걸 골라 줘.'); }
+function reset() { cancelPending(); clearBreathing(); state.history = []; state.answers = []; state.question = 0; state.goal = null; state.mood = ''; state.topic = 'challenge'; state.stage = 'welcome'; $('writing-panel').open = false; $('mood-picker').open = false; $('topic-picker').open = false; $('chat-scroll').scrollTop = 0; state.token = ''; state.connected = false; $('access-code').value = ''; $('messages').replaceChildren(); $('intro').hidden = false; $('goal-card').hidden = true; $('message').value = ''; $('connect-status').textContent = ''; clearChoices(); updateConnection(); active('talk'); notice('다시 시작할 수 있어. 아래에서 하고 싶은 걸 골라 줘.'); }
 
 document.querySelectorAll('[data-start]').forEach(b => b.addEventListener('click', () => { $('question-card')?.remove(); ({ talk: startTalk, check: startCheck, breathe: startBreathing })[b.dataset.start](); }));
 document.querySelectorAll('[data-entry]').forEach(b => b.addEventListener('click', () => startEntry(b.dataset.entry)));
@@ -274,7 +273,6 @@ $('privacy-open').addEventListener('click', () => { reader.stop(); $('privacy-di
 $('privacy-dialog').addEventListener('close', () => reader.stop());
 $('voice-preview').addEventListener('click', () => reader.read('오늘 무슨 일이 있었어? 말하기 어려우면 아래에서 하나 골라도 돼. 천천히 같이 해보자.'));
 $('access-code').addEventListener('input', updateConnectSubmit);
-$('transfer-consent').addEventListener('change', updateConnectSubmit);
 $('connect-open').addEventListener('click', openConnection);
 $('reset').addEventListener('click', () => $('reset-dialog').showModal());
 $('confirm-reset').addEventListener('click', () => { reset(); $('reset-dialog').close(); });
@@ -283,7 +281,6 @@ $('connect-form').addEventListener('submit', async e => {
   e.preventDefault(); if (connecting || state.connected) return;
   const code = $('access-code').value.trim();
   if (!/^[0-9]{4}$/.test(code)) { $('connect-status').textContent = '선생님께 받은 숫자 4자리를 넣어 줘.'; return; }
-  if (!$('transfer-consent').checked) return;
   const attempt = ++connectionGeneration;
   connecting = true; $('connect-submit').disabled = true; $('connect-submit').textContent = '연결하고 있어…'; $('connect-status').textContent = '';
   try {
@@ -298,7 +295,7 @@ $('connect-form').addEventListener('submit', async e => {
   } catch (error) { if (attempt === connectionGeneration) $('connect-status').textContent = error.name === 'TimeoutError' ? '연결이 늦어지고 있어. 잠시 뒤 다시 해 보자.' : error.message; }
   finally { if (attempt === connectionGeneration) { connecting = false; updateConnectSubmit(); $('connect-submit').textContent = 'AI 대화 시작하기'; } }
 });
-$('connect-dialog').addEventListener('close', () => { connectionGeneration++; connecting = false; $('connect-submit').textContent = 'AI 대화 시작하기'; $('access-code').value = ''; $('transfer-consent').checked = false; updateConnectSubmit(); });
+$('connect-dialog').addEventListener('close', () => { connectionGeneration++; connecting = false; $('connect-submit').textContent = 'AI 대화 시작하기'; $('access-code').value = ''; updateConnectSubmit(); });
 function useBasicActivities() { cancelPending(); state.token = ''; state.connected = false; state.history = []; $('access-code').value = ''; updateConnection(); $('connect-dialog').close(); notice('지금은 기본 활동 중이야. 아래 버튼에서 하고 싶은 걸 골라 줘.'); }
 $('disconnect').addEventListener('click', useBasicActivities);
 $('connect-skip').addEventListener('click', useBasicActivities);

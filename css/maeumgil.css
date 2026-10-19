@@ -121,8 +121,7 @@ textarea::placeholder { color: #919895; }
 .mic-button.recording { background: #f9ded7; border-radius: 6px; }
 .composer-foot { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #838b88; padding: 9px 0 0; gap: 10px; }
 .composer-foot button { font-size: 12px; padding: 3px; text-decoration: underline; text-underline-offset: 3px; }
-.page-footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: #898d86; padding: 11px 0; line-height: 1.7; }
-.page-footer p { margin: 0; white-space: nowrap; }
+.page-footer { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 10px; font-size: 12px; color: #898d86; padding: 11px 0; line-height: 1.7; }
 .page-footer a { font-size: 11px; white-space: nowrap; text-decoration-color: #c5c9bf; text-underline-offset: 3px; }
 .message-row { display: flex; gap: 11px; margin: 0 0 22px; align-items: flex-start; }
 .message-row.user { justify-content: flex-end; }
@@ -188,7 +187,7 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 .join-code { width: 100%; border: 1px solid #aebfc5; border-radius: 8px; padding: 13px 16px; font-size: 24px; letter-spacing: .22em; color: var(--ink); background: #fff; }
 .join-code::placeholder { font-size: 19px; letter-spacing: .05em; color: #7b8589; }
 .join-code:focus-visible { outline: 2px solid #55788e; outline-offset: 3px; }
-.connection-info { background: #edf2f2; padding: 10px 14px; border-radius: 8px; }
+.connection-info { white-space: pre-line; background: #edf2f2; padding: 10px 14px; border-radius: 8px; }
 .connect-skip { display: block; width: 100%; min-height: 44px; margin-top: 16px; color: #486779; text-decoration: underline; text-underline-offset: 4px; }
 .operator-note { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 14px; font-size: 13px; color: var(--muted); }
 .operator-note summary { cursor: pointer; min-height: 30px; }
@@ -203,8 +202,6 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 #connect-dialog .connect-skip { margin-top: 8px; }
 #connect-dialog .operator-note { margin-top: 8px; padding-top: 10px; }
 #connect-status:empty { display: none; }
-.checkbox-label { display: flex; align-items: flex-start; gap: 8px; line-height: 1.8; }
-.checkbox-label input { margin-top: 4px; }
 .dialog-close { position: absolute; top: 13px; right: 16px; font-size: 25px; min-width: 34px; min-height: 34px; }
 .primary-button { display: inline-block; background: #55788e; color: white; padding: 12px 20px; border-radius: 6px; text-decoration: none; font-size: 15px; }
 .dialog-actions { display: flex; gap: 15px; align-items: center; margin-top: 20px; }
@@ -300,7 +297,7 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
   .bubble { font-size: 15px; padding: 12px 14px; }
   .message-avatar { min-width: 25px; }
   .message-avatar img { width: 24px; height: 24px; }
-  .page-footer { font-size: 11px; padding: 10px 2px; align-items: flex-start; }
+  .page-footer { justify-content: flex-end; font-size: 11px; padding: 10px 2px; align-items: flex-start; }
   .page-footer a { font-size: 8px; }
   .question-card { padding: 16px; }
   .question-card h3 { font-size: 16px; }
