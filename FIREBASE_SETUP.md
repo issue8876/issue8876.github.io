@@ -1,15 +1,18 @@
 # 마음쉼 · Firebase로 연구용 시험 환경 만들기
 
 구성: Firebase Hosting(화면) → Cloud Functions for Firebase(코드 확인·필터) → Gemini 3.8 Flash.
-프로젝트 ID는 `maeum-835b3`입니다. 웹앱 등록과 App Check 연결을 완료했고, 기본 활동은 https://maeum-835b3.web.app/pages/maeum.html 에 배포했습니다. 새 프로젝트에는 결제가 연결되어 있지만, 이번 계정·프로젝트 전환에서는 Cloud Functions와 AI 대화 배포를 보류했습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
+프로젝트 ID는 `maeum-835b3`입니다. https://maeum-835b3.web.app/pages/maeum.html 에 Hosting과 AI 함수, App Check를 연결했습니다. 숫자 코드 인증은 브라우저에서 확인했습니다. 실제 Gemini 요청은 선불 크레딧 부족(HTTP 402)으로 차단되어 충전을 기다리고 있습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
 
 ## 현재 상태와 다음 배포
 
-- 완료: Firebase CLI 로그인, 웹앱 등록, reCAPTCHA Enterprise App Check 설정, Hosting 기본 활동 배포.
-- 로컬에 준비: `.env`의 Gemini API 키·숫자 코드·서명 키. 값은 Git에 포함하지 않고 클라우드에도 아직 올리지 않았습니다.
+- 완료: Firebase CLI 로그인, 웹앱 등록, reCAPTCHA Enterprise App Check 설정, 서울 리전 `coachApi` 함수와 Hosting 배포, 숫자 코드 인증 확인.
+- `.env`의 Gemini API 키·숫자 코드·서명 키를 Secret Manager에 등록했습니다. 값은 Git과 정적 화면에 포함하지 않습니다.
 - App Check 사이트 키는 `functions/.env.maeum-835b3`에 준비했습니다. 이 파일도 Git에서 제외됩니다.
-- 현재 배포는 `firebase.static.json`을 사용하며 AI 서버를 호출하지 않습니다.
-- AI 연결을 진행할 때 새 프로젝트에서 사용할 Gemini API 키를 확인하고, 세 가지 비밀 값을 Secret Manager에 등록한 뒤 `firebase.json`으로 함수와 Hosting을 함께 배포합니다. 기존 로컬 키가 새 프로젝트에 속하는지는 아직 확인하지 않았습니다.
+- 현재 배포는 `firebase.json`을 사용하며 `/api/**`를 AI 함수로 전달합니다. GitHub Pages 주소는 기본 활동만 제공합니다.
+- 기존 API 키는 다른 프로젝트 소속이라 `maeum-835b3`에 `maeum-server-gemini` 키를 만들었습니다. Gemini API(`generativelanguage.googleapis.com`)로만 사용을 제한하고 로컬 `.env`와 Secret Manager를 교체했습니다.
+- Firebase 결제 연결과 Gemini API 선불 잔액은 별개입니다. Google이 “Your prepayment credits are depleted”를 반환했습니다. 운영자가 https://ai.studio/projects 에서 이 프로젝트의 선불 크레딧을 확인·충전한 뒤 가상 사례로 다시 검증해야 합니다. 충전 금액은 운영자가 직접 결정합니다.
+- App Check 없는 POST 요청은 403으로 거부됩니다. 서버 테스트 14개와 정적 빌드의 비밀 값 검사도 통과했습니다. `/api/health`의 `ready: true`는 비밀 설정 완료를 뜻하며 Gemini 결제 상태까지 보장하지 않습니다.
+- 함수 빌드 이미지 저장소에 1일 경과 이미지 정리 정책을 설정했습니다.
 - CLI 실행: 이 기기에는 `.local/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js`에 CLI를 설치했습니다. Node로 이 파일을 실행하거나, 일반 환경에서는 아래의 `npx firebase-tools` 명령을 사용합니다.
 
 결제 없이 기본 화면만 다시 배포:
@@ -18,7 +21,7 @@
 npx firebase-tools deploy --only hosting --config firebase.static.json --project maeum-835b3
 ```
 
-Blaze 연결과 비밀 등록을 마친 뒤 AI 포함 배포:
+AI 함수를 포함해 다시 배포:
 
 ```sh
 npx firebase-tools deploy --only functions,hosting --project maeum-835b3
