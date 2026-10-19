@@ -155,7 +155,7 @@ function renderQuestion() {
     scale.forEach((label, i) => options.append(button(`${i + 1} · ${label}`, () => { result.textContent = `‘${label}’는 ${scaleHelp[i]} 실제 문장도 이런 뜻으로 골라 주면 돼.`; })));
     practice.append(summary, prompt, options, result); card.append(practice);
   }
-  card.append(controls); $('messages').append(card); notice('정답이나 등급을 정하는 점검이 아니야.'); legend.focus({ preventScroll: true }); scroll();
+  card.append(controls); $('messages').append(card); notice(''); legend.focus({ preventScroll: true }); scroll();
 }
 function answerCheck(score) { if (state.stage === 'check' && state.check.select(score)) renderQuestion(); }
 function renderCheckResult() {
@@ -325,7 +325,7 @@ document.querySelectorAll('[data-mood]').forEach(b => b.addEventListener('click'
 $('chat-form').addEventListener('submit', e => { e.preventDefault(); sendText($('message').value); });
 $('message').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); sendText($('message').value); } });
 $('message').addEventListener('input', () => { $('message').style.height = 'auto'; $('message').style.height = `${Math.min($('message').scrollHeight, 140)}px`; $('message').style.overflowY = $('message').scrollHeight > 140 ? 'auto' : 'hidden'; });
-$('profile').addEventListener('change', () => { cancelPending(); reader.stop(); state.profile = $('profile').value; document.body.classList.toggle('low-literacy', state.profile === 'lower'); $('profile-help').textContent = `${profiles[state.profile].label}: 문항 설명과 AI 말투를 바꿔 줘. 문항 6개와 응답 단계는 같아.`; if (state.stage === 'check') renderQuestion(); else if (state.stage === 'checked') renderCheckResult(); else if (state.history.length) { state.history = []; addMessage('assistant', `${profiles[state.profile].label}으로 바꿨어. 하고 싶은 활동을 골라 줘.`, { remember: false }); } });
+$('profile').addEventListener('change', () => { cancelPending(); reader.stop(); state.profile = $('profile').value; document.body.classList.toggle('low-literacy', state.profile === 'lower'); if (state.stage === 'check') renderQuestion(); else if (state.stage === 'checked') renderCheckResult(); else if (state.history.length) { state.history = []; addMessage('assistant', `${profiles[state.profile].label}으로 바꿨어. 하고 싶은 활동을 골라 줘.`, { remember: false }); } });
 $('privacy-open').addEventListener('click', () => { reader.stop(); $('privacy-dialog').showModal(); });
 $('privacy-dialog').addEventListener('close', () => reader.stop());
 $('voice-preview').addEventListener('click', () => reader.read('오늘 무슨 일이 있었어? 말하기 어려우면 아래에서 하나 골라도 돼. 천천히 같이 해보자.'));

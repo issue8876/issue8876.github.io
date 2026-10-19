@@ -321,7 +321,6 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 
 /* Review fixes: readable controls, explicit selection, and one scrolling surface on small screens. */
 .topbar { position: sticky; top: 0; z-index: 8; background: #f4f2ee; }
-.profile-help { color: #59666b; font-size: 12px; line-height: 1.6; margin: 7px 0 15px; }
 .composer-foot { color: #52636b; }
 .composer-foot button { color: #365b70; font-size: 14px; min-height: 44px; padding: 7px 4px; }
 .writing-mode { color: #52636b; font-size: 13px; line-height: 1.75; }
@@ -349,14 +348,12 @@ textarea { min-width: 0; }
 @media (max-width: 900px) {
   .topbar { height: 64px; gap: 8px; }
   .top-actions { gap: 10px; }
-  .profile-help { grid-column: 1/-1; grid-row: 3; font-size: 12px; margin: 0 0 3px; }
-  .goal-card { grid-row: 4; }
+  .goal-card { grid-row: 3; }
   .conversation { height: auto; min-height: 0; overflow: visible; }
   .conversation-top { border-radius: 8px 8px 0 0; height: auto; min-height: 52px; flex-wrap: wrap; gap: 5px; }
   .chat-scroll { overflow: visible; flex: initial; padding: 16px; scroll-behavior: auto; }
   .at-start .activity-nav { display: none; }
   .at-start .sidebar select { grid-row: 1; }
-  .at-start .profile-help { grid-row: 2; }
   .intro h2 { font-size: 23px; margin: 0; }
   .intro-illustration { width: 33px; height: 33px; }
   .intro > p { max-width: none; margin: 4px 0 0; font-size: 13px; }
