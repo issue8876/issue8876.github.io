@@ -1,7 +1,7 @@
 # 마음쉼 · Firebase로 연구용 시험 환경 만들기
 
 구성: Firebase Hosting(화면) → Cloud Functions for Firebase(코드 확인·필터) → Gemini 3.8 Flash.
-프로젝트 ID는 `maeum-835b3`입니다. https://maeum-835b3.web.app/pages/maeum.html 에 Hosting과 AI 함수, App Check를 연결했습니다. 운영자가 제공한 선불 충전 API 키로 교체하고 함수를 재배포했으며, 2026년 10월 19일 브라우저에서 숫자 코드 인증과 가상 사례의 실제 Gemini 답변을 확인했습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
+프로젝트 ID는 `maeum-835b3`이며, Hosting 사이트 ID는 `maeum`입니다. 정식 주소는 https://maeum.web.app/ 입니다. 이전 프로젝트 주소와 `/pages/maeum.html` 링크는 정식 주소로 이동합니다. https://maeum.web.app/ 에 Hosting과 AI 함수, App Check를 연결했습니다. 운영자가 제공한 선불 충전 API 키로 교체하고 함수를 재배포했으며, 2026년 10월 19일 브라우저에서 숫자 코드 인증과 가상 사례의 실제 Gemini 답변을 확인했습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
 
 ## 현재 상태와 다음 배포
 

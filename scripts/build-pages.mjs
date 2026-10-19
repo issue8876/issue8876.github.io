@@ -15,7 +15,14 @@ await writeFile(path.join(dist, 'js/maeumgil-config.js'), `export const config =
 if (firebase || firebaseStatic) {
   const page = path.join(dist, 'pages/maeum.html');
   const html = await readFile(page, 'utf8');
-  await writeFile(page, html.replace(/\s*<link rel="canonical"[^>]+>/, ''));
+  const appHtml = html.replace(/\s*<link rel="canonical"[^>]+>/, '');
+  await writeFile(page, appHtml);
+  if (firebase) {
+    // Serve the app at the domain root; GitHub's portfolio index stays unchanged.
+    const rootHtml = appHtml.replace(/(href|src)="\.\.\//g, '$1="/')
+      .replace('href="maeum.html"', 'href="/"').replace('href="/index.html"', 'href="/"');
+    await writeFile(path.join(dist, 'index.html'), rootHtml);
+  }
 }
 await writeFile(path.join(dist, '.nojekyll'), '');
 async function audit(dir) {

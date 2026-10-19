@@ -2,7 +2,7 @@ import { config } from './maeumgil-config.js';
 
 export function hostedConnectionUrl(page, settings = config) {
   if (page.protocol === 'file:' || (!settings.firebase && !settings.apiBase && page.hostname === 'issue8876.github.io')) {
-    return 'https://maeum-835b3.web.app/pages/maeum.html?connect=1';
+    return 'https://maeum.web.app/?connect=1';
   }
   return null;
 }

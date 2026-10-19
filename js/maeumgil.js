@@ -1,6 +1,6 @@
 import { config } from './maeumgil-config.js';
 import { createBreathingCard } from './maeumgil-breathing.js?v=20261019-clear';
-import { apiHeaders, hostedConnectionUrl } from './maeumgil-connection.js?v=20261019-entry';
+import { apiHeaders, hostedConnectionUrl } from './maeumgil-connection.js?v=20261019-short-url';
 import { createSpeechReader } from './maeumgil-speech.js?v=20261019-soft';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js';
 

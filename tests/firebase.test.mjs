@@ -4,7 +4,7 @@ import http from 'node:http';
 import { createSignedSessions } from '../server/access.mjs';
 import { createFirebaseHandler } from '../functions/handler.mjs';
 
-const settings = { projectId: 'maeum-test', apiKey: 'test-provider-key', joinCode: '0123', signingKey: 'test-only-secret-with-at-least-32-characters', appCheckSiteKey: 'test-public-site-key' };
+const settings = { projectId: 'maeum-test', hostingSites: ['maeum-test-short'], apiKey: 'test-provider-key', joinCode: '0123', signingKey: 'test-only-secret-with-at-least-32-characters', appCheckSiteKey: 'test-public-site-key' };
 test('signed sessions survive instance changes and reject tampering, expiry and code rotation', () => {
   let now = 0;
   const make = (extra = {}) => createSignedSessions({ code: settings.joinCode, secret: settings.signingKey, now: () => now, ...extra });
@@ -43,6 +43,8 @@ test('Firebase HTTP adapter verifies App Check, consumes rawBody, keeps secrets 
   assert.equal((await post('/api/session', { code: '0123' }, { 'X-Firebase-AppCheck': '' })).status, 403);
   assert.equal((await post('/api/session', { code: '0123' }, { 'X-Firebase-AppCheck': 'invalid' })).status, 403);
   assert.equal((await post('/api/session', { code: '0123' }, { Origin: 'https://evil.example' })).status, 403);
+  assert.equal((await post('/api/session', { code: '0123' }, { Origin: 'https://maeum-test-short.web.app' })).status, 200);
+  assert.equal((await post('/api/chat', { profile: 'upper', messages: [{ role: 'user', text: '숙제가 어려워' }] }, { Origin: 'https://maeum-test-short.web.app' })).status, 401);
   assert.equal((await post('/api/session', 'bad json')).status, 400);
   assert.equal((await post('/api/session', 'x'.repeat(64001))).status, 413);
   const joined = await post('/api/session', { code: '0123' }); assert.equal(joined.status, 200);

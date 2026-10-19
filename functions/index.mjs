@@ -15,6 +15,6 @@ export const coachApi = onRequest({
   timeoutSeconds: 60, memory: '256MiB', invoker: 'public',
   secrets: [apiKey, joinCode, signingKey],
 }, createFirebaseHandler({
-  getSettings: () => ({ projectId: process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT, apiKey: apiKey.value(), joinCode: joinCode.value(), signingKey: signingKey.value(), appCheckSiteKey: appCheckSiteKey.value() }),
+  getSettings: () => ({ projectId: process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT, hostingSites: ['maeum'], apiKey: apiKey.value(), joinCode: joinCode.value(), signingKey: signingKey.value(), appCheckSiteKey: appCheckSiteKey.value() }),
   verifyAppCheck: token => getAppCheck(app).verifyToken(token),
 }));

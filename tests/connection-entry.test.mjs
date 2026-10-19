@@ -5,7 +5,7 @@ import { runInNewContext } from 'node:vm';
 import { hostedConnectionUrl } from '../js/maeumgil-connection.js';
 
 test('static AI entry goes to the trusted host without forwarding local paths or credentials', () => {
-  const hosted = 'https://maeum-835b3.web.app/pages/maeum.html?connect=1';
+  const hosted = 'https://maeum.web.app/?connect=1';
   const plain = { apiBase: '' };
   assert.equal(hostedConnectionUrl(new URL('file:///C:/private/maeum.html?code=private'), plain), hosted);
   assert.equal(hostedConnectionUrl(new URL('https://issue8876.github.io/pages/maeum.html?code=private'), plain), hosted);
@@ -22,6 +22,6 @@ test('local HTML redirects before ES modules run, while hosted and development p
   for (const protocol of ['file:', 'https:', 'http:']) {
     const redirects = [];
     runInNewContext(boot, { location: { protocol, replace: url => redirects.push(url) } });
-    assert.deepEqual(redirects, protocol === 'file:' ? ['https://maeum-835b3.web.app/pages/maeum.html?connect=1'] : []);
+    assert.deepEqual(redirects, protocol === 'file:' ? ['https://maeum.web.app/?connect=1'] : []);
   }
 });
