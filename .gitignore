@@ -7,3 +7,6 @@ dist/
 coverage/
 *.log
 .DS_Store
+.firebase/
+functions/runtime/
+firebase-debug.log

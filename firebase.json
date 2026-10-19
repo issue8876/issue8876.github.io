@@ -1,0 +1,20 @@
+{
+  "functions": [{
+    "source": "functions", "codebase": "maeum", "runtime": "nodejs22",
+    "ignore": ["node_modules", ".git", ".env*", "*.log"],
+    "predeploy": ["node scripts/prepare-firebase.mjs"]
+  }],
+  "hosting": {
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "predeploy": ["node scripts/build-pages.mjs --firebase"],
+    "redirects": [{ "source": "/", "destination": "/pages/maeum.html", "type": 302 }],
+    "rewrites": [{ "source": "/api/**", "function": { "functionId": "coachApi", "region": "asia-northeast3" } }],
+    "headers": [
+      { "source": "/api/**", "headers": [{ "key": "Cache-Control", "value": "no-store" }] },
+      { "source": "**/*.html", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "**/*.js", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] },
+      { "source": "**/*.css", "headers": [{ "key": "Cache-Control", "value": "no-cache" }] }
+    ]
+  }
+}

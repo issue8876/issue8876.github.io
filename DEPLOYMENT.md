@@ -1,5 +1,7 @@
 # 마음쉼 배포와 운영
 
+현재 권장 배포 대상은 **Firebase Hosting + Cloud Functions + Gemini**입니다. [Firebase 설정 안내](FIREBASE_SETUP.md)를 먼저 읽어 주세요. 아래 Render·독립 Node 서버 안내는 기존 구성을 유지할 때 사용합니다. Firebase 전환은 제공사의 학생 이용 허가를 대신하지 않습니다.
+
 ## 현재 구성
 
 - 웹 화면: `pages/maeum.html`. GitHub Pages에 정적 파일로 배포합니다.

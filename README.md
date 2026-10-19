@@ -7,7 +7,9 @@
 초등 저학년·고학년·중학생·고등학생의 눈높이에 맞춘 마음 표현, 선택형 대화, 교육용 마음 점검, 숨 고르기, 작은 실천 카드를 추가했습니다.
 
 - 화면: `pages/maeum.html`
-- AI: Gemini 3.8 Flash. 입력·출력 필터와 서버 측 `.env`를 사용합니다.
+- AI: Gemini 3.8 Flash. 입력·출력 필터를 사용하며, 로컬에서는 `.env`, Firebase 배포에서는 Secret Manager로 키를 보관합니다.
+
+Firebase Hosting + Cloud Functions로 연구용 시험 환경을 준비했습니다. [Firebase 설정 안내](FIREBASE_SETUP.md)를 따라 프로젝트·App Check·비밀 설정을 등록합니다. 아직 Firebase 실서버에 배포된 상태는 아닙니다.
 - 실행: `node --env-file-if-exists=.env server/index.mjs`
 - 테스트: `node --test tests/*.test.mjs`
 - Pages 빌드: `node scripts/build-pages.mjs`

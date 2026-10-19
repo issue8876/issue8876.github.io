@@ -110,6 +110,7 @@ select { width: 100%; padding: 11px 10px; border: 1px solid #d9dcd9; border-radi
 .choices button:hover { background: #eaf1f4; }
 .notice { font-size: 13px; color: #768181; line-height: 1.7; margin: 1px 0 8px; }
 .notice.error { color: #9c4934; }
+.notice:empty { display: none; }
 .composer-area form { display: flex; gap: 9px; align-items: flex-end; border: 1px solid #dce0dc; border-radius: 8px; padding: 9px; background: white; }
 textarea { resize: none; width: 100%; max-height: 140px; min-height: 33px; background: none; border: 0; padding: 7px 4px; font-size: 15px; line-height: 1.6; overflow-y: hidden; }
 textarea::placeholder { color: #919895; }
@@ -145,11 +146,35 @@ textarea::placeholder { color: #919895; }
 .goal-card p { font-size: 13px; line-height: 1.8; color: #7a7668; }
 .goal-actions { display: flex; gap: 6px; flex-wrap: wrap; }
 .goal-actions button { background: #fffdf7; border: 1px solid #e7e0cd; border-radius: 5px; padding: 9px; font-size: 13px; }
-.breathing-card { padding: 25px; border-radius: 8px; background: #f1f6f7; text-align: center; margin: 15px 0; }
-.breathing-circle { width: 105px; height: 105px; border-radius: 50%; background: #d9e7e8; border: 1px solid #b3cbce; display: grid; place-items: center; margin: 22px auto; font-size: 15px; line-height: 1.8; }
-.breathing-circle.running { animation: breathe 8s ease-in-out infinite; }
-.breathing-card p { font-size: 14px; line-height: 1.9; }
-.breathing-card button { padding: 11px 18px; background: white; border: 1px solid #dce4e7; border-radius: 6px; }
+.conversation.is-breathing .composer-area { display: none; }
+.breathing-card { padding: 18px 22px; border-radius: 10px; background: #f1f6f4; text-align: center; margin: 0; scroll-margin-top: 4px; }
+.breathing-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.breathing-phase { margin: 0; font-size: 20px; }
+.breathing-time { font-size: 12px; color: #6e807a; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.breathing-scene { height: clamp(120px, 24dvh, 165px); margin: 2px auto 4px; }
+.breathing-scene svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.breath-halo { fill: #dceae3; transform-origin: 130px 96px; transform: scale(.78); }
+.breath-ring { fill: none; stroke: #b7d0c3; stroke-width: 1; transform-origin: 130px 96px; transform: scale(.78); }
+.breath-body { fill: #b7cfc4; stroke: #718d82; stroke-width: 1.6; transform-box: fill-box; transform-origin: 50% 90%; }
+.breath-neck, .breath-face { fill: #f1dcc7; stroke: #927e6b; stroke-width: 1.3; }
+.breath-neck { stroke-linejoin: round; }
+.breath-hair { fill: #7e7469; }
+.breath-feature, .breath-arm, .breath-hand { fill: none; stroke: #766e64; stroke-width: 1.5; stroke-linecap: round; }
+.breath-arm { stroke: #718d82; }
+.breath-air { fill: none; stroke: #8aafa1; stroke-width: 1.5; stroke-linecap: round; opacity: .3; }
+.is-running .breath-halo, .is-running .breath-ring { animation: breath-expand 6s ease-in-out infinite; }
+.is-running .breath-body { animation: breath-chest 6s ease-in-out infinite; }
+.is-running .breath-air { animation: breath-air 6s ease-in-out infinite; }
+.breathing-card .breathing-caption { font-size: 14px; line-height: 1.6; margin: 5px 0; }
+.breathing-card .breathing-note { font-size: 11px; color: #6d7e77; line-height: 1.5; margin: 4px 0 10px; }
+.breathing-progress { height: 3px; background: #dae5df; border-radius: 3px; overflow: hidden; }
+.breathing-progress > span { display: block; height: 100%; width: 0; background: #739d8b; }
+.breathing-controls { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 12px; }
+.breathing-card button { min-height: 42px; padding: 8px 14px; background: white; border: 1px solid #ccdcd3; border-radius: 6px; font-size: 13px; }
+.breathing-card .breathing-toggle { background: #567b6b; color: #fff; border-color: #567b6b; }
+@keyframes breath-expand { 0%,100% { transform: scale(.78); } 50% { transform: scale(1); } }
+@keyframes breath-chest { 0%,100% { transform: scale(1); } 50% { transform: scale(1.055, 1.035); } }
+@keyframes breath-air { 0%,100% { opacity: .2; transform: translateY(3px); } 50% { opacity: .8; transform: translateY(-3px); } }
 .small { font-size: 13px !important; color: var(--muted); }
 dialog { width: min(480px,calc(100% - 30px)); max-height: 85dvh; overflow-y: auto; border: 1px solid var(--line); border-radius: 12px; padding: 32px; color: var(--ink); box-shadow: 0 25px 90px #243b3126; }
 dialog::backdrop { background: #303a424d; }
@@ -186,7 +211,6 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 .low-literacy .bubble { font-size: 16px; }
 .low-literacy .choices button { font-size: 16px; }
 .low-literacy .scale-grid button { font-size: 15px; }
-@keyframes breathe { 0%,100% { transform: scale(.8); } 50% { transform: scale(1.1); } }
 @media (max-width: 1050px) {
   .app-shell { padding: 0 24px; }
   .workspace { grid-template-columns: 200px minmax(0,1fr); gap: 24px; }
@@ -283,4 +307,7 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  .allow-motion.is-running .breath-halo, .allow-motion.is-running .breath-ring { animation: breath-expand 6s ease-in-out infinite !important; }
+  .allow-motion.is-running .breath-body { animation: breath-chest 6s ease-in-out infinite !important; }
+  .allow-motion.is-running .breath-air { animation: breath-air 6s ease-in-out infinite !important; }
 }

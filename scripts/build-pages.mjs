@@ -7,9 +7,15 @@ const dist = path.join(root, 'dist');
 await mkdir(dist, { recursive: true });
 const entries = ['index.html', 'pages', 'css', 'js', 'assets'];
 for (const name of entries) await cp(path.join(root, name), path.join(dist, name), { recursive: true });
-const raw = process.env.PUBLIC_API_BASE_URL || '';
+const firebase = process.argv.includes('--firebase');
+const raw = firebase ? '' : process.env.PUBLIC_API_BASE_URL || '';
 if (raw) { const url = new URL(raw); if (url.protocol !== 'https:' || url.username || url.password || url.search || url.hash || url.pathname !== '/') throw new Error('PUBLIC_API_BASE_URL must be an HTTPS origin, without credentials or path.'); }
-await writeFile(path.join(dist, 'js/maeumgil-config.js'), `export const config = Object.freeze({apiBase:${JSON.stringify(raw.replace(/\/$/, ''))}});\n`);
+await writeFile(path.join(dist, 'js/maeumgil-config.js'), `export const config = Object.freeze({apiBase:${JSON.stringify(raw.replace(/\/$/, ''))},firebase:${firebase}});\n`);
+if (firebase) {
+  const page = path.join(dist, 'pages/maeum.html');
+  const html = await readFile(page, 'utf8');
+  await writeFile(page, html.replace(/\s*<link rel="canonical"[^>]+>/, ''));
+}
 await writeFile(path.join(dist, '.nojekyll'), '');
 async function audit(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {

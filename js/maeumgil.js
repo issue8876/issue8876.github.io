@@ -1,8 +1,10 @@
 import { config } from './maeumgil-config.js';
+import { createBreathingCard } from './maeumgil-breathing.js';
+import { apiHeaders } from './maeumgil-connection.js';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js';
 
 const $ = id => document.getElementById(id);
-const state = { profile: 'upper', topic: 'challenge', stage: 'welcome', answers: [], question: 0, mood: '', goal: null, history: [], token: '', connected: false, busy: false, generation: 0, abort: null, breathTimer: null, recognition: null };
+const state = { profile: 'upper', topic: 'challenge', stage: 'welcome', answers: [], question: 0, mood: '', goal: null, history: [], token: '', connected: false, busy: false, generation: 0, abort: null, breathing: null, recognition: null };
 const apiBase = config.apiBase.replace(/\/$/, '');
 let serverReady = false;
 let healthCheck = null;
@@ -12,7 +14,7 @@ let connectionGeneration = 0;
 function notice(text, error = false) { $('notice').textContent = text; $('notice').classList.toggle('error', error); }
 function scroll() { requestAnimationFrame(() => { const el = $('chat-scroll'); el.scrollTop = el.scrollHeight; }); }
 function active(name) { document.querySelectorAll('[data-start]').forEach(b => b.classList.toggle('active', b.dataset.start === name)); }
-function clearBreathing() { clearInterval(state.breathTimer); state.breathTimer = null; document.querySelectorAll('.breathing-circle').forEach(el => el.classList.remove('running')); window.speechSynthesis?.cancel(); $('read-aloud').setAttribute('aria-pressed', 'false'); if (state.recognition) { state.recognition.abort(); state.recognition = null; $('mic').classList.remove('recording'); } }
+function clearBreathing() { state.breathing?.destroy(); state.breathing = null; document.querySelector('.conversation').classList.remove('is-breathing'); window.speechSynthesis?.cancel(); $('read-aloud').setAttribute('aria-pressed', 'false'); if (state.recognition) { state.recognition.abort(); state.recognition = null; $('mic').classList.remove('recording'); } }
 function clearChoices() { $('choices').replaceChildren(); }
 function button(label, callback) { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', callback); return b; }
 function choices(items) { clearChoices(); for (const [label, cb] of items) $('choices').append(button(label, () => { if (!state.busy) cb(); })); const first = $('choices').querySelector('button'); requestAnimationFrame(() => first?.focus({ preventScroll: true })); }
@@ -44,6 +46,7 @@ function startTopic(key) {
 }
 function startTalk() {
   cancelPending(); clearBreathing(); state.stage = 'topic'; active('talk');
+  notice('');
   addMessage('assistant', '어떤 쪽 얘기야? 하나만 골라 줘.');
   choices(Object.entries(topics).map(([key, t]) => [t.label, () => startTopic(key)]));
 }
@@ -90,7 +93,7 @@ function startCheck() {
   cancelPending(); clearBreathing(); clearChoices(); active('check');
   state.stage = 'check'; state.question = Math.min(state.answers.length, 5);
   addMessage('assistant', '마음 점검은 어려운 일을 시작하고 방법을 찾는 나를 살펴보는 6문장이야. 평소에 얼마나 그런지 1~6 중에서 골라 줘. 시험이 아니고, 중간에 이야기부터 해도 돼.', { remember: false });
-  renderQuestion(); notice('교육용 마음 점검 · 표준화된 심리검사나 진단이 아니야.');
+  renderQuestion(); notice('');
 }
 function renderQuestion() {
   $('question-card')?.remove(); $('intro').hidden = true;
@@ -146,10 +149,11 @@ function endSession() { cancelPending(); clearBreathing(); state.stage = 'end'; 
 function startBreathing() {
   cancelPending(); clearBreathing(); clearChoices(); $('question-card')?.remove(); active('breathe'); state.stage = 'breathe';
   addMessage('assistant', '편하게 앉아서 숨을 천천히 내쉬어 봐. 억지로 깊게 쉴 필요는 없어. 불편하거나 어지러우면 바로 멈춰 줘.');
-  const card = document.createElement('div'); card.className = 'breathing-card'; const circle = document.createElement('div'); circle.className = 'breathing-circle'; circle.textContent = '편안하게';
-  const desc = document.createElement('p'); desc.textContent = '편하게 들이쉬고, 천천히 내쉬기.\n네가 편한 속도로 쉬어 줘.';
-  const toggle = button('30초 함께하기', () => { if (state.breathTimer) { clearBreathing(); toggle.textContent = '다시 함께하기'; circle.textContent = '편안하게'; return; } let left = 30; circle.classList.add('running'); toggle.textContent = '멈추기'; state.breathTimer = setInterval(() => { left--; circle.textContent = `${left}초`; if (left <= 0) { clearBreathing(); circle.textContent = '수고했어'; toggle.textContent = '다시 함께하기'; notice('조금 쉬었네. 이제 하고 싶은 걸 골라 줘.'); } }, 1000); });
-  card.append(circle, desc, toggle); $('messages').append(card); choices([['마음 점검 해보기', startCheck], ['어려웠던 일 고르기', startTalk], ['오늘은 여기까지', endSession]]); scroll();
+  notice(''); $('writing-panel').open = false;
+  state.breathing = createBreathingCard({ onLeave: startTalk });
+  const card = state.breathing.element;
+  $('messages').append(card); document.querySelector('.conversation').classList.add('is-breathing');
+  requestAnimationFrame(() => card.scrollIntoView({ block: 'start', behavior: 'instant' }));
 }
 function offlineReply(text = '') {
   if (state.stage === 'help') { addMessage('assistant', '지금은 너를 안전하게 도와줄 수 있는 실제 어른과 함께하는 게 중요해. 선생님이나 상담 선생님에게 이 화면을 보여줘도 괜찮아.'); choices([['도움받는 방법 보기', () => $('help-dialog').showModal()], ['잠깐 숨 고르기', startBreathing]]); return; }
@@ -164,7 +168,9 @@ async function requestAI() {
   const pending = document.createElement('div'); pending.className = 'busy'; pending.id = 'pending'; pending.setAttribute('role', 'status'); pending.textContent = '답변을 기다리고 있어…'; $('messages').append(pending); scroll();
   const timeout = setTimeout(() => controller.abort(), 35000);
   try {
-    const res = await fetch(`${apiBase}/api/chat`, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${state.token}` }, body: JSON.stringify(payload), signal: controller.signal });
+    const headers = await apiHeaders(); if (generation !== state.generation) return;
+    headers.Authorization = `Bearer ${state.token}`;
+    const res = await fetch(`${apiBase}/api/chat`, { method: 'POST', headers, body: JSON.stringify(payload), signal: controller.signal });
     const data = await res.json(); if (generation !== state.generation) return;
     if (res.status === 401) { state.connected = false; state.token = ''; updateConnection(); }
     if (!res.ok) throw new Error(data.error || '연결이 잠시 끊겼어. 다시 시도해 줄래?');
@@ -206,7 +212,7 @@ function openConnection() {
   checkServer();
 }
 async function checkServer() {
-  if (!apiBase && !['localhost', '127.0.0.1'].includes(location.hostname)) { $('connection-info').textContent = '아직 연결을 준비하고 있어. 아래 ‘코드 없이 기본 활동 하기’를 눌러도 돼.'; serverReady = false; return; }
+  if (!config.firebase && !apiBase && !['localhost', '127.0.0.1'].includes(location.hostname)) { $('connection-info').textContent = '아직 연결을 준비하고 있어. 아래 ‘코드 없이 기본 활동 하기’를 눌러도 돼.'; serverReady = false; return; }
   if (healthCheck) return healthCheck;
   $('connection-info').textContent = '연결을 확인하고 있어. 쉬고 있던 서버는 깨어나는 데 1분 정도 걸릴 수 있어.';
   healthCheck = (async () => {
@@ -246,7 +252,8 @@ $('connect-form').addEventListener('submit', async e => {
   try {
     await checkServer(); if (attempt !== connectionGeneration) return;
     if (!serverReady) { $('connect-status').textContent = '아직 연결되지 않았어. 아래에서 기본 활동을 먼저 해도 돼.'; return; }
-    const res = await fetch(`${apiBase}/api/session`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code }), signal: AbortSignal.timeout(15000) });
+    const headers = await apiHeaders(); if (attempt !== connectionGeneration) return;
+    const res = await fetch(`${apiBase}/api/session`, { method: 'POST', headers, body: JSON.stringify({ code }), signal: AbortSignal.timeout(15000) });
     const data = await res.json(); if (attempt !== connectionGeneration) return;
     if (!res.ok) throw new Error(data.error || '잠시 뒤 다시 연결해 줘.');
     if (typeof data.token !== 'string' || data.token.length < 32) throw new Error('연결을 다시 준비해야 해. 선생님께 알려 줘.');
@@ -260,6 +267,6 @@ document.querySelectorAll('[data-goal]').forEach(b => b.addEventListener('click'
 $('copy-goal').addEventListener('click', async () => { if (!state.goal) return; try { await navigator.clipboard.writeText(`오늘의 작은 한 걸음\n${state.goal.text}\n언제: ${state.goal.when}`); $('goal-feedback').textContent = '실천 카드를 복사했어. 공유할 사람은 네가 고르면 돼.'; } catch { $('goal-feedback').textContent = '복사가 어려워. 카드의 문장을 직접 선택해서 복사해 줘.'; } });
 $('read-aloud').addEventListener('click', () => { if (!('speechSynthesis' in window)) { notice('이 브라우저에서는 읽어주기가 지원되지 않아.', true); return; } if (speechSynthesis.speaking) { speechSynthesis.cancel(); $('read-aloud').setAttribute('aria-pressed', 'false'); return; } const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); const text = bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음 살펴볼까? 마음 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.'; const utterance = new SpeechSynthesisUtterance(text); utterance.lang = 'ko-KR'; utterance.rate = .9; utterance.onend = () => $('read-aloud').setAttribute('aria-pressed', 'false'); utterance.onerror = utterance.onend; speechSynthesis.speak(utterance); $('read-aloud').setAttribute('aria-pressed', 'true'); });
 $('mic').addEventListener('click', () => { const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!Recognition) { notice('말로 입력하기를 지원하지 않는 브라우저야. 버튼을 고르거나 글로 적어줘.', true); return; } if (state.recognition) { state.recognition.stop(); return; } if (!window.confirm('말로 입력하면 브라우저의 음성 서비스로 음성이 전송될 수 있어. 계속할까?')) return; const recognition = new Recognition(); state.recognition = recognition; recognition.lang = 'ko-KR'; recognition.interimResults = false; recognition.onresult = e => { $('message').value = e.results[0][0].transcript.slice(0, 1200); notice('알아들은 말을 확인하고 보내기를 눌러줘.'); }; recognition.onerror = () => notice('음성을 받지 못했어. 마이크 권한을 확인하거나 글로 적어줘.', true); recognition.onend = () => { state.recognition = null; $('mic').classList.remove('recording'); }; try { recognition.start(); $('mic').classList.add('recording'); notice('듣고 있어. 실명이나 학교 이름은 말하지 않아도 돼.'); } catch { state.recognition = null; notice('마이크를 시작하지 못했어.', true); } });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { clearBreathing(); window.speechSynthesis?.cancel(); } });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { state.breathing?.stop(); window.speechSynthesis?.cancel(); } });
 window.addEventListener('pagehide', () => { cancelPending(); clearBreathing(); window.speechSynthesis?.cancel(); state.token = ''; state.history = []; });
 updateConnection();
