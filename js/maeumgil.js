@@ -1,6 +1,6 @@
 import { config } from './maeumgil-config.js';
 import { createBreathingCard } from './maeumgil-breathing.js?v=20261019-clear';
-import { apiHeaders, hostedConnectionUrl } from './maeumgil-connection.js?v=20261019-short-url';
+import { apiHeaders, hostedConnectionUrl, readAPIResponse } from './maeumgil-connection.js?v=20261020-review2';
 import { createSpeechReader } from './maeumgil-speech.js?v=20261019-soft';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js?v=20261020-review';
 import { createCheckSession } from './maeumgil-check.js';
@@ -254,7 +254,7 @@ async function requestAI() {
     const headers = await apiHeaders(); if (generation !== state.generation) return;
     headers.Authorization = `Bearer ${state.token}`;
     const res = await fetch(`${apiBase}/api/chat`, { method: 'POST', headers, body: JSON.stringify(payload), signal: controller.signal });
-    const data = await res.json(); if (generation !== state.generation) return;
+    const data = await readAPIResponse(res); if (generation !== state.generation) return;
     if (res.status === 401) { state.connected = false; state.token = ''; updateConnection(); }
     if (!res.ok) throw new Error(data.error || '연결이 잠시 끊겼어. 다시 시도해 줄래?');
     addMessage('assistant', data.message, { alert: Boolean(data.safety) });
@@ -345,7 +345,7 @@ $('connect-form').addEventListener('submit', async e => {
     if (!serverReady) { $('connection-retry').hidden = false; $('connect-status').textContent = '아직 연결되지 않았어. 다시 확인하거나 기본 활동을 해도 돼.'; return; }
     const headers = await apiHeaders(); if (attempt !== connectionGeneration) return;
     const res = await fetch(`${apiBase}/api/session`, { method: 'POST', headers, body: JSON.stringify({ code }), signal: AbortSignal.timeout(15000) });
-    const data = await res.json(); if (attempt !== connectionGeneration) return;
+    const data = await readAPIResponse(res); if (attempt !== connectionGeneration) return;
     if (!res.ok) throw new Error(data.error || '잠시 뒤 다시 연결해 줘.');
     if (typeof data.token !== 'string' || data.token.length < 32) throw new Error('연결을 다시 준비해야 해. 선생님께 알려 줘.');
     cancelPending(); state.token = data.token; state.connected = true; state.history = []; updateConnection(); $('access-code').value = ''; $('connect-dialog').close(); notice('AI와 연결됐어. 지금부터 나누는 대화만 Google로 전송돼.');

@@ -1,5 +1,17 @@
 import { config } from './maeumgil-config.js';
 
+// A proxy may return HTML or plain text while a deployment is becoming ready.
+// Never show its body or a JSON parser's internal error to a student.
+export async function readAPIResponse(response) {
+  try {
+    const data = await response.json();
+    if (!data || typeof data !== 'object' || Array.isArray(data)) throw new Error();
+    return data;
+  } catch {
+    throw new Error('연결이 잠시 불안정해. 다시 시도하거나 기본 활동을 골라 줘.');
+  }
+}
+
 export function hostedConnectionUrl(page, settings = config) {
   if (page.protocol === 'file:' || (!settings.firebase && !settings.apiBase && page.hostname === 'issue8876.github.io')) {
     return 'https://maeum.web.app/?connect=1';
