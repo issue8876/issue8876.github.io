@@ -1,7 +1,7 @@
 # 마음쉼 · Firebase로 연구용 시험 환경 만들기
 
 구성: Firebase Hosting(화면) → Cloud Functions for Firebase(코드 확인·필터) → Gemini 3.8 Flash.
-프로젝트 ID는 `maeum-835b3`입니다. https://maeum-835b3.web.app/pages/maeum.html 에 Hosting과 AI 함수, App Check를 연결했습니다. 숫자 코드 인증은 브라우저에서 확인했습니다. 실제 Gemini 요청은 선불 크레딧 부족(HTTP 402)으로 차단되어 충전을 기다리고 있습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
+프로젝트 ID는 `maeum-835b3`입니다. https://maeum-835b3.web.app/pages/maeum.html 에 Hosting과 AI 함수, App Check를 연결했습니다. 숫자 코드 인증은 브라우저에서 확인했습니다. 운영자가 충전을 완료했다고 알려 주었으나, 마지막 검증에서도 Google이 선불 크레딧 부족(HTTP 402)을 반환해 실제 AI 답변은 확인하지 못했습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
 
 ## 현재 상태와 다음 배포
 
@@ -10,7 +10,7 @@
 - App Check 사이트 키는 `functions/.env.maeum-835b3`에 준비했습니다. 이 파일도 Git에서 제외됩니다.
 - 현재 배포는 `firebase.json`을 사용하며 `/api/**`를 AI 함수로 전달합니다. GitHub Pages 주소는 기본 활동만 제공합니다.
 - 기존 API 키는 다른 프로젝트 소속이라 `maeum-835b3`에 `maeum-server-gemini` 키를 만들었습니다. Gemini API(`generativelanguage.googleapis.com`)로만 사용을 제한하고 로컬 `.env`와 Secret Manager를 교체했습니다.
-- Firebase 결제 연결과 Gemini API 선불 잔액은 별개입니다. Google이 “Your prepayment credits are depleted”를 반환했습니다. 운영자가 https://ai.studio/projects 에서 이 프로젝트의 선불 크레딧을 확인·충전한 뒤 가상 사례로 다시 검증해야 합니다. 충전 금액은 운영자가 직접 결정합니다.
+- Firebase 결제 연결과 Gemini API 선불 잔액은 별개입니다. 충전 완료 안내 후에도 Google이 “Your prepayment credits are depleted”를 반환했습니다. 추가 충전 전에 https://ai.studio/projects 에서 이 프로젝트가 사용하는 결제 계정과 선불 잔액 표시를 확인하고, 결제 반영 후 가상 사례로 다시 검증해야 합니다.
 - App Check 없는 POST 요청은 403으로 거부됩니다. 서버 테스트 14개와 정적 빌드의 비밀 값 검사도 통과했습니다. `/api/health`의 `ready: true`는 비밀 설정 완료를 뜻하며 Gemini 결제 상태까지 보장하지 않습니다.
 - 함수 빌드 이미지 저장소에 1일 경과 이미지 정리 정책을 설정했습니다.
 - CLI 실행: 이 기기에는 `.local/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js`에 CLI를 설치했습니다. Node로 이 파일을 실행하거나, 일반 환경에서는 아래의 `npx firebase-tools` 명령을 사용합니다.

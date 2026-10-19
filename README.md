@@ -9,7 +9,7 @@
 - 화면: `pages/maeum.html`
 - AI: Gemini 3.8 Flash. 입력·출력 필터를 사용하며, 로컬에서는 `.env`, Firebase 배포에서는 Secret Manager로 키를 보관합니다.
 
-Firebase 프로젝트는 `maeum-835b3`입니다. [Firebase 화면](https://maeum-835b3.web.app/pages/maeum.html)에 AI 함수와 App Check, 숫자 코드 인증을 연결했습니다. API 키·숫자 코드·서명 키는 Secret Manager에 보관합니다. 실제 Gemini 요청은 선불 크레딧 부족(HTTP 402)으로 차단되어 충전을 기다리고 있습니다. GitHub Pages는 기본 활동을 제공하며 AI 대화는 Firebase 주소에서 이용합니다. [Firebase 설정 안내](FIREBASE_SETUP.md)에 배포 상태와 확인 방법을 기록했습니다.
+Firebase 프로젝트는 `maeum-835b3`입니다. [Firebase 화면](https://maeum-835b3.web.app/pages/maeum.html)에 AI 함수와 App Check, 숫자 코드 인증을 연결했습니다. API 키·숫자 코드·서명 키는 Secret Manager에 보관합니다. 운영자가 충전을 완료했다고 알려 주었으나, 마지막 검증에서도 Google이 선불 크레딧 부족(HTTP 402)을 반환해 실제 AI 답변은 확인하지 못했습니다. GitHub Pages는 기본 활동을 제공하며 AI 대화는 Firebase 주소에서 이용합니다. [Firebase 설정 안내](FIREBASE_SETUP.md)에 배포 상태와 확인 방법을 기록했습니다.
 - 실행: `node --env-file-if-exists=.env server/index.mjs`
 - 테스트: `npm test` (서버 복사 준비 후 테스트 실행)
 - Pages 빌드: `node scripts/build-pages.mjs`
