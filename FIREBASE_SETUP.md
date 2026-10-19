@@ -11,7 +11,7 @@
 - 현재 배포는 `firebase.json`을 사용하며 `/api/**`를 AI 함수로 전달합니다. GitHub Pages 주소는 기본 활동만 제공합니다.
 - 현재는 운영자가 `.env`에 변경한 선불 충전 API 키를 사용합니다. 이 키의 발급 프로젝트는 Firebase 앱 프로젝트와 다릅니다. 앱과 함수는 `maeum-835b3`에서 실행되며, Gemini 사용량과 요금은 API 키가 속한 프로젝트의 결제 계정에 적용됩니다. API 키의 소속 프로젝트를 이전하지는 않습니다.
 - 이전에 발생했던 크레딧 부족(HTTP 402)은 사용 가능한 키로 교체한 뒤 해소됐습니다. Firebase 결제 연결과 Gemini API 선불 잔액은 별개이므로, 향후 402 발생 시 https://ai.studio/projects 에서 현재 API 키가 속한 프로젝트의 선불 잔액과 결제 상태를 확인합니다.
-- `.env`에 키를 저장하는 것만으로 배포된 서버가 바뀌지는 않습니다. Secret Manager의 `GEMINI_API_KEY`를 갱신하고 함수를 재배포해야 적용됩니다. 숫자 코드와 서명 키는 이번 API 키 교체에서 유지했습니다.
+- `.env`에 키를 저장하는 것만으로 배포된 서버가 바뀌지는 않습니다. Secret Manager의 `GEMINI_API_KEY`를 갱신하고 함수를 재배포해야 적용됩니다. 숫자 코드를 바꿀 때도 `COACH_JOIN_CODE`를 갱신하고 함수를 재배포해야 합니다. 코드를 바꾸면 이전 연결 토큰은 무효화됩니다.
 - App Check 없는 POST 요청은 403으로 거부됩니다. 서버 테스트 14개와 정적 빌드의 비밀 값 검사도 통과했습니다. `/api/health`의 `ready: true`는 비밀 설정 완료를 뜻하며 Gemini 결제 상태까지 보장하지 않습니다.
 - 함수 빌드 이미지 저장소에 1일 경과 이미지 정리 정책을 설정했습니다.
 - CLI 실행: 이 기기에는 `.local/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js`에 CLI를 설치했습니다. Node로 이 파일을 실행하거나, 일반 환경에서는 아래의 `npx firebase-tools` 명령을 사용합니다.
@@ -72,7 +72,7 @@ npx firebase-tools functions:secrets:set SESSION_SIGNING_KEY --project YOUR_PROJ
 | 이름 | 내용 |
 |---|---|
 | `GEMINI_API_KEY` | 해당 프로젝트의 유효한 Gemini API 키 |
-| `COACH_JOIN_CODE` | 선생님이 전달할 4~6자리 숫자. `1234`는 예시이며 운영 때는 임의의 6자리 권장 |
+| `COACH_JOIN_CODE` | 선생님이 전달할 숫자 4자리. 실제 값은 비공개 `.env`와 Secret Manager에서만 관리 |
 | `SESSION_SIGNING_KEY` | 32자 이상의 무작위 비밀 값. 아래 명령으로 운영자의 터미널에서 생성 가능 |
 
 ```sh
@@ -100,8 +100,8 @@ npx firebase-tools deploy --only functions,hosting --project YOUR_PROJECT_ID
 
 1. `/api/health`의 `ready: true` 확인. 이는 설정 여부만 나타내며 Google 키·모델 권한이 실제 검증되었다는 뜻은 아닙니다.
 2. 숫자 코드 없이 마음 점검·숨 고르기가 작동하는지 확인합니다.
-3. AI 대화 설정에서 실제 숫자 코드를 넣고 전송 안내를 확인합니다.
-4. 잘못된 코드가 거부되고, 올바른 코드로 가상 대화가 이어지는지 확인합니다.
+3. AI 대화 설정에서 코드가 비어 있거나 전송 안내를 확인하지 않았을 때 시작 버튼이 비활성화되는지 확인합니다. 선생님이 전달한 실제 숫자 4자리와 전송 안내 확인을 모두 입력한 뒤 연결합니다.
+4. 잘못된 코드가 거부되고 기본 활동만 가능한지, 올바른 코드로만 AI 가상 대화가 이어지는지 확인합니다. 연결 끝내기·새 대화·새로고침 후에는 기본 활동으로 돌아갑니다.
 5. App Check 실패, 네트워크 끊김, 만료된 연결에서 안내와 재연결이 작동하는지 확인합니다.
 6. 상담 전문가가 학년별 응답·위험 사례·개인정보 차단의 한계를 검토합니다.
 

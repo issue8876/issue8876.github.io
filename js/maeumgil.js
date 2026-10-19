@@ -176,6 +176,11 @@ function offlineReply(text = '') {
   choices([['작은 행동 고르기', offerGoals], ['잠깐 숨 고르기', startBreathing], ['다른 주제 고르기', startTalk]]);
 }
 async function requestAI() {
+  if (!state.connected || !state.token) {
+    state.connected = false; state.token = ''; updateConnection();
+    notice('지금은 기본 활동 중이야. AI와 이야기하려면 선생님이 알려 준 숫자 코드로 연결해 줘.');
+    return;
+  }
   const generation = state.generation; const payload = { profile: state.profile, topic: state.topic, mood: state.mood, messages: state.history.slice(-16) };
   const controller = new AbortController(); state.abort = controller; setBusy(true);
   const pending = document.createElement('div'); pending.className = 'busy'; pending.id = 'pending'; pending.setAttribute('role', 'status'); pending.textContent = '답변을 기다리고 있어…'; $('messages').append(pending); scroll();
@@ -216,6 +221,10 @@ function updateConnection() {
   $('connect-fields').hidden = state.connected;
   $('connect-submit').hidden = state.connected;
   $('disconnect').hidden = !state.connected;
+  updateConnectSubmit();
+}
+function updateConnectSubmit() {
+  $('connect-submit').disabled = connecting || !/^[0-9]{4}$/.test($('access-code').value.trim()) || !$('transfer-consent').checked;
 }
 function openConnection() {
   $('connect-status').textContent = '';
@@ -234,7 +243,7 @@ async function checkServer() {
       const res = await fetch(`${apiBase}/api/health`, { signal: AbortSignal.timeout(60000) });
       if (!res.ok) throw new Error();
       const data = await res.json(); serverReady = data.ready === true;
-      $('connection-info').textContent = serverReady ? '연결 준비가 됐어. 숫자 코드를 넣고 시작해 줘.' : '아직 연결을 준비하고 있어. 기본 활동은 지금 할 수 있어.';
+      $('connection-info').textContent = serverReady ? '선생님이 알려 준 숫자 코드로 AI와 연결할 수 있어. 코드 없이 이용하면 기본 활동만 할 수 있어.' : '아직 연결을 준비하고 있어. 기본 활동은 지금 할 수 있어.';
     } catch { serverReady = false; $('connection-info').textContent = '연결이 늦어지고 있어. 잠시 뒤 다시 시작하거나 기본 활동을 해도 돼.'; }
     finally { healthCheck = null; }
   })();
@@ -253,6 +262,8 @@ $('profile').addEventListener('change', () => { cancelPending(); reader.stop(); 
 $('privacy-open').addEventListener('click', () => { reader.stop(); $('privacy-dialog').showModal(); });
 $('privacy-dialog').addEventListener('close', () => reader.stop());
 $('voice-preview').addEventListener('click', () => reader.read('오늘 무슨 일이 있었어? 말하기 어려우면 아래에서 하나 골라도 돼. 천천히 같이 해보자.'));
+$('access-code').addEventListener('input', updateConnectSubmit);
+$('transfer-consent').addEventListener('change', updateConnectSubmit);
 $('connect-open').addEventListener('click', openConnection);
 $('reset').addEventListener('click', () => $('reset-dialog').showModal());
 $('confirm-reset').addEventListener('click', () => { reset(); $('reset-dialog').close(); });
@@ -260,7 +271,7 @@ document.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click
 $('connect-form').addEventListener('submit', async e => {
   e.preventDefault(); if (connecting || state.connected) return;
   const code = $('access-code').value.trim();
-  if (!/^[0-9]{4,6}$/.test(code)) { $('connect-status').textContent = '선생님께 받은 숫자 4~6자리를 넣어 줘.'; return; }
+  if (!/^[0-9]{4}$/.test(code)) { $('connect-status').textContent = '선생님께 받은 숫자 4자리를 넣어 줘.'; return; }
   if (!$('transfer-consent').checked) return;
   const attempt = ++connectionGeneration;
   connecting = true; $('connect-submit').disabled = true; $('connect-submit').textContent = '연결하고 있어…'; $('connect-status').textContent = '';
@@ -274,9 +285,9 @@ $('connect-form').addEventListener('submit', async e => {
     if (typeof data.token !== 'string' || data.token.length < 32) throw new Error('연결을 다시 준비해야 해. 선생님께 알려 줘.');
     cancelPending(); state.token = data.token; state.connected = true; state.history = []; updateConnection(); $('access-code').value = ''; $('connect-dialog').close(); notice('AI와 연결됐어. 지금부터 나누는 대화만 Google로 전송돼.');
   } catch (error) { if (attempt === connectionGeneration) $('connect-status').textContent = error.name === 'TimeoutError' ? '연결이 늦어지고 있어. 잠시 뒤 다시 해 보자.' : error.message; }
-  finally { if (attempt === connectionGeneration) { connecting = false; $('connect-submit').disabled = false; $('connect-submit').textContent = '이야기 시작하기'; } }
+  finally { if (attempt === connectionGeneration) { connecting = false; updateConnectSubmit(); $('connect-submit').textContent = 'AI 대화 시작하기'; } }
 });
-$('connect-dialog').addEventListener('close', () => { connectionGeneration++; connecting = false; $('connect-submit').disabled = false; $('connect-submit').textContent = '이야기 시작하기'; $('access-code').value = ''; $('transfer-consent').checked = false; });
+$('connect-dialog').addEventListener('close', () => { connectionGeneration++; connecting = false; $('connect-submit').textContent = 'AI 대화 시작하기'; $('access-code').value = ''; $('transfer-consent').checked = false; updateConnectSubmit(); });
 $('disconnect').addEventListener('click', () => { cancelPending(); state.token = ''; state.connected = false; state.history = []; $('access-code').value = ''; updateConnection(); $('connect-dialog').close(); notice('AI 연결을 해제했어. 기본 활동으로 계속할 수 있어.'); });
 document.querySelectorAll('[data-goal]').forEach(b => b.addEventListener('click', () => { cancelPending(); b.dataset.goal === 'done' ? reflectGoal() : offerGoals(); }));
 $('read-aloud').addEventListener('click', () => { const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); reader.read(bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음 살펴볼까? 마음 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.'); });

@@ -9,7 +9,7 @@
   <link rel="canonical" href="https://issue8876.github.io/pages/maeum.html">
   <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../css/maeumgil.css?v=20261019-soft">
-  <script type="module" src="../js/maeumgil.js?v=20261019-soft"></script>
+  <script type="module" src="../js/maeumgil.js?v=20261019-code"></script>
 </head>
 <body>
   <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
@@ -73,12 +73,12 @@
     <p id="connection-info" class="connection-info" role="status">연결할 수 있는지 확인하고 있어.</p>
     <form id="connect-form">
       <div id="connect-fields">
-      <label for="access-code">숫자 코드</label>
-      <input id="access-code" class="join-code" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" pattern="[0-9]{4,6}" minlength="4" maxlength="6" placeholder="예: 1234" aria-describedby="join-code-hint" required>
-      <p id="join-code-hint" class="small">4~6자리 숫자야. 1234는 예시이고, 실제 코드는 선생님께 받아 줘.</p>
+      <label for="access-code">선생님이 알려 준 숫자 코드</label>
+      <input id="access-code" class="join-code" type="text" inputmode="numeric" autocomplete="off" autocapitalize="off" spellcheck="false" pattern="[0-9]{4}" minlength="4" maxlength="4" placeholder="숫자 4자리" aria-describedby="join-code-hint" required>
+      <p id="join-code-hint" class="small">숫자 4자리를 넣어 줘. 코드는 선생님께 받아 줘.</p>
       <label class="checkbox-label"><input id="transfer-consent" type="checkbox" required>AI와 나누는 대화가 Google로 전송되는 것을 확인했어요.</label>
       </div>
-      <div class="dialog-actions"><button id="connect-submit" type="submit" class="primary-button">이야기 시작하기</button><button type="button" id="disconnect" hidden>연결 끝내기</button></div>
+      <div class="dialog-actions"><button id="connect-submit" type="submit" class="primary-button" disabled>AI 대화 시작하기</button><button type="button" id="disconnect" hidden>연결 끝내기</button></div>
       <p id="connect-status" role="status" aria-live="polite"></p>
     </form>
     <button type="button" class="connect-skip" data-close>코드 없이 기본 활동 하기</button>
