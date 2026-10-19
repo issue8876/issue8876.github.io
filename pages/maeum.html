@@ -9,7 +9,7 @@
   <link rel="canonical" href="https://issue8876.github.io/pages/maeum.html">
   <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="../css/maeumgil.css?v=20261019-soft">
-  <script type="module" src="../js/maeumgil.js?v=20261019-code"></script>
+  <script type="module" src="../js/maeumgil.js?v=20261019-goal"></script>
 </head>
 <body>
   <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
@@ -81,7 +81,7 @@
       <div class="dialog-actions"><button id="connect-submit" type="submit" class="primary-button" disabled>AI 대화 시작하기</button><button type="button" id="disconnect" hidden>연결 끝내기</button></div>
       <p id="connect-status" role="status" aria-live="polite"></p>
     </form>
-    <button type="button" class="connect-skip" data-close>코드 없이 기본 활동 하기</button>
+    <button type="button" class="connect-skip" id="connect-skip">코드 없이 기본 활동 하기</button>
   </dialog>
   <dialog id="help-dialog"><button class="dialog-close" data-close aria-label="닫기">×</button><span class="eyebrow">지금은 안전이 먼저야</span><h2>혼자 견디지 않아도 돼.</h2><p>너를 안전하게 도울 수 있는 선생님, 상담 선생님이나 믿을 수 있는 어른에게 이 화면을 보여줘. 너를 해치는 사람에게 직접 도움을 청할 필요는 없어.</p><p>당장 위험하면 <a href="tel:112">112</a> 또는 <a href="tel:119">119</a>에 도움을 요청해.</p><a class="primary-button help-call" href="tel:+82109?oai_link_source=model_response_hotline">자살예방상담전화 109</a><p class="small">이 화면은 긴급 구조를 요청하거나 주변 어른에게 자동으로 연락하지 않아.</p><button data-close>화면으로 돌아가기</button></dialog>
   <dialog id="reset-dialog"><h2>대화를 지우고 다시 시작할까?</h2><p>지금 대화와 마음 점검, 실천 카드가 지워져. AI 연결도 해제돼.</p><div class="dialog-actions"><button id="confirm-reset" class="primary-button">지우고 시작하기</button><button data-close>돌아가기</button></div></dialog>

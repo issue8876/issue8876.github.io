@@ -51,13 +51,16 @@ function safetyRoute(text) {
 }
 function setBusy(busy) { state.busy = busy; $('send').disabled = busy; $('mic').disabled = busy; $('message').disabled = busy; document.querySelectorAll('#choices button').forEach(b => b.disabled = busy); }
 function cancelPending() { state.generation++; state.abort?.abort(); state.abort = null; $('pending')?.remove(); setBusy(false); }
+function clearGoal() { state.goal = null; $('goal-card').hidden = true; }
 function startTopic(key) {
+  clearGoal();
   cancelPending(); clearBreathing(); state.topic = key; state.stage = 'explore'; active('talk');
   addMessage('assistant', topics[key].intro);
   choices(topics[key].choices.map(label => [label, () => chooseTopicAnswer(label)]));
   notice(state.connected ? 'AI 연결 중 · 이름이나 연락처는 적지 않아도 돼.' : '아래 버튼에서 하나만 골라 줘.');
 }
 function startTalk() {
+  clearGoal();
   cancelPending(); clearBreathing(); state.stage = 'topic'; active('talk');
   notice('');
   addMessage('assistant', '어떤 쪽 얘기야? 하나만 골라 줘.');
@@ -86,6 +89,7 @@ function chooseTopicAnswer(label) {
   choices([['전에 해본 방법 떠올리기', () => startStrategy('agency')], ['다른 방법 찾아보기', () => startStrategy('pathways')], ['먼저 마음 가라앉히기', startBreathing]]);
 }
 function startStrategy(kind) {
+  clearGoal();
   cancelPending(); clearBreathing(); $('question-card')?.remove(); state.stage = 'strategy'; active('talk');
   addMessage('user', kind === 'agency' ? '시작하는 힘을 찾고 싶어' : '다른 방법을 찾고 싶어');
   if (kind === 'agency') {
@@ -98,11 +102,13 @@ function startStrategy(kind) {
 }
 function strategyAnswer(label, response) { addMessage('user', label); offerGoals(response); }
 function chooseMood(mood) {
+  clearGoal();
   state.mood = mood; addMessage('user', mood);
   addMessage('assistant', ({ '괜찮아': '오늘 기억에 남는 일이 있어?', '속상해': '어떤 일 때문에 속상했어?', '걱정돼': '뭐가 걱정되는지 이야기해 줄래?', '화가 나': '무슨 일이 있었어?', '잘 모르겠어': '그럼 오늘 있었던 일부터 이야기해 볼까?' })[mood]);
   state.stage = 'topic'; choices(Object.entries(topics).map(([key, t]) => [t.label, () => startTopic(key)]));
 }
 function startCheck() {
+  clearGoal();
   cancelPending(); clearBreathing(); clearChoices(); active('check');
   state.stage = 'check'; state.question = Math.min(state.answers.length, 5);
   addMessage('assistant', '마음 점검은 어려운 일을 시작하고 방법을 찾는 나를 살펴보는 6문장이야. 평소에 얼마나 그런지 1~6 중에서 골라 줘. 시험이 아니고, 중간에 이야기부터 해도 돼.', { remember: false });
@@ -137,12 +143,14 @@ function answerCheck(score) {
   notice('교육용 참고 답변이야. 점수로 너를 판단하거나 상태를 진단하지 않아.');
 }
 function offerGoals(context = '') {
+  clearGoal();
   cancelPending(); clearBreathing(); $('question-card')?.remove(); active('talk');
   state.stage = 'goal'; addMessage('assistant', (typeof context === 'string' && context ? context + ' ' : '') + '오늘 해볼 수 있는 일 하나를 골라볼까?');
   choices(topics[state.topic].goals.map(goal => [goal, () => chooseGoal(goal)]).concat([['지금은 쉬고 싶어', () => finishRest()]]));
 }
 
 function chooseGoal(text) {
+  clearGoal();
   addMessage('user', text); state.goal = { text, when: '', done: false }; state.stage = 'when';
   addMessage('assistant', '언제 해볼까?'); choices(['지금 잠깐', '오늘 쉬는 시간', '오늘 집에서'].map(when => [when, () => saveGoal(when)]));
 }
@@ -150,16 +158,17 @@ function saveGoal(when) {
   state.goal.when = when; state.stage = 'followup'; renderGoal(); addMessage('assistant', '카드에 적어 뒀어. 해보고 나서 어땠는지 알려줘.');
   choices([['해봤어', () => reflectGoal()], ['더 작게 바꿀래', () => offerGoals()], ['오늘은 여기까지', () => endSession()]]);
 }
-function renderGoal() { $('goal-card').hidden = !state.goal; if (!state.goal) return; $('goal-text').textContent = state.goal.text; $('goal-when').textContent = state.goal.when; }
+function renderGoal() { $('goal-card').hidden = !state.goal || state.goal.done; if (!state.goal || state.goal.done) return; $('goal-text').textContent = state.goal.text; $('goal-when').textContent = state.goal.when; }
 function reflectGoal() {
   if (!state.goal) return;
   state.goal.done = true; renderGoal(); addMessage('assistant', '해보고 나니 어땠어?');
   const reflect = (label, reply) => { addMessage('user', label); addMessage('assistant', reply); choices([['같은 방법 다시 해볼래', () => chooseGoal(state.goal.text)], ['다른 방법 찾아볼래', () => startStrategy('pathways')], ['오늘은 여기까지', endSession]]); };
   choices([['조금은 해볼 수 있었어', () => reflect('조금은 해볼 수 있었어', '작게 정한 일을 해본 경험이 생겼어. 다음에도 이 방법을 써볼까?')], ['도움을 받아 해봤어', () => reflect('도움을 받아 해봤어', '도움을 받아 해본 방법도 다음에 쓸 수 있어. 이어서 어떻게 해볼까?')], ['아직 어려워', () => { addMessage('user', '아직 어려워'); addMessage('assistant', '해보니 어느 쪽에서 막혔어?'); choices([['시작이 어려웠어', () => startStrategy('agency')], ['방법이 안 맞았어', () => startStrategy('pathways')], ['먼저 쉬고 싶어', startBreathing]]); }]]);
 }
-function finishRest() { state.stage = 'rest'; addMessage('assistant', '잠깐 쉬자. 물 한 모금 마시고 편하게 앉아 있어도 좋아.'); choices([['숨 고르기', startBreathing], ['오늘은 여기까지', endSession]]); }
-function endSession() { cancelPending(); clearBreathing(); state.stage = 'end'; clearChoices(); addMessage('assistant', '오늘은 여기까지 하자. 힘든 일이 계속되면 믿을 수 있는 어른에게도 이야기해 줘.'); choices([['다른 이야기하기', startTalk], ['대화 지우기', () => $('reset-dialog').showModal()]]); }
+function finishRest() { clearGoal(); state.stage = 'rest'; addMessage('assistant', '잠깐 쉬자. 물 한 모금 마시고 편하게 앉아 있어도 좋아.'); choices([['숨 고르기', startBreathing], ['오늘은 여기까지', endSession]]); }
+function endSession() { clearGoal(); cancelPending(); clearBreathing(); state.stage = 'end'; clearChoices(); addMessage('assistant', '오늘은 여기까지 하자. 힘든 일이 계속되면 믿을 수 있는 어른에게도 이야기해 줘.'); choices([['다른 이야기하기', startTalk], ['대화 지우기', () => $('reset-dialog').showModal()]]); }
 function startBreathing() {
+  clearGoal();
   cancelPending(); clearBreathing(); clearChoices(); $('question-card')?.remove(); active('breathe'); state.stage = 'breathe';
   addMessage('assistant', '편하게 앉아서 숨을 천천히 내쉬어 봐. 억지로 깊게 쉴 필요는 없어. 불편하거나 어지러우면 바로 멈춰 줘.');
   notice(''); $('writing-panel').open = false;
@@ -288,7 +297,9 @@ $('connect-form').addEventListener('submit', async e => {
   finally { if (attempt === connectionGeneration) { connecting = false; updateConnectSubmit(); $('connect-submit').textContent = 'AI 대화 시작하기'; } }
 });
 $('connect-dialog').addEventListener('close', () => { connectionGeneration++; connecting = false; $('connect-submit').textContent = 'AI 대화 시작하기'; $('access-code').value = ''; $('transfer-consent').checked = false; updateConnectSubmit(); });
-$('disconnect').addEventListener('click', () => { cancelPending(); state.token = ''; state.connected = false; state.history = []; $('access-code').value = ''; updateConnection(); $('connect-dialog').close(); notice('AI 연결을 해제했어. 기본 활동으로 계속할 수 있어.'); });
+function useBasicActivities() { cancelPending(); state.token = ''; state.connected = false; state.history = []; $('access-code').value = ''; updateConnection(); $('connect-dialog').close(); notice('지금은 기본 활동 중이야. 아래 버튼에서 하고 싶은 걸 골라 줘.'); }
+$('disconnect').addEventListener('click', useBasicActivities);
+$('connect-skip').addEventListener('click', useBasicActivities);
 document.querySelectorAll('[data-goal]').forEach(b => b.addEventListener('click', () => { cancelPending(); b.dataset.goal === 'done' ? reflectGoal() : offerGoals(); }));
 $('read-aloud').addEventListener('click', () => { const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); reader.read(bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음 살펴볼까? 마음 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.'); });
 $('mic').addEventListener('click', () => { const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!Recognition) { notice('말로 입력하기를 지원하지 않는 브라우저야. 버튼을 고르거나 글로 적어줘.', true); return; } if (state.recognition) { state.recognition.stop(); return; } if (!window.confirm('말로 입력하면 브라우저의 음성 서비스로 음성이 전송될 수 있어. 계속할까?')) return; const recognition = new Recognition(); state.recognition = recognition; recognition.lang = 'ko-KR'; recognition.interimResults = false; recognition.onresult = e => { $('message').value = e.results[0][0].transcript.slice(0, 1200); notice('알아들은 말을 확인하고 보내기를 눌러줘.'); }; recognition.onerror = () => notice('음성을 받지 못했어. 마이크 권한을 확인하거나 글로 적어줘.', true); recognition.onend = () => { state.recognition = null; $('mic').classList.remove('recording'); }; try { recognition.start(); $('mic').classList.add('recording'); notice('듣고 있어. 실명이나 학교 이름은 말하지 않아도 돼.'); } catch { state.recognition = null; notice('마이크를 시작하지 못했어.', true); } });
