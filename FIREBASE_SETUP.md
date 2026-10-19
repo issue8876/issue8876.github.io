@@ -1,34 +1,34 @@
 # 마음쉼 · Firebase로 연구용 시험 환경 만들기
 
 구성: Firebase Hosting(화면) → Cloud Functions for Firebase(코드 확인·필터) → Gemini 3.8 Flash.
-프로젝트 ID는 `maeum-d3a43`입니다. 웹앱 등록과 App Check 연결을 완료했고, 기본 활동은 https://maeum-d3a43.web.app/pages/maeum.html 에 배포했습니다. 사용자의 요청으로 결제 연결을 미뤘으므로 Cloud Functions와 AI 대화는 아직 배포하지 않았습니다. Render 계정은 필요하지 않습니다.
+프로젝트 ID는 `maeum-835b3`입니다. 웹앱 등록과 App Check 연결을 완료했고, 기본 활동은 https://maeum-835b3.web.app/pages/maeum.html 에 배포했습니다. 새 프로젝트에는 결제가 연결되어 있지만, 이번 계정·프로젝트 전환에서는 Cloud Functions와 AI 대화 배포를 보류했습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
 
 ## 현재 상태와 다음 배포
 
 - 완료: Firebase CLI 로그인, 웹앱 등록, reCAPTCHA Enterprise App Check 설정, Hosting 기본 활동 배포.
 - 로컬에 준비: `.env`의 Gemini API 키·숫자 코드·서명 키. 값은 Git에 포함하지 않고 클라우드에도 아직 올리지 않았습니다.
-- App Check 사이트 키는 `functions/.env.maeum-d3a43`에 준비했습니다. 이 파일도 Git에서 제외됩니다.
+- App Check 사이트 키는 `functions/.env.maeum-835b3`에 준비했습니다. 이 파일도 Git에서 제외됩니다.
 - 현재 배포는 `firebase.static.json`을 사용하며 AI 서버를 호출하지 않습니다.
-- 결제 연결 이후 세 가지 비밀 값을 Secret Manager에 등록하고, `firebase.json`으로 함수와 Hosting을 함께 배포해야 AI가 연결됩니다.
+- AI 연결을 진행할 때 새 프로젝트에서 사용할 Gemini API 키를 확인하고, 세 가지 비밀 값을 Secret Manager에 등록한 뒤 `firebase.json`으로 함수와 Hosting을 함께 배포합니다. 기존 로컬 키가 새 프로젝트에 속하는지는 아직 확인하지 않았습니다.
 - CLI 실행: 이 기기에는 `.local/firebase-cli/node_modules/firebase-tools/lib/bin/firebase.js`에 CLI를 설치했습니다. Node로 이 파일을 실행하거나, 일반 환경에서는 아래의 `npx firebase-tools` 명령을 사용합니다.
 
 결제 없이 기본 화면만 다시 배포:
 
 ```sh
-npx firebase-tools deploy --only hosting --config firebase.static.json --project maeum-d3a43
+npx firebase-tools deploy --only hosting --config firebase.static.json --project maeum-835b3
 ```
 
 Blaze 연결과 비밀 등록을 마친 뒤 AI 포함 배포:
 
 ```sh
-npx firebase-tools deploy --only functions,hosting --project maeum-d3a43
+npx firebase-tools deploy --only functions,hosting --project maeum-835b3
 ```
 
 ## 1. 프로젝트와 웹앱 만들기
 
-1. 기존 프로젝트 `maeum-d3a43`을 사용합니다. Analytics는 이 기능에 필요하지 않습니다.
+1. 프로젝트 `maeum-835b3`을 사용합니다. 이 저장소의 Firebase CLI 기본 계정도 새 운영 계정으로 전환했습니다. 다른 컴퓨터에서는 `npx firebase-tools login:add`로 로그인한 뒤 `npx firebase-tools login:use 계정이메일`로 지정합니다. Analytics는 이 기능에 필요하지 않습니다.
 2. ‘마음쉼 연구용’ 웹앱이 등록되어 있습니다. 설정 객체를 직접 코드에 복사할 필요는 없습니다. 배포 후 Hosting의 `/__/firebase/init.json`에서 공개 Firebase 설정을 읽습니다.
-3. Cloud Functions 배포를 위해 **Blaze** 요금제로 연결합니다. 무료 사용량은 있어도 전체가 무료로 보장되는 구성이 아닙니다. Gemini API 결제·선불 크레딧 상태도 별도로 확인합니다.
+3. 프로젝트의 결제 연결은 확인했습니다. Cloud Functions 배포 전 **Blaze** 상태를 다시 확인합니다. 무료 사용량은 있어도 전체가 무료로 보장되는 구성이 아닙니다. Gemini API 결제·선불 크레딧 상태도 별도로 확인합니다.
 4. 프로젝트의 예산 알림을 설정합니다. 알림만으로 지출이 자동 차단되지는 않습니다.
 
 ## 2. App Check 설정
