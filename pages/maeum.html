@@ -12,8 +12,8 @@
   </script>
   <link rel="canonical" href="https://issue8876.github.io/pages/maeum.html">
   <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../css/maeumgil.css?v=20261020-trim2">
-  <script type="module" src="../js/maeumgil.js?v=20261027-openai"></script>
+  <link rel="stylesheet" href="../css/maeumgil.css?v=20261027-welcome">
+  <script type="module" src="../js/maeumgil.js?v=20261027-welcome"></script>
 </head>
 <body class="at-start">
   <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
@@ -64,13 +64,21 @@
           </div>
           </details>
         </div><div id="messages" role="log" aria-live="polite" aria-relevant="additions text"></div></div>
-        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">내 마음 점검과 선택형 활동은 AI 연결 없이 할 수 있어.</div><details class="writing-panel" id="writing-panel"><summary>직접 쓰고 싶을 때</summary><p id="writing-mode" class="writing-mode"></p><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="쓰고 싶은 말이 생기면 여기에 적어 줘."></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><p class="writing-hint">이름, 학교, 연락처는 적지 말아 줘.</p></details><div class="composer-foot"><span>버튼만 눌러도 이어갈 수 있어.</span><button id="connect-open">AI 대화 설정</button></div></div>
+        <div class="composer-area"><div id="choices" class="choices" aria-label="대답 고르기"></div><div id="notice" class="notice" role="status">내 마음 점검과 선택형 활동은 AI 연결 없이 할 수 있어.</div><details class="writing-panel" id="writing-panel"><summary>직접 쓰고 싶을 때</summary><form id="chat-form"><label class="sr-only" for="message">이야기 적기</label><textarea id="message" rows="1" maxlength="1200" placeholder="쓰고 싶은 말이 생기면 여기에 적어 줘."></textarea><button type="button" id="mic" class="mic-button" aria-label="말로 입력하기" title="말로 입력하기"><img class="ui-icon" src="../assets/icons/microphone.svg" alt="" aria-hidden="true" width="48" height="48"></button><button type="submit" id="send" class="send-button" aria-label="메시지 보내기">↑</button></form><p class="writing-hint">이름, 학교, 연락처는 적지 말아 줘.</p></details><div class="composer-foot"><span>버튼만 눌러도 이어갈 수 있어.</span><button id="connect-open">AI 대화 설정</button></div></div>
       </section>
     </main>
     <footer class="page-footer"><a href="https://streamlinehq.com" target="_blank" rel="noopener noreferrer">아이콘 · Streamline</a></footer>
   </div>
+  <dialog id="welcome-dialog" class="welcome-dialog" aria-labelledby="welcome-title" aria-describedby="welcome-description">
+    <h2 id="welcome-title">시작하기 전에 알아 둬</h2>
+    <div id="welcome-description"><p id="welcome-ai-notice"></p><p>읽어주기와 말로 입력하기는 이 기기에서 처리해. 처음 한 번 음성 파일 약 350MB를 내려받아.</p><p>마이크는 네가 마이크 버튼을 누를 때만 켜져. 알아들은 글을 확인한 뒤 보내기를 눌러 줘.</p></div>
+    <p id="welcome-agreement" class="small">‘확인’을 누르면 이 안내에 동의하고 음성 파일 준비를 시작해.</p>
+    <div id="welcome-download" class="welcome-download" hidden><p id="welcome-status" role="status" aria-live="polite"></p><progress id="welcome-progress" max="100" value="0" aria-label="음성 파일 준비 진행률"></progress><p id="welcome-percent" class="small"></p></div>
+    <div class="welcome-actions"><button id="welcome-confirm" class="primary-button" type="button">확인</button><button id="welcome-retry" type="button" hidden>다시 준비하기</button><button id="welcome-skip" class="text-button" type="button">동의하지 않고 기본 활동 하기</button></div>
+  </dialog>
   <dialog id="privacy-dialog" aria-labelledby="privacy-title"><button class="dialog-close" data-close aria-label="닫기">×</button><h2 id="privacy-title">이용하기 전에 알아 둬</h2>
     <div class="voice-preview"><h3>목소리 들어보기</h3><p>어떤 목소리인지 먼저 들어볼까?</p><button id="voice-preview" type="button" aria-pressed="false">목소리 미리 듣기</button><p id="voice-preview-status" class="small" role="status"></p></div>
+    <p id="privacy-ai-notice"></p>
     <h3>기본 활동</h3><p>대화와 점검 답, 계획은 이 화면을 열어 둔 동안만 남아. ‘새로 쓰기’나 새로고침을 하면 지워져. 교사에게 자동으로 보내지 않아.</p>
     <button class="primary-button" data-close>알겠어</button>
   </dialog>

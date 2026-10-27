@@ -60,9 +60,10 @@ async function initialize(id) {
   return engine;
 }
 
-self.onmessage = async ({ data: { id, text } }) => {
+self.onmessage = async ({ data: { id, text, type } }) => {
   try {
     const { tts, style } = await initialize(id);
+    if (type === 'prepare') { postMessage({ id, type: 'ready' }); return; }
     const chunks = speechChunks(text);
     for (let index = 0; index < chunks.length; index++) {
       postMessage({ id, type: 'generating', index, total: chunks.length });
@@ -79,5 +80,5 @@ self.onmessage = async ({ data: { id, text } }) => {
       postMessage({ id, type: 'audio', pcm, sampleRate: tts.sampleRate }, [pcm.buffer]);
     }
     postMessage({ id, type: 'done' });
-  } catch { postMessage({ id, type: 'error' }); }
+  } catch (error) { postMessage({ id, type: 'error', preparationError: type === 'prepare' ? String(error.message).slice(0, 500) : undefined }); }
 };

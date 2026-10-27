@@ -12,7 +12,7 @@
 
 - 화면: `pages/maeum.html`
 - AI: OpenAI GPT-6.1 Terra (`gpt-6.1-terra`). 일반 API 방식으로 `store: false`를 사용하며 ZDR은 적용하지 않습니다. 로컬에서는 `.env`, Firebase 배포에서는 Secret Manager로 키를 보관합니다.
-- 읽어주기: 한국어 Supertonic 2 음성을 기기에서 합성합니다. 별도 음성 API 요금이 없으며 첫 사용 시 약 260MB의 모델을 내려받습니다. [음성 설정과 라이선스](VOICE_SETUP.md)를 참고하세요.
+- 음성 기능: 첫 접속 팝업에서 확인하면 Supertonic 2 읽어주기와 Whisper Tiny 음성 입력을 미리 준비합니다. 처음 약 350MB를 내려받으며 두 기능 모두 기기에서 처리합니다. 별도 음성 API 요금이 없습니다. [음성 설정과 라이선스](VOICE_SETUP.md).
 
 정식 이용 주소는 https://maeum.web.app/ 입니다. 로컬 HTML 파일을 직접 열면 이 사이트의 연결 화면으로 이동합니다. GitHub Pages에서 AI 대화 설정을 눌러도 같은 연결 화면으로 이동하며, 숫자 코드는 이동 후 다시 입력합니다.
 

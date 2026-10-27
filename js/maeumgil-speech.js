@@ -2,23 +2,53 @@ import { speechText, speechChunks, koreanVoice } from './maeumgil-speech-core.js
 
 export function createSpeechReader({
   onState = () => {},
-  makeWorker = () => new Worker(new URL('./maeumgil-speech-worker.js?v=20261019-soft', import.meta.url), { type: 'module' }),
+  makeWorker = () => new Worker(new URL('./maeumgil-speech-worker.js?v=20261027-welcome', import.meta.url), { type: 'module' }),
   makeContext = () => new (window.AudioContext || window.webkitAudioContext)(),
   synthesis = globalThis.speechSynthesis,
   makeUtterance = text => new SpeechSynthesisUtterance(text),
 } = {}) {
   let worker, context, generation = 0, active = false, done = false, nextTime = 0, timer, usingFallback = false;
   const sources = new Set();
+  let prepared = false, preparation, rejectPreparation;
   const report = (state, detail = '', percent) => onState({ state, detail, percent });
   const clearTimer = () => { clearTimeout(timer); timer = undefined; };
 
   function stop() {
     generation++; active = false; done = false; clearTimer();
+    rejectPreparation?.(Object.assign(new Error('준비를 멈췄어.'), { name: 'AbortError' }));
+    preparation = undefined; rejectPreparation = undefined; prepared = false;
     worker?.terminate(); worker = undefined;
     for (const source of sources) { source.onended = null; try { source.stop(); } catch {} }
     sources.clear();
     context?.close().catch(() => {}); context = undefined;
     synthesis?.cancel(); report('idle');
+  }
+  function prepare({ onProgress = () => {} } = {}) {
+    if (prepared) { onProgress(100); return Promise.resolve(); }
+    if (preparation) return preparation;
+    const id = ++generation;
+    preparation = new Promise((resolve, reject) => {
+      rejectPreparation = reject;
+      const failed = error => {
+        clearTimer(); worker?.terminate(); worker = undefined; prepared = false;
+        rejectPreparation = undefined; preparation = undefined;
+        reject(new Error(error?.message || '읽어주기 파일을 준비하지 못했어.'));
+      };
+      try {
+        worker ||= makeWorker();
+        worker.onerror = failed;
+        worker.onmessage = ({ data }) => {
+          if (data.id !== id || id !== generation) return;
+          if (data.type === 'loading') onProgress(data.percent);
+          else if (data.type === 'ready') { clearTimer(); prepared = true; rejectPreparation = undefined; preparation = undefined; onProgress(100); resolve(); }
+          else if (data.type === 'error') failed(new Error(data.preparationError || '읽어주기 파일을 준비하지 못했어.'));
+        };
+        timer = setTimeout(failed, 300000);
+        worker.postMessage({ id, type: 'prepare' });
+      } catch { failed(); }
+    });
+    const current = preparation;
+    return current.finally(() => { if (preparation === current && !prepared) preparation = undefined; });
   }
   function finish(id) {
     if (id !== generation || !done || sources.size) return;
@@ -49,12 +79,13 @@ export function createSpeechReader({
   }
 
   function read(value) {
+    if (preparation) return;
     if (active) { stop(); return; }
     const text = speechText(value);
     if (!text) return;
     const id = ++generation;
     active = true; done = false; usingFallback = false;
-    report('loading', '목소리를 준비하고 있어. 처음에는 약 260MB를 내려받아. 다시 누르면 멈출 수 있어.');
+    report('loading', '읽을 준비를 하고 있어. 다시 누르면 멈출 수 있어.');
     try {
       if (!context || context.state === 'closed') context = makeContext();
       context.resume().catch(() => fallback(text, id));
@@ -65,7 +96,7 @@ export function createSpeechReader({
       worker.onmessage = ({ data }) => {
         if (id !== generation || data.id !== id || !active) return;
         if (data.type === 'loading') {
-          if (!sources.size) report('loading', '목소리를 준비하고 있어. 처음 한 번은 약 260MB를 내려받아.', data.percent);
+          if (!sources.size) report('loading', '목소리 파일을 확인하고 있어.', data.percent);
         } else if (data.type === 'generating') {
           clearTimer(); timer = setTimeout(() => fallback(text, id), 60000);
           if (!sources.size) report('loading', '읽을 준비를 하고 있어. 잠깐만 기다려 줘.');
@@ -94,5 +125,5 @@ export function createSpeechReader({
       worker.postMessage({ id, text });
     } catch { fallback(text, id); }
   }
-  return { read, stop, get active() { return active; } };
+  return { read, stop, prepare, get prepared() { return prepared; }, get active() { return active; } };
 }

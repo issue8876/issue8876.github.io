@@ -42,6 +42,14 @@ test('stopping model preparation discards late audio and terminates the worker',
   assert.equal(h.states.at(-1).state,'idle');
 });
 
+test('voice preload downloads and initializes without creating audio or speaking', async t => {
+  const h = harness(); t.after(() => h.reader.stop());
+  const preparing = h.reader.prepare(); assert.equal(h.worker.request.type, 'prepare');
+  h.emit({ type: 'ready' }); await preparing;
+  assert.equal(h.reader.prepared, true); assert.equal(h.sources.length, 0); assert.equal(h.reader.active, false);
+  h.reader.read('지금부터 읽어 줄게.'); assert.equal(h.worker.request.text, '지금부터 읽어 줄게.');
+});
+
 test('speech stays active until queued audio ends and stops all audio on navigation', () => {
   const h=harness();
   h.reader.read('하나씩 해보자.');

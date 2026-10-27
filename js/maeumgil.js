@@ -1,7 +1,9 @@
 import { config } from './maeumgil-config.js';
 import { createBreathingCard } from './maeumgil-breathing.js?v=20261019-clear';
 import { apiHeaders, hostedConnectionUrl, readAPIResponse } from './maeumgil-connection.js?v=20261020-review2';
-import { createSpeechReader } from './maeumgil-speech.js?v=20261019-soft';
+import { createSpeechReader } from './maeumgil-speech.js?v=20261027-welcome';
+import { createSpeechInput } from './maeumgil-input.js?v=20261027-welcome';
+import { createOnboarding, AI_DATA_NOTICE } from './maeumgil-onboarding.js?v=20261027-welcome';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js?v=20261020-review';
 import { createCheckSession } from './maeumgil-check.js';
 import { readingSupport, scaleHelp } from './maeumgil-reading.js';
@@ -20,6 +22,51 @@ const reader = createSpeechReader({ onState: ({ state, detail, percent }) => {
   if ($('voice-preview-status').textContent !== detail) $('voice-preview-status').textContent = detail;
 } });
 const state = { profile: 'upper', topic: 'challenge', stage: 'welcome', check: createCheckSession(), lastPlan: null, mood: '', goal: null, history: [], token: '', connected: false, busy: false, generation: 0, abort: null, breathing: null, recognition: null };
+const speechInput = createSpeechInput({
+  onText: text => { $('message').value = text; $('message').dispatchEvent(new Event('input')); $('message').focus(); },
+  onState: ({ state: inputState, detail }) => {
+    const recording = inputState === 'recording';
+    $('mic').classList.toggle('recording', recording);
+    $('mic').setAttribute('aria-pressed', String(recording));
+    $('mic').setAttribute('aria-label', recording ? '말하기 끝내기' : '말로 입력하기');
+    $('mic').disabled = state.busy || ['preparing', 'permission', 'transcribing'].includes(inputState);
+    if (detail) notice(detail, inputState === 'error');
+  },
+});
+let agreementStorage;
+try { agreementStorage = window.sessionStorage; } catch {}
+let afterWelcome;
+const onboarding = createOnboarding({
+  storage: agreementStorage, prepareReader: options => reader.prepare(options), prepareInput: options => speechInput.prepare(options),
+  cancelReader: () => reader.stop(), cancelInput: () => speechInput.cancel(),
+  onPreparationError: error => console.warn('Voice preparation:', error.message),
+  onState: ({ phase, detail, percent }) => {
+    const preparing = phase === 'preparing';
+    $('welcome-dialog').setAttribute('aria-busy', String(preparing));
+    $('welcome-download').hidden = false; $('welcome-status').textContent = detail;
+    $('welcome-confirm').hidden = true; $('welcome-retry').hidden = phase !== 'error';
+    $('welcome-progress').hidden = phase === 'error';
+    if (Number.isFinite(percent)) { $('welcome-progress').value = percent; $('welcome-percent').textContent = `${percent}%`; }
+    else $('welcome-percent').textContent = '';
+    $('welcome-skip').textContent = preparing ? '준비를 멈추고 글과 버튼으로 시작하기' : '음성 없이 시작하기';
+  },
+});
+$('welcome-ai-notice').textContent = AI_DATA_NOTICE;
+$('privacy-ai-notice').textContent = AI_DATA_NOTICE;
+function showWelcome(next) {
+  afterWelcome = next;
+  if (!onboarding.agreed) { $('welcome-download').hidden = true; $('welcome-confirm').hidden = false; $('welcome-retry').hidden = true; $('welcome-skip').textContent = '동의하지 않고 기본 활동 하기'; }
+  if (!$('welcome-dialog').open) $('welcome-dialog').showModal();
+}
+async function prepareWelcome(accept = false) {
+  const ready = await (accept ? onboarding.accept() : onboarding.prepare());
+  if (!ready || !$('welcome-dialog').open) return;
+  $('welcome-dialog').close();
+  notice('음성 준비가 끝났어. 하고 싶은 활동을 골라 줘.');
+  const next = afterWelcome; afterWelcome = undefined;
+  if (next) next(); else $('entry-start').focus({ preventScroll: true });
+}
+function withAgreement(action) { if (!onboarding.agreed) showWelcome(action); else action(); }
 const apiBase = config.apiBase.replace(/\/$/, '');
 let serverReady = false;
 let healthCheck = null;
@@ -29,7 +76,7 @@ let connectionGeneration = 0;
 function notice(text, error = false) { $('notice').textContent = text; $('notice').classList.toggle('error', error); }
 function scroll() { requestAnimationFrame(() => { const el = $('chat-scroll'); el.scrollTop = el.scrollHeight; }); }
 function active(name) { document.querySelectorAll('[data-start]').forEach(b => b.classList.toggle('active', b.dataset.start === name)); }
-function clearBreathing() { $('question-card')?.remove(); $('check-result')?.remove(); $('session-summary')?.remove(); state.breathing?.destroy(); state.breathing = null; document.querySelector('.conversation').classList.remove('is-breathing'); reader.stop(); if (state.recognition) { state.recognition.abort(); state.recognition = null; $('mic').classList.remove('recording'); } }
+function clearBreathing() { $('question-card')?.remove(); $('check-result')?.remove(); $('session-summary')?.remove(); state.breathing?.destroy(); state.breathing = null; document.querySelector('.conversation').classList.remove('is-breathing'); reader.stop(); speechInput.cancel(); }
 function clearChoices() { $('choices').replaceChildren(); }
 function button(label, callback) { const b = document.createElement('button'); b.type = 'button'; b.textContent = label; b.addEventListener('click', callback); return b; }
 function choices(items) { clearChoices(); for (const [label, cb] of items) $('choices').append(button(label, () => { if (!state.busy) cb(); })); const first = $('choices').querySelector('button'); requestAnimationFrame(() => first?.focus({ preventScroll: true })); }
@@ -51,7 +98,7 @@ function safetyRoute(text) {
   notice('안전 안내는 AI 연결 없이도 볼 수 있어. 실제 어른에게 도움을 요청해 줘.');
   return true;
 }
-function setBusy(busy) { state.busy = busy; $('send').disabled = busy; $('mic').disabled = busy; $('message').disabled = busy; document.querySelectorAll('#choices button').forEach(b => b.disabled = busy); }
+function setBusy(busy) { state.busy = busy; $('send').disabled = busy; $('mic').disabled = busy || ['preparing', 'permission', 'transcribing'].includes(speechInput.activity); $('message').disabled = busy; document.querySelectorAll('#choices button').forEach(b => b.disabled = busy); }
 function cancelPending() { state.generation++; state.abort?.abort(); state.abort = null; $('pending')?.remove(); setBusy(false); }
 function clearGoal() { state.goal = null; $('goal-card').hidden = true; }
 function startTopic(key) {
@@ -270,7 +317,7 @@ async function requestAI() {
 }
 async function sendText(raw) {
   const text = raw.trim(); if (state.busy) return; if (!text) { notice('보내고 싶은 말을 적거나 아래 활동 버튼을 골라 줘.'); $('message').focus(); return; }
-  reader.stop();
+  reader.stop(); speechInput.cancel();
   if (text.length > 1200) { notice('한 번에 1,200자 이내로 적어줘.', true); return; }
   $('message').value = ''; $('message').style.height = ''; clearChoices(); addMessage('user', text, { remember: state.stage !== 'check' });
   if (safetyRoute(text)) return;
@@ -286,13 +333,13 @@ function updateConnection() {
   $('connect-fields').hidden = state.connected;
   $('connect-submit').hidden = state.connected;
   $('disconnect').hidden = !state.connected;
-  $('writing-mode').textContent = state.connected ? 'AI 연결 중 · 지금 보내는 말과 최근 대화 일부가 OpenAI로 전송돼.' : '기본 활동 중 · 글에 맞춘 AI 답변은 제공되지 않아. 버튼으로 활동을 이어갈 수 있어.';
   updateConnectSubmit();
 }
 function updateConnectSubmit() {
   $('connect-submit').disabled = connecting || !/^[0-9]{4}$/.test($('access-code').value.trim());
 }
 function openConnection() {
+  if (!onboarding.agreed) { showWelcome(openConnection); return; }
   const hostedUrl = hostedConnectionUrl(location);
   if (hostedUrl) { location.assign(hostedUrl); return; }
   $('connect-status').textContent = '';
@@ -328,7 +375,7 @@ $('message').addEventListener('input', () => { $('message').style.height = 'auto
 $('profile').addEventListener('change', () => { cancelPending(); reader.stop(); state.profile = $('profile').value; document.body.classList.toggle('low-literacy', state.profile === 'lower'); if (state.stage === 'check') renderQuestion(); else if (state.stage === 'checked') renderCheckResult(); else if (state.history.length) { state.history = []; addMessage('assistant', `${profiles[state.profile].label}으로 바꿨어. 하고 싶은 활동을 골라 줘.`, { remember: false }); } });
 $('privacy-open').addEventListener('click', () => { reader.stop(); $('privacy-dialog').showModal(); });
 $('privacy-dialog').addEventListener('close', () => reader.stop());
-$('voice-preview').addEventListener('click', () => reader.read('오늘 무슨 일이 있었어? 말하기 어려우면 아래에서 하나 골라도 돼. 천천히 같이 해보자.'));
+$('voice-preview').addEventListener('click', () => withAgreement(() => reader.read('오늘 무슨 일이 있었어? 말하기 어려우면 아래에서 하나 골라도 돼. 천천히 같이 해보자.')));
 $('access-code').addEventListener('input', updateConnectSubmit);
 $('connect-open').addEventListener('click', openConnection);
 $('reset').addEventListener('click', () => $('reset-dialog').showModal());
@@ -348,7 +395,7 @@ $('connect-form').addEventListener('submit', async e => {
     const data = await readAPIResponse(res); if (attempt !== connectionGeneration) return;
     if (!res.ok) throw new Error(data.error || '잠시 뒤 다시 연결해 줘.');
     if (typeof data.token !== 'string' || data.token.length < 32) throw new Error('연결을 다시 준비해야 해. 선생님께 알려 줘.');
-    cancelPending(); state.token = data.token; state.connected = true; state.history = []; updateConnection(); $('access-code').value = ''; $('connect-dialog').close(); notice('AI와 연결됐어. 지금부터 나누는 대화만 OpenAI로 전송돼.');
+    cancelPending(); state.token = data.token; state.connected = true; state.history = []; updateConnection(); $('access-code').value = ''; $('connect-dialog').close(); notice('AI와 연결됐어. 이야기할 준비가 됐어.');
   } catch (error) { if (attempt === connectionGeneration) $('connect-status').textContent = error.name === 'TimeoutError' ? '연결이 늦어지고 있어. 잠시 뒤 다시 해 보자.' : error.message; }
   finally { if (attempt === connectionGeneration) { connecting = false; updateConnectSubmit(); $('connect-submit').textContent = 'AI 대화 시작하기'; } }
 });
@@ -357,15 +404,24 @@ function useBasicActivities() { cancelPending(); state.token = ''; state.connect
 $('disconnect').addEventListener('click', useBasicActivities);
 $('connect-skip').addEventListener('click', useBasicActivities);
 $('connection-retry').addEventListener('click', () => checkServer());
-$('read-aloud').addEventListener('click', () => { const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); reader.read($('question-card')?.innerText || $('check-result')?.innerText || (bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음 살펴볼까? 마음 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.')); });
-$('mic').addEventListener('click', () => { const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!Recognition) { notice('말로 입력하기를 지원하지 않는 브라우저야. 버튼을 고르거나 글로 적어줘.', true); return; } if (state.recognition) { state.recognition.stop(); return; } if (!window.confirm('말로 입력하면 브라우저의 음성 서비스로 음성이 전송될 수 있어. 계속할까?')) return; const recognition = new Recognition(); state.recognition = recognition; recognition.lang = 'ko-KR'; recognition.interimResults = false; recognition.onresult = e => { $('message').value = e.results[0][0].transcript.slice(0, 1200); notice('알아들은 말을 확인하고 보내기를 눌러줘.'); }; recognition.onerror = () => notice('음성을 받지 못했어. 마이크 권한을 확인하거나 글로 적어줘.', true); recognition.onend = () => { state.recognition = null; $('mic').classList.remove('recording'); }; try { recognition.start(); $('mic').classList.add('recording'); notice('듣고 있어. 실명이나 학교 이름은 말하지 않아도 돼.'); } catch { state.recognition = null; notice('마이크를 시작하지 못했어.', true); } });
-document.addEventListener('visibilitychange', () => { if (document.hidden) { state.breathing?.stop(); reader.stop(); } });
+$('read-aloud').addEventListener('click', () => withAgreement(() => { const bubbles = document.querySelectorAll('.message-row.assistant .bubble'); reader.read($('question-card')?.innerText || $('check-result')?.innerText || (bubbles.length ? bubbles[bubbles.length - 1].textContent : '내 마음 살펴볼까? 마음 점검부터 해도, 어려웠던 일부터 골라도 돼. 먼저 마음을 가라앉혀도 좋아.')); }));
+$('mic').addEventListener('click', () => withAgreement(() => { reader.stop(); speechInput.start(); }));
+$('welcome-confirm').addEventListener('click', () => prepareWelcome(true));
+$('welcome-retry').addEventListener('click', () => { reader.stop(); speechInput.cancel(); prepareWelcome(); });
+function skipWelcome() { onboarding.skip(); afterWelcome = undefined; $('welcome-dialog').close(); notice('글과 버튼으로 활동을 시작할 수 있어.'); }
+$('welcome-skip').addEventListener('click', skipWelcome);
+$('welcome-dialog').addEventListener('cancel', event => { event.preventDefault(); skipWelcome(); });
+
+document.addEventListener('visibilitychange', () => { if (document.hidden) { state.breathing?.stop(); if (!$('welcome-dialog').open) { reader.stop(); speechInput.cancel(); } } });
 window.addEventListener('pagehide', reset);
 window.addEventListener('pageshow', event => { if (event.persisted) reset(); });
 updateConnection();
 const entryUrl = new URL(location.href);
+let connectOnStart = false;
 if (entryUrl.searchParams.get('connect') === '1') {
   entryUrl.searchParams.delete('connect');
   history.replaceState(null, '', `${entryUrl.pathname}${entryUrl.search}${entryUrl.hash}`);
-  openConnection();
+  connectOnStart = true;
 }
+showWelcome(connectOnStart ? openConnection : undefined);
+if (onboarding.agreed) prepareWelcome();
