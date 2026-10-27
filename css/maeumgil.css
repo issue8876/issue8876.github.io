@@ -207,7 +207,15 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 .dialog-actions { display: flex; gap: 15px; align-items: center; margin-top: 20px; }
 .dialog-actions button { font-size: 14px; }
 .help-call { margin: 12px 0; }
-.busy { color: #7e8e96; font-size: 14px; padding: 10px 0 20px; }
+.conversation.is-waiting .chat-scroll { min-height: 220px; }
+.reply-pending { position: fixed; z-index: 9; transform: translate(-50%, -50%); display: grid; place-items: center; padding: 19px 24px; border: 1px solid #dce6e2; border-radius: 22px; background: #f0f5f3; box-shadow: 0 3px 14px #304c4212; pointer-events: none; }
+.typing-dots { display: inline-flex; align-items: center; gap: 7px; height: 12px; }
+.typing-dot { width: 7px; height: 7px; border-radius: 50%; background: #55788e; opacity: .65; animation: typing-pulse 1.2s ease-in-out infinite; }
+.typing-dot:nth-child(2) { animation-delay: .16s; }
+.typing-dot:nth-child(3) { animation-delay: .32s; }
+.reply-arrival { animation: reply-arrive .18s ease-out; }
+@keyframes typing-pulse { 0%, 65%, 100% { opacity: .4; transform: translateY(0); } 32% { opacity: 1; transform: translateY(-3px); } }
+@keyframes reply-arrive { from { opacity: .4; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
 .low-literacy .bubble { font-size: 16px; }
 .low-literacy .choices button { font-size: 16px; }
 .low-literacy .scale-grid button { font-size: 15px; }

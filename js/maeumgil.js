@@ -62,7 +62,7 @@ async function prepareWelcome(accept = false) {
   const ready = await (accept ? onboarding.accept() : onboarding.prepare());
   if (!ready || !$('welcome-dialog').open) return;
   $('welcome-dialog').close();
-  notice('음성 준비가 끝났어. 하고 싶은 활동을 골라 줘.');
+  notice('하고 싶은 활동을 골라 줘.');
   const next = afterWelcome; afterWelcome = undefined;
   if (next) next(); else $('entry-start').focus({ preventScroll: true });
 }
@@ -99,7 +99,28 @@ function safetyRoute(text) {
   return true;
 }
 function setBusy(busy) { state.busy = busy; $('send').disabled = busy; $('mic').disabled = busy || ['preparing', 'permission', 'transcribing'].includes(speechInput.activity); $('message').disabled = busy; document.querySelectorAll('#choices button').forEach(b => b.disabled = busy); }
-function cancelPending() { state.generation++; state.abort?.abort(); state.abort = null; $('pending')?.remove(); setBusy(false); }
+function clearTyping() { $('pending')?.remove(); document.querySelector('.conversation').classList.remove('is-waiting'); }
+function positionTyping() {
+  const pending = $('pending'); if (!pending) return;
+  const bounds = $('chat-scroll').getBoundingClientRect();
+  const headerBottom = document.querySelector('.topbar').getBoundingClientRect().bottom;
+  const top = Math.max(bounds.top, headerBottom, 12), bottom = Math.min(bounds.bottom, window.innerHeight - 12);
+  const left = Math.max(bounds.left, 12), right = Math.min(bounds.right, window.innerWidth - 12);
+  pending.style.left = `${right > left ? (left + right) / 2 : window.innerWidth / 2}px`;
+  pending.style.top = `${bottom > top ? (top + bottom) / 2 : window.innerHeight / 2}px`;
+}
+function showTyping() {
+  clearTyping();
+  const pending = document.createElement('div'); pending.id = 'pending'; pending.className = 'reply-pending'; pending.setAttribute('role', 'status');
+  const label = document.createElement('span'); label.className = 'sr-only'; label.textContent = 'AI가 답변을 준비하고 있어.';
+  const dots = document.createElement('span'); dots.className = 'typing-dots'; dots.setAttribute('aria-hidden', 'true');
+  for (let index = 0; index < 3; index++) { const dot = document.createElement('span'); dot.className = 'typing-dot'; dots.append(dot); }
+  pending.append(label, dots); document.querySelector('.conversation').append(pending);
+  document.querySelector('.conversation').classList.add('is-waiting'); positionTyping(); requestAnimationFrame(positionTyping);
+}
+window.addEventListener('resize', positionTyping);
+window.addEventListener('scroll', positionTyping, { capture: true, passive: true });
+function cancelPending() { state.generation++; state.abort?.abort(); state.abort = null; clearTyping(); setBusy(false); }
 function clearGoal() { state.goal = null; $('goal-card').hidden = true; }
 function startTopic(key) {
   clearGoal(); state.lastPlan = null;
@@ -295,7 +316,7 @@ async function requestAI() {
   }
   const generation = state.generation; const payload = { profile: state.profile, topic: state.topic, mood: state.mood, messages: state.history.slice(-16) };
   const controller = new AbortController(); state.abort = controller; setBusy(true);
-  const pending = document.createElement('div'); pending.className = 'busy'; pending.id = 'pending'; pending.setAttribute('role', 'status'); pending.textContent = '답변을 기다리고 있어…'; $('messages').append(pending); scroll();
+  notice(''); showTyping(); scroll();
   const timeout = setTimeout(() => controller.abort(), 35000);
   try {
     const headers = await apiHeaders(); if (generation !== state.generation) return;
@@ -304,7 +325,8 @@ async function requestAI() {
     const data = await readAPIResponse(res); if (generation !== state.generation) return;
     if (res.status === 401) { state.connected = false; state.token = ''; updateConnection(); }
     if (!res.ok) throw new Error(data.error || '연결이 잠시 끊겼어. 다시 시도해 줄래?');
-    addMessage('assistant', data.message, { alert: Boolean(data.safety) });
+    clearTyping();
+    addMessage('assistant', data.message, { alert: Boolean(data.safety) }).classList.add('reply-arrival');
     state.stage = data.safety ? 'help' : 'explore';
     if (data.safety) choices([['도움받는 방법 보기', () => $('help-dialog').showModal()]]);
     else choices([['작은 행동 고르기', offerGoals], ['다른 이야기 고르기', startTalk], ['잠깐 쉬기', finishRest]]);
@@ -313,7 +335,7 @@ async function requestAI() {
     if (generation !== state.generation) return;
     notice(error.name === 'AbortError' ? '답변이 늦어지고 있어. 다시 보내거나 기본 활동을 골라줘.' : error.message, true);
     choices([[state.connected ? '다시 보내기' : '다시 연결하기', () => state.connected ? requestAI() : openConnection()], ['기본 활동으로 계속', () => { state.connected = false; state.token = ''; updateConnection(); offlineReply(); }]]);
-  } finally { clearTimeout(timeout); if (generation === state.generation) { pending.remove(); state.abort = null; setBusy(false); if ($('writing-panel').open) $('message').focus(); } }
+  } finally { clearTimeout(timeout); if (generation === state.generation) { clearTyping(); state.abort = null; setBusy(false); if ($('writing-panel').open) $('message').focus(); } }
 }
 async function sendText(raw) {
   const text = raw.trim(); if (state.busy) return; if (!text) { notice('보내고 싶은 말을 적거나 아래 활동 버튼을 골라 줘.'); $('message').focus(); return; }
