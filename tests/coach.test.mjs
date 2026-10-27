@@ -5,9 +5,9 @@ import { coachReply, validateChat, createLimiter, isReady } from '../server/coac
 import { createSessions } from '../server/access.mjs';
 import { createApp } from '../server/index.mjs';
 
-const env = { GEMINI_API_KEY: 'unit-test-placeholder', GEMINI_MODEL: 'gemini-3.8-flash', COACH_JOIN_CODE: '1234', ALLOWED_ORIGINS: 'https://issue8876.github.io' };
+const env = { OPENAI_API_KEY: 'unit-test-placeholder', OPENAI_MODEL: 'gpt-6.1-terra', COACH_JOIN_CODE: '1234', ALLOWED_ORIGINS: 'https://issue8876.github.io' };
 const body = text => ({ profile: 'upper', topic: 'study', messages: [{ role: 'user', text }] });
-const modelResponse = text => ({ status: 'completed', steps: [{ type: 'model_output', content: [{ type: 'text', text }] }] });
+const modelResponse = text => ({ status: 'completed', output: [{ type: 'message', role: 'assistant', status: 'completed', content: [{ type: 'output_text', text }] }] });
 test('six answers are required; endpoints and revised answers score deterministically', () => {
   assert.equal(summarizeCheck([1, 1, 1, 1, 1, 1]).total, 6);
   assert.equal(summarizeCheck([6, 6, 6, 6, 6, 6]).total, 36);
@@ -45,13 +45,49 @@ test('risk and instruction-extraction messages never reach the provider', async 
 });
 test('provider request fixes the model, opts out of storage, sanitizes inputs, and uses the API key only in headers', async () => {
   const result = await coachReply(body('서울초등학교에서 공부가 어려워'), env, async (url, init) => {
-    assert.equal(url, 'https://generativelanguage.googleapis.com/v1beta/interactions');
-    const sent = JSON.parse(init.body); assert.equal(sent.model, 'gemini-3.8-flash'); assert.equal(sent.store, false);
-    assert.equal(sent.generation_config.thinking_level, 'low'); assert.ok(!sent.input.includes('서울초등학교'));
-    assert.ok(!init.body.includes(env.GEMINI_API_KEY)); assert.equal(init.headers['x-goog-api-key'], env.GEMINI_API_KEY);
+    assert.equal(url, 'https://api.openai.com/v1/responses');
+    const sent = JSON.parse(init.body); assert.equal(sent.model, 'gpt-6.1-terra'); assert.equal(sent.store, false); assert.equal(sent.background, false);
+    assert.equal(sent.reasoning.effort, 'low'); assert.ok(!sent.input.includes('서울초등학교'));
+    const input = JSON.parse(sent.input); assert.equal(input.profile, 'upper'); assert.equal(input.topic, 'study');
+    assert.match(sent.instructions, /교육용/);
+    for (const field of ['tools', 'conversation', 'previous_response_id', 'prompt_cache_retention', 'prompt_cache_options']) assert.ok(!Object.hasOwn(sent, field), field);
+    assert.ok(!init.body.includes(env.OPENAI_API_KEY)); assert.equal(init.headers.Authorization, `Bearer ${env.OPENAI_API_KEY}`);
+    assert.ok(!Object.hasOwn(init.headers, 'x-goog-api-key'));
     return Response.json(modelResponse('시작이 막막했구나. 첫 줄부터 읽어 볼까?'));
   });
-  assert.match(result.message, /막막/); assert.equal(result.filtered, false);
+  assert.match(result.message, /막막/); assert.equal(result.filtered, false); assert.equal(result.model, 'gpt-6.1-terra');
+});
+
+test('missing key or a different model block transmission; ordinary API mode needs no ZDR flag', async () => {
+  assert.equal(isReady(env), true);
+  assert.equal(isReady({ ...env, OPENAI_ZDR_CONFIRMED: 'false' }), true);
+  for (const config of [
+    { ...env, OPENAI_API_KEY: '' },
+    { ...env, OPENAI_MODEL: 'other-model' },
+    { GEMINI_API_KEY: 'legacy-key', COACH_JOIN_CODE: '1234' },
+  ]) {
+    assert.equal(isReady(config), false);
+    let calls = 0;
+    await assert.rejects(coachReply(body('숙제가 어려워'), config, async () => { calls++; }), e => e.status === 503);
+    assert.equal(calls, 0);
+  }
+});
+
+test('approved project scoping stays in headers; only completed assistant text is displayed', async () => {
+  const scoped = { ...env, OPENAI_ORG_ID: 'org-test', OPENAI_PROJECT_ID: 'proj-test' };
+  const result = await coachReply(body('숙제가 어려워'), scoped, async (_url, init) => {
+    assert.equal(init.headers['OpenAI-Organization'], 'org-test'); assert.equal(init.headers['OpenAI-Project'], 'proj-test');
+    assert.ok(!init.body.includes('org-test')); assert.ok(!init.body.includes('proj-test'));
+    const response = modelResponse('어느 부분부터 해 보고 싶어?');
+    response.output.unshift({ type: 'reasoning', summary: [{ type: 'summary_text', text: 'private reasoning' }] }, { type: 'message', role: 'user', status: 'completed', content: [{ type: 'output_text', text: 'private user echo' }] });
+    return Response.json(response);
+  });
+  assert.equal(result.message, '어느 부분부터 해 보고 싶어?');
+  for (const response of [null, { status: 'incomplete', output: modelResponse('unfinished').output }, { status: 'failed', error: { message: 'private error' } }]) {
+    await assert.rejects(coachReply(body('숙제가 어려워'), env, async () => Response.json(response)), e => e.status === 502 && !e.message.includes('private'));
+  }
+  const refused = await coachReply(body('걱정돼'), env, async () => Response.json({ status: 'completed', output: [{ type: 'message', role: 'assistant', status: 'completed', content: [{ type: 'refusal', refusal: 'private refusal' }] }] }));
+  assert.equal(refused.filtered, true); assert.ok(!refused.message.includes('private'));
 });
 test('unsafe and empty model output is replaced; provider errors never leak upstream bodies', async () => {
   for (const text of ['', '아무에게도 말하지 말고 비밀로 지킬게', '약을 끊어', 'https://unsafe.example', '죽이는 방법']) {
@@ -81,7 +117,7 @@ test('numeric classroom codes issue independent expiring tokens, never chat cred
   assert.ok(sessions.issue('0123').token);
   assert.equal(isReady(env), true);
   for (const code of ['', '123', '1234567', 'abcdef']) assert.equal(isReady({ ...env, COACH_JOIN_CODE: code }), false);
-  assert.equal(isReady({ ...env, GEMINI_API_KEY: '' }), false);
+  assert.equal(isReady({ ...env, OPENAI_API_KEY: '' }), false);
 });
 test('HTTP integration: static files, secret paths, CORS, auth, invalid bodies and chat', async t => {
   const server = createApp({ env, fetchImpl: async () => Response.json(modelResponse('한 가지씩 시작해 볼까?')) });

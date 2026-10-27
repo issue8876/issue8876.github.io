@@ -1,16 +1,18 @@
 # 마음쉼 배포와 운영
 
-현재 권장 배포 대상은 **Firebase Hosting + Cloud Functions + Gemini**입니다. [Firebase 설정 안내](FIREBASE_SETUP.md)를 먼저 읽어 주세요. 아래 Render·독립 Node 서버 안내는 기존 구성을 유지할 때 사용합니다. Firebase 전환은 제공사의 학생 이용 허가를 대신하지 않습니다.
+> 2026-10-27: 새 코드는 OpenAI `gpt-6.1-terra`를 일반 API 방식으로 사용합니다. ZDR 확인 없이 연결하며 응답 저장 해제 요청은 유지합니다. [OpenAI 설정 안내](OPENAI_SETUP.md)를 먼저 적용합니다. 아래 Gemini 관련 설정·제공 조건은 전환 전 기록이며 새 제공사 설정으로 사용할 수 없습니다. 현재 `.env.example`은 OpenAI 설정을 사용합니다.
+
+현재 배포 대상은 **Firebase Hosting + Cloud Functions + OpenAI GPT-6.1 Terra**입니다. 현재 설정은 [OpenAI 설정 안내](OPENAI_SETUP.md)를 따릅니다. 아래 Gemini·Render·독립 Node 서버 안내는 이전 배포 기록입니다.
 
 ## 현재 구성
 
 - 웹 화면: `pages/maeum.html`. GitHub Pages에 정적 파일로 배포합니다.
 - AI 서버: Node.js 22.12 이상. 외부 패키지 설치 없이 실행합니다.
-- 모델: `gemini-3.8-flash`, 기본 thinking level `low`.
+- 모델: `gpt-6.1-terra`, `reasoning.effort: low`.
 - 로컬 비밀 설정: `.env`. `.gitignore`와 `.dockerignore`로 제외합니다.
 - 공개 설정: `PUBLIC_API_BASE_URL`에는 API 서버의 HTTPS origin만 넣습니다. API 키를 넣으면 안 됩니다.
 - 대화, 점검 응답, 임시 연결 토큰은 브라우저 메모리에만 유지합니다. 새로고침하면 사라집니다. 숫자 코드는 연결 요청 뒤 입력칸에서 지웁니다.
-- 서버는 대화 본문이나 키를 기록하지 않습니다. Google 요청에 `store: false`를 사용합니다. 이는 Google의 모든 데이터 처리·보관 조건이 없어지는 뜻은 아닙니다.
+- 서버는 대화 본문이나 키를 기록하지 않습니다. OpenAI 요청에 `store: false`를 사용합니다. 일반 API 방식이며 ZDR을 적용한 구성은 아닙니다.
 
 GitHub Pages는 Node 서버를 실행하지 않으므로 **화면 배포와 AI 서버 배포는 별도**입니다. 서버가 없어도 마음 점검, 준비된 선택형 활동, 숨 고르기, 실천 카드는 작동합니다. 이때 화면은 ‘기본 활동’이라고 표시하며 AI가 답하는 것처럼 표현하지 않습니다.
 

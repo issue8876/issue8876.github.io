@@ -286,7 +286,7 @@ function updateConnection() {
   $('connect-fields').hidden = state.connected;
   $('connect-submit').hidden = state.connected;
   $('disconnect').hidden = !state.connected;
-  $('writing-mode').textContent = state.connected ? 'AI 연결 중 · 지금 보내는 말과 최근 대화 일부가 Google로 전송돼.' : '기본 활동 중 · 글에 맞춘 AI 답변은 제공되지 않아. 버튼으로 활동을 이어갈 수 있어.';
+  $('writing-mode').textContent = state.connected ? 'AI 연결 중 · 지금 보내는 말과 최근 대화 일부가 OpenAI로 전송돼.' : '기본 활동 중 · 글에 맞춘 AI 답변은 제공되지 않아. 버튼으로 활동을 이어갈 수 있어.';
   updateConnectSubmit();
 }
 function updateConnectSubmit() {
@@ -348,7 +348,7 @@ $('connect-form').addEventListener('submit', async e => {
     const data = await readAPIResponse(res); if (attempt !== connectionGeneration) return;
     if (!res.ok) throw new Error(data.error || '잠시 뒤 다시 연결해 줘.');
     if (typeof data.token !== 'string' || data.token.length < 32) throw new Error('연결을 다시 준비해야 해. 선생님께 알려 줘.');
-    cancelPending(); state.token = data.token; state.connected = true; state.history = []; updateConnection(); $('access-code').value = ''; $('connect-dialog').close(); notice('AI와 연결됐어. 지금부터 나누는 대화만 Google로 전송돼.');
+    cancelPending(); state.token = data.token; state.connected = true; state.history = []; updateConnection(); $('access-code').value = ''; $('connect-dialog').close(); notice('AI와 연결됐어. 지금부터 나누는 대화만 OpenAI로 전송돼.');
   } catch (error) { if (attempt === connectionGeneration) $('connect-status').textContent = error.name === 'TimeoutError' ? '연결이 늦어지고 있어. 잠시 뒤 다시 해 보자.' : error.message; }
   finally { if (attempt === connectionGeneration) { connecting = false; updateConnectSubmit(); $('connect-submit').textContent = 'AI 대화 시작하기'; } }
 });

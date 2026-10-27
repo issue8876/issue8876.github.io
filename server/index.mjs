@@ -2,7 +2,7 @@ import http from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { coachReply, createLimiter, HttpError, isReady } from './coach.mjs';
+import { coachReply, createLimiter, HttpError, isReady, OPENAI_MODEL } from './coach.mjs';
 import { createSessions } from './access.mjs';
 
 const root = path.resolve(fileURLToPath(new URL('../', import.meta.url)));
@@ -44,7 +44,7 @@ export function createHandler({ env = process.env, fetchImpl = fetch, now = Date
     try {
       const url = new URL(req.url, 'http://localhost');
       if (isAPI) {
-        if (url.pathname === '/api/health' && req.method === 'GET') { send(200, { ok: true, ready: isReady(env), model: 'gemini-3.8-flash' }); return; }
+        if (url.pathname === '/api/health' && req.method === 'GET') { send(200, { ok: true, ready: isReady(env), model: OPENAI_MODEL }); return; }
         if (!['/api/chat', '/api/session'].includes(url.pathname) || req.method !== 'POST') { send(404, { error: '요청한 기능을 찾을 수 없어.' }); return; }
         // A single trusted reverse proxy may provide a client IP. Never trust arbitrary X-Forwarded-For.
         const peer = resolvePeer ? resolvePeer(req) : env.TRUST_PROXY === 'true' ? (req.headers['x-forwarded-for'] || '').split(',').at(-1)?.trim() || req.socket.remoteAddress : req.socket.remoteAddress;

@@ -1,6 +1,8 @@
 # 마음쉼 · Firebase로 연구용 시험 환경 만들기
 
-구성: Firebase Hosting(화면) → Cloud Functions for Firebase(코드 확인·필터) → Gemini 3.8 Flash.
+> 2026-10-27: 새 코드는 OpenAI `gpt-6.1-terra`를 일반 API 방식으로 사용하며 ZDR 확인을 요구하지 않습니다. [OpenAI 설정 안내](OPENAI_SETUP.md)를 우선 적용합니다. 아래 Gemini API 키 등록·결제 안내는 이전 배포 기록입니다. 새 코드에는 `OPENAI_API_KEY`가 필요합니다.
+
+현재 구성: Firebase Hosting(화면) → Cloud Functions for Firebase(코드 확인·필터) → OpenAI GPT-6.1 Terra. 아래 Gemini 관련 완료 기록은 이전 배포 이력입니다.
 프로젝트 ID는 `maeum-835b3`이며, Hosting 사이트 ID는 `maeum`입니다. 정식 주소는 https://maeum.web.app/ 입니다. 이전 프로젝트 주소와 `/pages/maeum.html` 링크는 정식 주소로 이동합니다. https://maeum.web.app/ 에 Hosting과 AI 함수, App Check를 연결했습니다. 운영자가 제공한 선불 충전 API 키로 교체하고 함수를 재배포했으며, 2026년 10월 19일 브라우저에서 숫자 코드 인증과 가상 사례의 실제 Gemini 답변을 확인했습니다. 이전 프로젝트 `maeum-d3a43`의 리소스는 유지합니다. Render 계정은 필요하지 않습니다.
 
 ## 현재 상태와 다음 배포

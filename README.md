@@ -2,6 +2,8 @@
 
 ## 마음쉼 v2
 
+2026-10-27 OpenAI 전환 완료: `gpt-6.1-terra`와 Responses API를 일반 API 방식으로 연결했습니다. ZDR 대기 조건을 제거하고 `store: false`를 유지합니다. 테스트 36개 통과, 함수·Hosting 배포와 공개 사이트의 코드 인증·실제 답변을 확인했습니다. [OpenAI 설정 안내](OPENAI_SETUP.md). 아래 Gemini 배포 확인 내용은 전환 전 운영 기록입니다.
+
 2026-10-20 점검 보고서 반영: 완료한 점검의 결과 재진입·응답 수정, 명시적 다음 버튼, 학년별 읽기 도움, 실천 계획과 마무리 요약, 연결 전 데이터 안내 및 화면 접근성을 개선했습니다. 항목별 변경과 검증 범위는 [REVIEW_CHANGES.md](REVIEW_CHANGES.md)에 기록했습니다. [교사용 수업 안내](https://maeum.web.app/pages/teacher-guide.html) · [대화·데이터 안내](https://maeum.web.app/pages/data-guide.html).
 
 기존 Dify의 마음길 점검(6문장·6점 응답), 시작하고 이어가는 힘과 방법 찾기, 작은 실천과 돌아보기를 중심으로 구성했습니다. 첫 화면에서 점검·어려웠던 일·마음 가라앉히기 중 하나를 버튼으로 고릅니다. 점검과 기분 표현, 글쓰기는 필수가 아닙니다. 내용과 평가 반영 기준은 [CONTENT_BASIS.md](CONTENT_BASIS.md)에 기록했습니다.
@@ -9,7 +11,7 @@
 초등 저학년·고학년·중학생·고등학생의 눈높이에 맞춘 마음 표현, 선택형 대화, 교육용 마음 점검, 숨 고르기, 작은 실천 카드를 추가했습니다.
 
 - 화면: `pages/maeum.html`
-- AI: Gemini 3.8 Flash. 입력·출력 필터를 사용하며, 로컬에서는 `.env`, Firebase 배포에서는 Secret Manager로 키를 보관합니다.
+- AI: OpenAI GPT-6.1 Terra (`gpt-6.1-terra`). 일반 API 방식으로 `store: false`를 사용하며 ZDR은 적용하지 않습니다. 로컬에서는 `.env`, Firebase 배포에서는 Secret Manager로 키를 보관합니다.
 - 읽어주기: 한국어 Supertonic 2 음성을 기기에서 합성합니다. 별도 음성 API 요금이 없으며 첫 사용 시 약 260MB의 모델을 내려받습니다. [음성 설정과 라이선스](VOICE_SETUP.md)를 참고하세요.
 
 정식 이용 주소는 https://maeum.web.app/ 입니다. 로컬 HTML 파일을 직접 열면 이 사이트의 연결 화면으로 이동합니다. GitHub Pages에서 AI 대화 설정을 눌러도 같은 연결 화면으로 이동하며, 숫자 코드는 이동 후 다시 입력합니다.

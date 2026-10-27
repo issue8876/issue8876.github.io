@@ -4,7 +4,11 @@ import { assessSafety, helpMessage, redactPII, safeModelText, profiles, topics }
 export class HttpError extends Error {
   constructor(status, message) { super(message); this.status = status; }
 }
-export function isReady(env) { return Boolean(env.GEMINI_API_KEY?.trim() && validJoinCode(env.COACH_JOIN_CODE)); }
+export const OPENAI_MODEL = 'gpt-6.1-terra';
+function providerReady(env) {
+  return Boolean(env.OPENAI_API_KEY?.trim() && (!env.OPENAI_MODEL || env.OPENAI_MODEL === OPENAI_MODEL));
+}
+export function isReady(env) { return providerReady(env) && validJoinCode(env.COACH_JOIN_CODE); }
 export function validateChat(body) {
   if (!body || typeof body !== 'object' || !Object.hasOwn(profiles, body.profile) || !Object.hasOwn(topics, body.topic)) throw new HttpError(400, '활동과 학년을 다시 선택해 줘.');
   if (!Array.isArray(body.messages) || body.messages.length < 1 || body.messages.length > 16) throw new HttpError(400, '대화가 너무 길어졌어. 새 대화로 시작해 줘.');
@@ -47,15 +51,17 @@ export async function coachReply(raw, env, fetchImpl = fetch) {
   if (/(시스템\s*프롬프트|system\s*prompt|api.?key|API\s*키|이전\s*(명령|지침).{0,8}(무시|잊)|필터.{0,5}(우회|해제))/i.test(last)) {
     return { message: '지금은 네 마음과 오늘 해볼 수 있는 일을 함께 살펴볼 수 있어. 공부, 친구, 걱정 중 어떤 이야기를 나누고 싶어?', filtered: true };
   }
-  if (!env.GEMINI_API_KEY?.trim()) throw new HttpError(503, '운영자가 AI 연결을 준비하고 있어. 기본 활동을 이용해 줘.');
-  if (env.GEMINI_MODEL && env.GEMINI_MODEL !== 'gemini-3.8-flash') throw new HttpError(503, 'AI 모델 설정을 확인해야 해. 운영자에게 알려 줘.');
-  const thinking = ['low', 'medium', 'high'].includes(env.GEMINI_THINKING_LEVEL) ? env.GEMINI_THINKING_LEVEL : 'low';
+  if (!providerReady(env)) throw new HttpError(503, '운영자가 AI 연결을 준비하고 있어. 기본 활동을 이용해 줘.');
+  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${env.OPENAI_API_KEY.trim()}` };
+  if (env.OPENAI_ORG_ID?.trim()) headers['OpenAI-Organization'] = env.OPENAI_ORG_ID.trim();
+  if (env.OPENAI_PROJECT_ID?.trim()) headers['OpenAI-Project'] = env.OPENAI_PROJECT_ID.trim();
   let response;
   try {
-    response = await fetchImpl('https://generativelanguage.googleapis.com/v1beta/interactions', {
+    response = await fetchImpl('https://api.openai.com/v1/responses', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': env.GEMINI_API_KEY },
-      body: JSON.stringify({ model: 'gemini-3.8-flash', store: false, system_instruction: systemInstruction(body.profile, body.topic), input: JSON.stringify(body), generation_config: { thinking_level: thinking, thinking_summaries: 'none', max_output_tokens: 1200 } }),
+      headers,
+      // Stateless text only: no stored conversation, background job, files or tools.
+      body: JSON.stringify({ model: OPENAI_MODEL, store: false, background: false, instructions: systemInstruction(body.profile, body.topic), input: JSON.stringify(body), reasoning: { effort: 'low' }, max_output_tokens: 1200 }),
       signal: AbortSignal.timeout(25000),
     });
   } catch { throw new HttpError(504, 'AI 답변이 늦어지고 있어. 잠시 뒤 다시 보내거나 기본 활동을 골라줘.'); }
@@ -66,13 +72,13 @@ export async function coachReply(raw, env, fetchImpl = fetch) {
   }
   let result;
   try { result = await response.json(); } catch { throw new HttpError(502, '답변을 읽지 못했어. 다시 보내 줘.'); }
-  if (result.status && result.status !== 'completed') throw new HttpError(502, '답변을 끝까지 받지 못했어. 다시 보내 줘.');
-  const text = (Array.isArray(result.steps) ? result.steps : [])
-    .filter(step => step.type === 'model_output' && Array.isArray(step.content))
-    .flatMap(step => step.content)
-    .filter(part => part.type === 'text' && typeof part.text === 'string')
+  if (result?.status !== 'completed') throw new HttpError(502, '답변을 끝까지 받지 못했어. 다시 보내 줘.');
+  const text = (Array.isArray(result.output) ? result.output : [])
+    .filter(item => item.type === 'message' && item.role === 'assistant' && item.status === 'completed' && Array.isArray(item.content))
+    .flatMap(item => item.content)
+    .filter(part => part.type === 'output_text' && typeof part.text === 'string')
     .map(part => part.text).join('\n');
   const message = safeModelText(text);
   if (!message) return { message: '이 이야기는 안전하게 도와줄 수 있는 선생님이나 상담 선생님과 함께 살펴보면 좋겠어. 지금 믿고 이야기할 수 있는 어른을 떠올릴 수 있을까?', filtered: true };
-  return { message, model: 'gemini-3.8-flash', filtered: false };
+  return { message, model: OPENAI_MODEL, filtered: false };
 }

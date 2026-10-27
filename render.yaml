@@ -12,11 +12,9 @@ services:
         value: production
       - key: HOST
         value: 0.0.0.0
-      - key: GEMINI_MODEL
-        value: gemini-3.8-flash
-      - key: GEMINI_THINKING_LEVEL
-        value: low
-      - key: GEMINI_API_KEY
+      - key: OPENAI_MODEL
+        value: gpt-6.1-terra
+      - key: OPENAI_API_KEY
         sync: false
       - key: COACH_JOIN_CODE
         sync: false

@@ -18,7 +18,7 @@ export function createFirebaseHandler({ getSettings, verifyAppCheck, fetchImpl =
       if (!handler) {
         if (!settings.projectId) throw new Error('Missing project');
         const env = {
-          GEMINI_API_KEY: settings.apiKey, COACH_JOIN_CODE: settings.joinCode, GEMINI_MODEL: 'gemini-3.8-flash', GEMINI_THINKING_LEVEL: 'low',
+          OPENAI_API_KEY: settings.apiKey, OPENAI_ORG_ID: settings.openaiOrg, OPENAI_PROJECT_ID: settings.openaiProject, COACH_JOIN_CODE: settings.joinCode,
           ALLOWED_ORIGINS: [settings.projectId, ...(settings.hostingSites || [])].flatMap(site => [`https://${site}.web.app`, `https://${site}.firebaseapp.com`]).join(','),
         };
         handler = createHandler({ env, fetchImpl, sessionStore: createSignedSessions({ code: env.COACH_JOIN_CODE, secret: settings.signingKey }), resolvePeer: request => request.ip || request.socket.remoteAddress });

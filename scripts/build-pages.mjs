@@ -36,7 +36,7 @@ async function audit(dir) {
         continue;
       }
       const content = data.toString('utf8');
-      if (/AIza[\w-]{30,}|-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}/.test(content)) throw new Error('Possible secret found in public build.');
+      if (/AIza[\w-]{30,}|sk-(?:proj-|svcacct-)?[A-Za-z0-9_-]{20,}|-----BEGIN .*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9]{30,}/.test(content)) throw new Error('Possible secret found in public build.');
     }
   }
 }

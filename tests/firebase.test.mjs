@@ -5,6 +5,18 @@ import { createSignedSessions } from '../server/access.mjs';
 import { createFirebaseHandler } from '../functions/handler.mjs';
 
 const settings = { projectId: 'maeum-test', hostingSites: ['maeum-test-short'], apiKey: 'test-provider-key', joinCode: '0123', signingKey: 'test-only-secret-with-at-least-32-characters', appCheckSiteKey: 'test-public-site-key' };
+
+test('Firebase numeric code authentication works in ordinary API mode without ZDR confirmation', async () => {
+  for (const zdrConfirmed of [undefined, false, 'true']) {
+    let calls = 0;
+    const handler = createFirebaseHandler({ getSettings: () => ({ ...settings, zdrConfirmed }), verifyAppCheck: async () => ({ appId: 'test-app' }), fetchImpl: async () => { calls++; throw new Error('must not send'); } });
+    const req = { path: '/api/session', url: '/api/session', method: 'POST', ip: '127.0.0.1', headers: { 'content-type': 'application/json' }, get: () => 'test-app-check', rawBody: Buffer.from('{"code":"0123"}') };
+    let status, content;
+    const res = { set() {}, writeHead(code) { status = code; }, end(body) { content = JSON.parse(body); }, status(code) { status = code; return this; }, json(body) { content = body; } };
+    await handler(req, res);
+    assert.equal(status, 200); assert.equal(calls, 0); assert.ok(content.token);
+  }
+});
 test('signed sessions survive instance changes and reject tampering, expiry and code rotation', () => {
   let now = 0;
   const make = (extra = {}) => createSignedSessions({ code: settings.joinCode, secret: settings.signingKey, now: () => now, ...extra });
@@ -25,7 +37,7 @@ test('Firebase HTTP adapter verifies App Check, consumes rawBody, keeps secrets 
   const handler = createFirebaseHandler({
     getSettings: () => settings,
     verifyAppCheck: async token => { if (token !== 'test-app-check') throw new Error('private validation error'); return { appId: 'test-app' }; },
-    fetchImpl: async () => { providerCalls++; return Response.json({ status: 'completed', steps: [{ type: 'model_output', content: [{ type: 'text', text: '어떤 방법부터 해 보고 싶어?' }] }] }); },
+    fetchImpl: async (url, init) => { providerCalls++; assert.equal(url, 'https://api.openai.com/v1/responses'); assert.equal(JSON.parse(init.body).store, false); return Response.json({ status: 'completed', output: [{ type: 'message', role: 'assistant', status: 'completed', content: [{ type: 'output_text', text: '어떤 방법부터 해 보고 싶어?' }] }] }); },
   });
   const server = http.createServer(async (req, res) => {
     const chunks = []; for await (const chunk of req) chunks.push(chunk); req.rawBody = Buffer.concat(chunks);
