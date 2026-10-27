@@ -331,16 +331,22 @@ dialog input[type=password] { width: 100%; border: 1px solid #d7dfdf; border-rad
 .topbar { position: sticky; top: 0; z-index: 8; background: #f4f2ee; }
 .composer-foot { color: #52636b; }
 .composer-foot button { color: #365b70; font-size: 14px; min-height: 44px; padding: 7px 4px; }
-.welcome-dialog { width: min(560px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); }
-.welcome-dialog h2 { margin-top: 0; font-size: 25px; }
-.welcome-dialog p { line-height: 1.85; word-break: keep-all; overflow-wrap: anywhere; }
+.welcome-dialog { width: min(620px, calc(100vw - 32px)); max-height: calc(100dvh - 24px); padding: 24px 28px; }
+.welcome-dialog h2 { margin: 0 0 16px; font-size: 25px; line-height: 1.45; }
+.welcome-dialog p { line-height: 1.75; word-break: keep-all; overflow-wrap: anywhere; }
+#welcome-description { display: grid; gap: 12px; }
+#welcome-description p { margin: 0; }
+.welcome-storage { color: #466054; }
+#welcome-agreement { margin: 16px 0 0; line-height: 1.65; }
 .welcome-download { background: #edf3ef; padding: 16px; border-radius: 10px; margin: 18px 0; }
 .welcome-download p { margin: 0 0 10px; }
 .welcome-download progress { width: 100%; height: 12px; accent-color: #527d6d; }
 .welcome-download .small { margin: 8px 0 0; }
-.welcome-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 22px; }
+.welcome-actions { display: flex; flex-direction: column; gap: 4px; align-items: center; margin-top: 18px; }
 .welcome-actions button { min-height: 44px; }
-.welcome-actions .text-button { font-size: 14px; text-decoration: underline; }
+.welcome-actions .primary-button { min-width: 120px; padding: 11px 28px; }
+.welcome-actions .text-button { font-size: 14px; text-decoration: underline; min-height: 36px; padding: 5px 0; }
+@media (max-width: 480px) { .welcome-dialog { padding: 22px 20px; } .welcome-dialog h2 { font-size: 23px; } }
 #connection-retry { min-height: 44px; text-decoration: underline; color: #365b70; }
 .check-options { border: 0; padding: 0; margin: 16px 0; min-width: 0; }
 .check-options legend { font-size: 19px; line-height: 1.8; width: 100%; padding: 0; margin-bottom: 12px; }

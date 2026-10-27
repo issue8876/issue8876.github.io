@@ -1,5 +1,5 @@
 export const AGREEMENT_KEY = 'maeum-start-agreement';
-export const AGREEMENT_VERSION = '20261027-local-voice-v1';
+export const AGREEMENT_VERSION = '20261027-local-voice-v2';
 export const AI_DATA_NOTICE = 'AI를 연결하면 지금 보내는 말과 최근 대화 일부가 OpenAI로 전송돼.';
 
 export function createOnboarding({ storage, prepareReader, prepareInput, cancelReader, cancelInput, onState = () => {}, onPreparationError = () => {} }) {

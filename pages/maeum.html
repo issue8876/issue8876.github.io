@@ -12,8 +12,8 @@
   </script>
   <link rel="canonical" href="https://issue8876.github.io/pages/maeum.html">
   <link rel="preload" href="../assets/fonts/GowunDodum-Regular.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="stylesheet" href="../css/maeumgil.css?v=20261027-typing">
-  <script type="module" src="../js/maeumgil.js?v=20261027-typing"></script>
+  <link rel="stylesheet" href="../css/maeumgil.css?v=20261027-popup2">
+  <script type="module" src="../js/maeumgil.js?v=20261027-popup2"></script>
 </head>
 <body class="at-start">
   <a class="skip" href="#chat-scroll">이야기로 건너뛰기</a>
@@ -71,7 +71,12 @@
   </div>
   <dialog id="welcome-dialog" class="welcome-dialog" aria-labelledby="welcome-title" aria-describedby="welcome-description">
     <h2 id="welcome-title">시작하기 전에 알아 둬</h2>
-    <div id="welcome-description"><p id="welcome-ai-notice"></p><p>읽어주기와 말로 입력하기는 이 기기에서 처리해. 처음 한 번 음성 파일 약 350MB를 내려받아.</p><p>마이크는 네가 마이크 버튼을 누를 때만 켜져. 알아들은 글을 확인한 뒤 보내기를 눌러 줘.</p></div>
+    <div id="welcome-description">
+      <p id="welcome-ai-notice"></p>
+      <p class="welcome-storage">창을 닫으면 이 앱 화면의 대화는 사라져.<br>OpenAI에는 안전 점검용 기록이 남을 수 있어.<br>마음 이야기는 편한 만큼만 나눠도 돼.</p>
+      <p>읽어주기와 말로 입력하기는 이 기기에서 처리해.<br>처음 한 번 음성 파일 약 350MB를 내려받아.</p>
+      <p>마이크는 네가 마이크 버튼을 누를 때만 켜져.<br>알아들은 글을 확인한 뒤 보내기를 눌러 줘.</p>
+    </div>
     <p id="welcome-agreement" class="small">‘확인’을 누르면 이 안내에 동의하고 음성 파일 준비를 시작해.</p>
     <div id="welcome-download" class="welcome-download" hidden><p id="welcome-status" role="status" aria-live="polite"></p><progress id="welcome-progress" max="100" value="0" aria-label="음성 파일 준비 진행률"></progress><p id="welcome-percent" class="small"></p></div>
     <div class="welcome-actions"><button id="welcome-confirm" class="primary-button" type="button">확인</button><button id="welcome-retry" type="button" hidden>다시 준비하기</button><button id="welcome-skip" class="text-button" type="button">동의하지 않고 기본 활동 하기</button></div>

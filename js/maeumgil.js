@@ -3,7 +3,7 @@ import { createBreathingCard } from './maeumgil-breathing.js?v=20261019-clear';
 import { apiHeaders, hostedConnectionUrl, readAPIResponse } from './maeumgil-connection.js?v=20261020-review2';
 import { createSpeechReader } from './maeumgil-speech.js?v=20261027-welcome';
 import { createSpeechInput } from './maeumgil-input.js?v=20261027-welcome';
-import { createOnboarding, AI_DATA_NOTICE } from './maeumgil-onboarding.js?v=20261027-welcome';
+import { createOnboarding, AI_DATA_NOTICE } from './maeumgil-onboarding.js?v=20261027-popup2';
 import { profiles, questions, scale, summarizeCheck, assessSafety, helpMessage, redactPII, topics } from './maeumgil-core.js?v=20261020-review';
 import { createCheckSession } from './maeumgil-check.js';
 import { readingSupport, scaleHelp } from './maeumgil-reading.js';
